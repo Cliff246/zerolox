@@ -1,2 +1,0 @@
-/usr/bin/ar qc libZLX_commons.a CMakeFiles/ZLX_commons.dir/isa/ISA_zerolox.c.o
-/usr/bin/ranlib libZLX_commons.a
