@@ -86,10 +86,11 @@ uint32_t ZLX_EMU_read_24_Memory(ZLX_EMU_Memory_t *memory, uint32_t address)
 
 	uint8_t byte3 = memory->ap__memory[address + 2];
 
-	uint16_t short1 = (((uint16_t) byte3) << 8) + byte2; 
 
 
-	uint32_t data = ((uint32_t) short1 << 16) + byte1;
+	uint32_t data = ((uint32_t)byte1) | 
+					((uint32_t)byte2 << 8) | 
+					((uint32_t)byte3 << 16);	
 	return data;
 
 }
@@ -154,7 +155,7 @@ void ZLX_EMU_write_24_Memory(ZLX_EMU_Memory_t *memory, uint32_t address, uint32_
 
 	memory->ap__memory[address ] = value;
 	memory->ap__memory[address + 1] = (uint8_t)(value >> 8);
-	memory->ap__memory[address + 2] = (uint8_t)((value >> 8) & 0xff);
+	memory->ap__memory[address + 2] = (uint8_t)((value >> 16) & 0xff);
 }
 
 
