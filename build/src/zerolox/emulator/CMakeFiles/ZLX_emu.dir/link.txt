@@ -1,0 +1,1 @@
+/usr/bin/cc  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/ZLX_emu.dir/EMU_zlx.c.o CMakeFiles/ZLX_emu.dir/EMU_Context.c.o CMakeFiles/ZLX_emu.dir/EMU__CPU.c.o CMakeFiles/ZLX_emu.dir/EMU_Machine.c.o CMakeFiles/ZLX_emu.dir/EMU_Memory.c.o -o ../../../ZLX_emu  ../commons/libZLX_commons.a ../../mylibrary/libMY_library.a

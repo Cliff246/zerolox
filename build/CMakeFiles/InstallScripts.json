@@ -1,0 +1,12 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/heathfortin/programing/projects/zerolox/build/cmake_install.cmake",
+		"/Users/heathfortin/programing/projects/zerolox/build/src/cmake_install.cmake",
+		"/Users/heathfortin/programing/projects/zerolox/build/src/mylibrary/cmake_install.cmake",
+		"/Users/heathfortin/programing/projects/zerolox/build/src/zerolox/cmake_install.cmake",
+		"/Users/heathfortin/programing/projects/zerolox/build/src/zerolox/emulator/cmake_install.cmake",
+		"/Users/heathfortin/programing/projects/zerolox/build/src/zerolox/commons/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
