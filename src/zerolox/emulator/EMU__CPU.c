@@ -1060,10 +1060,85 @@ static ZLX_EMU__CPU_operation_t major_operations[] =
 
 };
 
-
-void ZLX_EMU_Minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor)
+void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output)
 {
-	if(minor.operation) 
+	
+	if(output.use_destination == true)
+	{
+		bool use_d1 = false, use_d2 = false;
+		if(output.use_destination_1 == true)
+		{
+			use_d1 = true;
+			ZLX_EMU_set_regiser__CPU(cpu, output.destination_1, output.destination_1_data);
+		}
+
+		if(output.use_destination_2 == true)
+		{
+			use_d2 = true;
+
+			ZLX_EMU_set_regiser__CPU(cpu, output.destination_2, output.destination_2_data);
+		}
+		
+		if(use_d1 == use_d2)
+		{
+			if(output.destination_1 == output.destination_2 && output.destination_1 != ZLX_ISA_Register_identifier_zero)
+			{
+				MY_FAULT("cannot have w1 == w2");
+			}
+		}
+	
+	}
+
+
+	if(output.pc_changed == true)
+	{
+		if(output.pc_set_or_add == true)
+		{
+
+			cpu->program_counter = output.pc_value; 
+		}
+		else
+		{
+			cpu->program_counter += output.pc_value;
+	
+		}
+
+	}
+	else
+	{
+		MY_FAULT("add instruction increment i think");
+		MY_TODO;		
+	}
+
+}
+
+void ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor)
+{
+	ZLX_EMU__CPU_parameters_t parameters = {};
+	ZLX_EMU__CPU_output_t output;
+	switch(minor.operation)
+	{
+		case ZLX_ISA_Minor_operation_move:
+		
+
+			parameters.source_1 = minor.u__format_55.a5;
+			parameters.source_2 = minor.u__format_55.b5;
+			break;
+		
+		
+		default:
+			printf("ZLX %d\n",minor.operation); 
+			MY_FAULT("not a valid instruction");
+			break;
+	}
+
+
+	output = minor_operations[minor.operation](machine, parameters);
+
+
+
+
+
 }
 
 
