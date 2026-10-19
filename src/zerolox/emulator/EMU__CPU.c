@@ -1112,6 +1112,31 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output)
 
 }
 
+/*
+ *	[ZLX_ISA_Minor_operation_move] = minor_move,
+	[ZLX_ISA_Minor_operation_swap] = minor_swap,
+	[ZLX_ISA_Minor_operation_add] = minor_add,
+	[ZLX_ISA_Minor_operation_adda] = minor_adda,
+	[ZLX_ISA_Minor_operation_sub] = minor_sub,
+	[ZLX_ISA_Minor_operation_addi] = minor_addi,
+	[ZLX_ISA_Minor_operation_geta] = minor_geta, 
+	[ZLX_ISA_Minor_operation_get8] = minor_get8,
+	[ZLX_ISA_Minor_operation_b] = minor_branch, 
+	[ZLX_ISA_Minor_operation_baeqz] = minor_branch_accumulator_equals_zero,
+	[ZLX_ISA_Minor_operation_baneqz] = minor_branch_accumulator_not_equals_zero,
+	[ZLX_ISA_Minor_operation_lda] = minor_load_accumulator, 
+	[ZLX_ISA_Minor_operation_ald] = minor_accumulator_load,
+	[ZLX_ISA_Minor_operation_sta] = minor_store_accumulator,
+	[ZLX_ISA_Minor_operation_ast] = minor_accumulator_store,
+	[ZLX_ISA_Minor_operation_ldsa] = minor_load_stack_accumulator,
+	[ZLX_ISA_Minor_operation_stsa] = minor_store_stack_accumulator,
+
+ */
+
+
+//exact decoder postions to very
+
+
 void ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor)
 {
 	ZLX_EMU__CPU_parameters_t parameters = {};
@@ -1119,15 +1144,91 @@ void ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor)
 	switch(minor.operation)
 	{
 		case ZLX_ISA_Minor_operation_move:
-		
+			//[rd][rs]
+			//[s1][s2]
 
 			parameters.source_1 = minor.u__format_55.a5;
 			parameters.source_2 = minor.u__format_55.b5;
 			break;
 		
-		
+		case ZLX_ISA_Minor_operation_swap:
+			//[5][5]
+			parameters.source_1 = minor.u__format_55.a5;		
+			parameters.source_2 = minor.u__format_55.b5;
+			break;
+		case ZLX_ISA_Minor_operation_add:
+			//[5][5]			
+			parameters.source_1 = minor.u__format_55.a5;		
+			parameters.source_2 = minor.u__format_55.b5;
+
+			break;
+		case ZLX_ISA_Minor_operation_adda:
+			//[5][5]			
+			//r1 = acc + r2
+			parameters.source_1 = minor.u__format_55.a5;		
+			parameters.source_2 = minor.u__format_55.b5;
+
+			break;
+		case ZLX_ISA_Minor_operation_sub:
+			parameters.source_1 = minor.u__format_55.a5;	
+			parameters.source_2 = minor.u__format_55.b5;
+			break;
+
+		case ZLX_ISA_Minor_operation_addi:
+			parameters.imm5 = minor.u__format_55.a5;	
+			parameters.source_1 = minor.u__format_55.b5;
+
+			break;
+		case ZLX_ISA_Minor_operation_geta:
+			parameters.imm10 = minor.u__format_a.aa;	
+			break;
+		case ZLX_ISA_Minor_operation_get8:
+			parameters.imm2 = minor.u__format_28.a2;
+			parameters.imm8 = minor.u__format_28.b8;
+			break;
+		case ZLX_ISA_Minor_operation_b:
+			parameters.imm10 = minor.u__format_a.aa;	
+			break;
+	
+		case ZLX_ISA_Minor_operation_baeqz:
+			parameters.imm10 = minor.u__format_a.aa;	
+			break;
+		case ZLX_ISA_Minor_operation_baneqz:
+			parameters.imm10 = minor.u__format_a.aa;	
+			break;
+		case ZLX_ISA_Minor_operation_ldsa:
+			parameters.imm2 = minor.u__format_28.a2;
+			parameters.imm8 = minor.u__format_28.b8;
+			break;
+		case ZLX_ISA_Minor_operation_stsa:
+			parameters.imm2 = minor.u__format_28.a2;
+			parameters.imm8 = minor.u__format_28.b8;
+			break;
+		case ZLX_ISA_Minor_operation_lda:
+			parameters.imm2 = minor.u__format_235.a2;
+			parameters.imm3 = minor.u__format_235.b3; 
+			parameters.source_1 = minor.u__format_235.c5;
+			
+			break;
+		case ZLX_ISA_Minor_operation_ald:
+			parameters.imm2 = minor.u__format_235.a2;
+			parameters.imm3 = minor.u__format_235.b3; 
+			parameters.source_1 = minor.u__format_235.c5;
+			break;
+		case ZLX_ISA_Minor_operation_sta:
+			parameters.imm2 = minor.u__format_235.a2;
+			parameters.imm3 = minor.u__format_235.b3; 
+			parameters.source_1 = minor.u__format_235.c5;
+			break;
+		case ZLX_ISA_Minor_operation_ast:
+			parameters.imm2 = minor.u__format_235.a2;
+			parameters.imm3 = minor.u__format_235.b3; 
+			parameters.source_1 = minor.u__format_235.c5;
+			break;
+
 		default:
 			printf("ZLX %d\n",minor.operation); 
+
 			MY_FAULT("not a valid instruction");
 			break;
 	}
