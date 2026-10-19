@@ -198,7 +198,7 @@ OPERATION(minor_adda)
 
 
 //m.lda.s 
-//acc = mem_s[r1 - imm3 * s]
+//acc = mem_s[r1 + imm3 * s]
 OPERATION(minor_load_accumulator)
 {
 	
@@ -217,7 +217,7 @@ OPERATION(minor_load_accumulator)
 	
 
 	
-	uint32_t address = data_1 - temp;
+	uint32_t address = data_1 + temp;
 
 	output.memory_operation = true;
 	output.memory_load = true;
@@ -237,7 +237,7 @@ OPERATION(minor_load_accumulator)
 }
 	
 //m.sta.s r1
-//mem_s[r1 - imm3 * s] = acc
+//mem_s[r1 + imm3 * s] = acc
 OPERATION(minor_store_accumulator)
 {
 	OPERATION_SETUP;
@@ -256,7 +256,7 @@ OPERATION(minor_store_accumulator)
 	
 
 	
-	uint32_t address = data_1 - temp;
+	uint32_t address = data_1 + temp;
 
 	output.memory_operation = true;
 	output.memory_store = true;
@@ -274,7 +274,7 @@ OPERATION(minor_store_accumulator)
 }
 
 //m.ald.s 
-//r1 = mem_s[acc - imm3 * s]
+//r1 = mem_s[acc + imm3 * s]
 OPERATION(minor_accumulator_load)
 {
 	
@@ -293,7 +293,7 @@ OPERATION(minor_accumulator_load)
 	
 
 	
-	uint32_t address = data_1 - temp;
+	uint32_t address = data_1 + temp;
 
 	output.memory_operation = true;
 	output.memory_load = true;
@@ -331,7 +331,7 @@ OPERATION(minor_accumulator_store)
 
 	uint32_t temp = imm3_size_solution(offset, size);	
 	
-	uint32_t address = data_2 - temp;
+	uint32_t address = data_2 + temp;
 
 	output.memory_operation = true;
 	output.memory_store = true;
@@ -1063,7 +1063,7 @@ static ZLX_EMU__CPU_operation_t major_operations[] =
 
 void ZLX_EMU_Minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor)
 {
-
+	if(minor.operation) 
 }
 
 
@@ -1072,28 +1072,12 @@ void ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine)
 {
 
 	ZLX_EMU__CPU_t *cpu = machine->p__cpu;
-
-
-	
-
-
-
 }
 
 
 void ZLX_EMU_step(ZLX_EMU_Machine_t *machine)
 {
 	ZLX_EMU__CPU_t *cpu = machine->p__cpu;
-
-		
-	
-	
-
-
-
-
-
-
 }
 
 
