@@ -53,7 +53,7 @@ typedef enum ZLX_ISA_Minor_format_type
 	ZLX_ISA_Minor_format_type_55,
 	ZLX_ISA_Minor_format_type_235,
 	ZLX_ISA_Minor_format_type_28,
-	ZLX_ISA_Minor_format_type_10,
+	ZLX_ISA_Minor_format_type_a,
 }ZLX_ISA_Minor_format_type_t;
 
 
@@ -101,6 +101,9 @@ typedef struct ZLX_ISA_Minor
 		ZLX_ISA_Minor_format_a_t u__format_a;
 	};	
 }ZLX_ISA_Minor_t;
+
+
+extern ZLX_ISA_Minor_format_type_t ZLX_ISA_Minor_operation_formats[];
 
 //
 //
