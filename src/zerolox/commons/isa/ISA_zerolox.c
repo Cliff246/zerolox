@@ -22,7 +22,7 @@ ZLX_ISA_Minor_format_type_t ZLX_ISA_Minor_operation_formats[] =
 	[ZLX_ISA_Minor_operation_stsa] = ZLX_ISA_Minor_format_type_28,
 
 
-}
+};
 
 char *ZLX_ISA_opcodes[] = 
 {

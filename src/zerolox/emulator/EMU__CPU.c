@@ -142,7 +142,7 @@ OPERATION(minor_move)
 {
 	OPERATION_SETUP;
 	
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_2);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);
 	
 		
 	output.use_destination = true;
@@ -161,9 +161,9 @@ OPERATION(minor_add)
 	OPERATION_SETUP;
 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
 
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_2);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);
 
 	output.use_destination = true;
 	output.use_destination_1 = true;
@@ -182,9 +182,9 @@ OPERATION(minor_adda)
 {
 	OPERATION_SETUP;
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_2);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);
 
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
 
 	output.use_destination = true;
 	output.use_destination_1 = true;
@@ -204,7 +204,7 @@ OPERATION(minor_load_accumulator)
 	
 	OPERATION_SETUP;
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
 	
 	uint32_t size = paramaters.imm2;
 
@@ -242,8 +242,8 @@ OPERATION(minor_store_accumulator)
 {
 	OPERATION_SETUP;
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
 	
 	uint32_t size = paramaters.imm2;
 
@@ -280,7 +280,7 @@ OPERATION(minor_accumulator_load)
 	
 	OPERATION_SETUP;
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
 	
 	uint32_t size = paramaters.imm2;
 
@@ -319,8 +319,8 @@ OPERATION(minor_accumulator_store)
 {
 	OPERATION_SETUP;
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
 	
 	uint32_t size = paramaters.imm2;
 
@@ -350,7 +350,7 @@ OPERATION(minor_load_stack_accumulator)
 {	
 	OPERATION_SETUP;
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
 	
 	uint32_t size = paramaters.imm2;
 	uint8_t size_in_bytes = imm2_size_to_bytes(size);
@@ -384,8 +384,8 @@ OPERATION(minor_store_stack_accumulator)
 {
 	OPERATION_SETUP;
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
 	
 	uint32_t size = paramaters.imm2;
 
@@ -411,8 +411,8 @@ OPERATION(minor_swap)
 {
 
 	OPERATION_SETUP;
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_2);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);
 
 
 	output.use_destination = true;
@@ -434,7 +434,7 @@ OPERATION(minor_addi)
 	OPERATION_SETUP;
 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
 
 	uint32_t imm5 = paramaters.imm5; 
 
@@ -483,7 +483,7 @@ OPERATION(minor_branch_accumulator_equals_zero)
 {
 	OPERATION_SETUP;
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
 
 	int32_t pc = MY_sign_extend32(paramaters.imm10 << 1, 11);
 	if(data_1 == 0)
@@ -500,7 +500,7 @@ OPERATION(minor_branch_accumulator_not_equals_zero)
 {
 	OPERATION_SETUP;
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
 
 	int32_t pc = MY_sign_extend32(paramaters.imm10 << 1, 11);
 	if(data_1 != 0)
@@ -537,8 +537,8 @@ OPERATION(minor_sub)
 {
 	OPERATION_SETUP;
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1); 
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_2); 
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1); 
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2); 
 
 	output.use_destination = true;
 	output.use_destination_1 = true;
@@ -584,7 +584,7 @@ OPERATION(major_load)
 	//rs is in s1 and rd is s2	
 	//[opcode][s1][1] [i9{0:4}][size][i9{5:7}[source2][i9{8}]
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
 	
 	uint32_t size = paramaters.imm2;
 
@@ -620,8 +620,8 @@ OPERATION(major_store)
 	//rs1 is in s1 and rs2 is s2	
 	//[opcode][s1][1] [i9{0:4}][size][i9{5:7}[source2][i9{8}]
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_2);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);
 	
 	uint32_t size = paramaters.imm2;
 
@@ -648,8 +648,8 @@ OPERATION(major_push8)
 {
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
 	
 	uint32_t stack_change = data_2 - 1;
 
@@ -671,8 +671,8 @@ OPERATION(major_push16)
 {
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
 	
 	uint32_t stack_change = data_2 - 2;
 
@@ -696,8 +696,8 @@ OPERATION(major_push32)
 {
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
 	
 	uint32_t stack_change = data_2 - 4;
 
@@ -721,8 +721,8 @@ OPERATION(major_pushp)
 {
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
 	
 	uint32_t stack_change = data_2 - 3;
 
@@ -746,7 +746,7 @@ OPERATION(major_pop8)
 {
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
 	
 
 	output.memory_operation = true;
@@ -775,7 +775,7 @@ OPERATION(major_pop16)
 {
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
 	
 
 	output.memory_operation = true;
@@ -806,7 +806,7 @@ OPERATION(major_pop32)
 {
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
 	
 
 	output.memory_operation = true;
@@ -837,7 +837,7 @@ OPERATION(major_pop24)
 {
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_stack_pointer);
 	
 	output.memory_operation = true;
 	output.memory_load = true;
@@ -867,7 +867,7 @@ OPERATION(major_load_iterator_x_accumualtor)
 
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_iterator_x);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_iterator_x);
 	
 	uint32_t size = paramaters.imm2;
 
@@ -905,7 +905,7 @@ OPERATION(major_load_iterator_y_accumualtor)
 
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_iterator_y);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_iterator_y);
 	
 	uint32_t size = paramaters.imm2;
 
@@ -943,9 +943,9 @@ OPERATION(major_store_iterator_x_accumualtor)
 
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_iterator_x);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_iterator_x);
 
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
 	
 	uint32_t size = paramaters.imm2;
 
@@ -980,9 +980,9 @@ OPERATION(major_store_iterator_y_accumualtor)
 
 	OPERATION_SETUP; 
 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_iterator_y);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_iterator_y);
 
-	uint32_t data_2 = ZLX_EMU_get_register_CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
 	
 	uint32_t size = paramaters.imm2;
 
@@ -1016,7 +1016,7 @@ OPERATION(major_store_iterator_y_accumualtor)
 OPERATION(major_increment)
 {
 	OPERATION_SETUP; 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
 	output.use_destination = true;
 	output.use_destination_1 = true;
 	output.destination_1 = paramaters.source_1; 
@@ -1029,7 +1029,7 @@ OPERATION(major_increment)
 OPERATION(major_decrement)
 {
 	OPERATION_SETUP; 
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
 	output.use_destination = true;
 	output.use_destination_1 = true;
 	output.destination_1 = paramaters.source_1; 
@@ -1042,7 +1042,7 @@ OPERATION(major_add_immediate)
 	//[opcode][rs1][1] [i11{0:4][ill{5:9}][rs1][i11{10}]
 	OPERATION_SETUP; 
 	
-	uint32_t data_1 = ZLX_EMU_get_register_CPU(cpu, paramaters.source_1);
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
 	uint32_t change = MY_sign_extend32(paramaters.imm11, 11);
 
 
@@ -1092,7 +1092,7 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output)
 
 	if(output.pc_changed == true)
 	{
-		if(output.pc_set_or_add == true)
+		if(output.pc_set_or_add == false)
 		{
 
 			cpu->program_counter = output.pc_value; 
