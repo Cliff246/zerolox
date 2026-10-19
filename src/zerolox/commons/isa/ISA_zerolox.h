@@ -105,6 +105,9 @@ typedef struct ZLX_ISA_Minor
 
 extern ZLX_ISA_Minor_format_type_t ZLX_ISA_Minor_operation_formats[];
 
+
+
+
 //
 //
 //----------------------------------------------------------------------------------------------
@@ -116,6 +119,12 @@ typedef enum ZLX_ISA_Major_operation
 	ZLX_ISA_Major_operation_st,
 
 }ZLX_ISA_Major_operation_t;
+
+
+typedef enum ZLX_ISA_Major_format_type
+{
+	ZLX_ISA_Major_format_type_5,
+}ZLX_ISA_Major_format_type_t;
 
 
 
@@ -182,7 +191,7 @@ typedef struct ZLX_ISA_Major_format_5_53251
 	uint8_t e5;
 	uint8_t f1;
 
-}ZLX_ISA_Major_format_5_5321_t;
+}ZLX_ISA_Major_format_5_53251_t;
 
 typedef struct ZLX_ISA_Major_format_5_b5
 {
@@ -192,14 +201,46 @@ typedef struct ZLX_ISA_Major_format_5_b5
 	uint8_t c5;	
 }ZLX_ISA_Major_format_5_b5_t;
 
+typedef struct ZLX_ISA_Major
+{
+	ZLX_ISA_Major_operation_t operation;
+	ZLX_ISA_Major_format_type_t type;
+	union 
+	{
+		ZLX_ISA_Major_format_5_b5_t u__format_5_b5; 
+		ZLX_ISA_Major_format_5_655_t u__format_5_665;
+		ZLX_ISA_Major_format_5_952_t u__format_5_952;
+		ZLX_ISA_Major_format_5_53251_t u__format_5_53251;
+		ZLX_ISA_Major_format_32_t u__foramt_32;
+		ZLX_ISA_Major_format_5_t u__foramt_5;
+	};
+
+}ZLX_ISA_Major_t;
+
+//
 
 typedef enum ZLX_ISA_Zerolox_version
 {
 	ZLX_ISA_ZEROLOX1,
 }ZLX_ISA_Zerolox_version_t;
 
+typedef enum ZLX_ISA_Instruction_type
+{
+	ZLX_ISA_Major_type,
+	ZLX_ISA_Minor_type,
+}ZLX_ISA_Instruction_type_t;
 
 
+typedef struct ZLX_ISA_Instruction
+{
+	ZLX_ISA_Instruction_type_t type;
+
+	union
+	{
+		ZLX_ISA_Major_t u__major;
+		ZLX_ISA_Minor_t u__minor;
+	};
+}ZLX_ISA_Instruction_t;
 
 
 
@@ -208,13 +249,11 @@ typedef struct ZLX_ISA_Parcel
 	uint16_t parcel;
 }ZLX_ISA_Parcel_t;
 
-typedef struct ZLX_ISA_Instruction
-{
-	ZLX_ISA_Parcel_t a__parcels[8];
-}ZLX_ISA_Instruction_t;
-
 
 extern char *ZLX_ISA_opcodes[];
+
+
+
 
 
 

@@ -93,17 +93,17 @@ static void store_variable_size_data(ZLX_EMU_Memory_t *memory, uint32_t address,
 	switch(size)
 	{
 		case 1:
-			ZLX_EMU_write_8_Memory(memory, data, address);
+			ZLX_EMU_write_8_Memory(memory, address, data);
 			break;
 		case 2: 
-			ZLX_EMU_write_16_Memory(memory, data, address);
+			ZLX_EMU_write_16_Memory(memory, address, data);
 			break;
 			//load 24 
 		case 3:
-			ZLX_EMU_write_24_Memory(memory, data, address);
+			ZLX_EMU_write_24_Memory(memory, address, data);
 			break;
 		case 4:
-			ZLX_EMU_write_32_Memory(memory, data, address);
+			ZLX_EMU_write_32_Memory(memory, address, data);
 			break;
 
 		default:
@@ -1235,7 +1235,8 @@ void ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor)
 
 
 	output = minor_operations[minor.operation](machine, parameters);
-
+	
+	ZLX_EMU_solve__CPU(machine->p__cpu, output);
 
 
 
