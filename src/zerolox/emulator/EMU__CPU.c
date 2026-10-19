@@ -419,10 +419,10 @@ OPERATION(minor_swap)
 	output.use_destination_1 = true;
 	output.use_destination_2 = true;
 
-	output.destination_1 = paramaters.source_2;
+	output.destination_1 = paramaters.source_1;
 	output.destination_1_data = data_2;
 
-	output.destination_2 = paramaters.source_1;
+	output.destination_2 = paramaters.source_2;
 	output.destination_2_data = data_1;
 	return output;
 }
@@ -521,7 +521,7 @@ OPERATION(minor_get8)
 	uint8_t imm8 = paramaters.imm8;
 	if(paramaters.imm2 > 3)
 		MY_FAULT("fails");
-	int register_id = paramaters.imm2 + 7;
+	int register_id = paramaters.imm2 + 8;
 	
 	output.use_destination = true;
 	output.use_destination_1 = true;
@@ -1116,7 +1116,7 @@ uint32_t ZLX_EMU_get_register__CPU(ZLX_EMU__CPU_t *cpu, uint8_t id)
 
 
 
-uint32_t ZLX_get_register__CPU(ZLX_EMU__CPU_t *cpu, uint8_t id)
+void ZLX_EMU_set_regiser__CPU(ZLX_EMU__CPU_t *cpu, uint8_t id, uint32_t value)
 {
 	if(id >= 32)
 	{
@@ -1125,11 +1125,9 @@ uint32_t ZLX_get_register__CPU(ZLX_EMU__CPU_t *cpu, uint8_t id)
 	if(id == 0)
 	{
 		cpu->a__registers[0] = 0;
-		return 0;
 	}
 	else
 	{
-		return cpu->a__registers[id];	
+		cpu->a__registers[id] = value;	
 	}
 }
-#undef GET_CPU
