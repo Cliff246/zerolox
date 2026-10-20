@@ -619,6 +619,53 @@ OPERATION(minor_store_plus)
 	output.destination_1_data = iterator_change;
 	
 	return output;	
+}
+
+//beqi
+OPERATION(minor_branch_compare_iterator)
+{	
+	OPERATION_SETUP;
+
+	bool operation_type = paramaters.imm2 & 0x1;
+	bool pull_type = paramaters.imm2 & 0x2;
+	uint32_t iterator;
+	uint32_t counter;	
+	if(pull_type == false)
+	{	
+		iterator = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_iterator_x);
+		counter = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_counter_x);
+	}
+	else
+	{
+		iterator = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_iterator_y);
+		counter = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_counter_y);
+
+	}
+	//maybe
+	int32_t pc = MY_sign_extend32(paramaters.imm8 << 1, 9);
+
+	if(operation_type == false)
+	{
+		if(iterator == counter)
+		{
+			output.pc_set_or_add = true;	
+			output.pc_changed = true;
+			output.pc_value = pc;
+		
+		}
+	}
+	else
+	{
+		if(iterator != counter)
+		{
+			output.pc_set_or_add = true;	
+			output.pc_changed = true;
+			output.pc_value = pc;
+		}
+	}
+
+	
+	return output;
 
 }
 
@@ -644,6 +691,7 @@ static ZLX_EMU__CPU_operation_t minor_operations[] =
 	[ZLX_ISA_Minor_operation_stsa] = minor_store_stack_accumulator,
 	[ZLX_ISA_Minor_operation_ld_plus] = minor_load_plus,
 	[ZLX_ISA_Minor_operation_st_plus] = minor_store_plus,
+	[ZLX_ISA_Minor_operation_bieqc] = minor_branch_compare_iterator,
 };
 
 //
@@ -1188,7 +1236,24 @@ ZLX_EMU__CPU_output_t ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 			parameters.imm3 = minor.u__format_235.b3; 
 			parameters.source_1 = minor.u__format_235.c5;
 			break;
+		case ZLX_ISA_Minor_operation_ld_plus:
+			parameters.imm2 = minor.u__format_235.a2;
+			parameters.imm3 = minor.u__format_235.b3; 
+			parameters.source_1 = minor.u__format_235.c5;
 
+
+			break;
+		case ZLX_ISA_Minor_operation_st_plus:
+			parameters.imm2 = minor.u__format_235.a2;
+			parameters.imm3 = minor.u__format_235.b3; 
+			parameters.source_1 = minor.u__format_235.c5;
+
+			break;
+		case ZLX_ISA_Minor_operation_bieqc:
+			parameters.imm2 = minor.u__format_28.a2;
+			parameters.imm8 = minor.u__format_28.b8;
+
+			break;
 		default:
 			printf("ZLX %d\n",minor.operation); 
 
