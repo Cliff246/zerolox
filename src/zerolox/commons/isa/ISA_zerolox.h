@@ -2,6 +2,7 @@
 #define ZLX_ISA_ZEROLOX_HEADER
 
 #include <stdint.h>
+#include "stdbool.h"
 
 
 
@@ -246,10 +247,17 @@ typedef struct ZLX_ISA_Instruction
 
 
 
+
+
 typedef struct ZLX_ISA_Parcel
 {
 	uint16_t parcel;
 }ZLX_ISA_Parcel_t;
+
+
+//continue to push into the parcel, it fills then return true on completion 
+bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parcel_t parcels[8], int *count, int position);
+
 
 
 extern char *ZLX_ISA_opcodes[];

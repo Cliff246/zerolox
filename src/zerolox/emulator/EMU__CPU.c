@@ -1240,19 +1240,15 @@ ZLX_EMU__CPU_output_t ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 			parameters.imm2 = minor.u__format_235.a2;
 			parameters.imm3 = minor.u__format_235.b3; 
 			parameters.source_1 = minor.u__format_235.c5;
-
-
 			break;
 		case ZLX_ISA_Minor_operation_st_plus:
 			parameters.imm2 = minor.u__format_235.a2;
 			parameters.imm3 = minor.u__format_235.b3; 
 			parameters.source_1 = minor.u__format_235.c5;
-
 			break;
 		case ZLX_ISA_Minor_operation_bieqc:
 			parameters.imm2 = minor.u__format_28.a2;
 			parameters.imm8 = minor.u__format_28.b8;
-
 			break;
 		default:
 			printf("ZLX %d\n",minor.operation); 
