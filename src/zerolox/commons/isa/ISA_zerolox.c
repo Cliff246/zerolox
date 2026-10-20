@@ -30,9 +30,15 @@ char *ZLX_ISA_opcodes[] =
 	[0] = ""
 };
 
-bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parcel_t parcels[8], int *count)
+bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parcel_t parcels[8], int *count, int position)
 {
-	return;
+	if(*count)
+	{
+
+	}	
+
+
+
+	return false;;
 }
 
-;
