@@ -549,6 +549,80 @@ OPERATION(minor_sub)
 
 }
 
+OPERATION(minor_load_plus)
+{
+	OPERATION_SETUP; 
+
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	
+	uint32_t size = paramaters.imm2;
+
+	uint32_t size_in_bytes = imm2_size_to_bytes(size);
+
+
+	int32_t offset = paramaters.imm3; 
+	output.memory_operation = true;
+	output.memory_load = true;
+	output.memory_address = data_1;
+	
+	uint32_t load = load_variable_size_data(memory, data_1, size_in_bytes);
+
+
+	output.memory_value = load;
+
+	output.use_destination = true;
+	output.use_destination_1 = true;
+	output.use_destination_2 = true;
+
+	uint32_t iterator_change = data_1 +  offset * size_in_bytes; 
+
+	output.destination_1 = paramaters.source_1; 
+	output.destination_1_data = iterator_change;
+	
+	output.destination_2 = ZLX_ISA_Register_identifier_accumulator;
+	output.destination_2_data = load;
+
+	return output;	
+
+}
+
+OPERATION(minor_store_plus)
+{
+	OPERATION_SETUP; 
+
+	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+
+	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	
+	uint32_t size = paramaters.imm2;
+
+	uint32_t size_in_bytes = imm2_size_to_bytes(size);
+
+
+	int32_t offset = paramaters.imm3;
+
+	output.memory_operation = true;
+	output.memory_store = true;
+	output.memory_address = data_1;
+	
+	output.memory_value = data_2;
+	store_variable_size_data(memory, data_1, data_2, size_in_bytes);
+
+
+
+	output.use_destination = true;
+	output.use_destination_1 = true;
+
+	uint32_t iterator_change = data_1 +  offset * size_in_bytes; 
+
+	output.destination_1 = paramaters.source_1; 
+	output.destination_1_data = iterator_change;
+	
+	return output;	
+
+}
+
+
 static ZLX_EMU__CPU_operation_t minor_operations[] = 
 {
 	[ZLX_ISA_Minor_operation_move] = minor_move,
@@ -568,7 +642,8 @@ static ZLX_EMU__CPU_operation_t minor_operations[] =
 	[ZLX_ISA_Minor_operation_ast] = minor_accumulator_store,
 	[ZLX_ISA_Minor_operation_ldsa] = minor_load_stack_accumulator,
 	[ZLX_ISA_Minor_operation_stsa] = minor_store_stack_accumulator,
-
+	[ZLX_ISA_Minor_operation_ld_plus] = minor_load_plus,
+	[ZLX_ISA_Minor_operation_st_plus] = minor_store_plus,
 };
 
 //
@@ -899,118 +974,6 @@ OPERATION(major_load_iterator_x_accumualtor)
 
 	return output;	
 }
-//ldya
-OPERATION(major_load_iterator_y_accumualtor)
-{
-
-	OPERATION_SETUP; 
-
-	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_iterator_y);
-	
-	uint32_t size = paramaters.imm2;
-
-	uint32_t size_in_bytes = imm2_size_to_bytes(size);
-
-
-	int32_t offset = MY_sign_extend32(paramaters.imm3, 3);
-
-	output.memory_operation = true;
-	output.memory_load = true;
-	output.memory_address = data_1;
-	
-	uint32_t load = load_variable_size_data(memory, data_1, size_in_bytes);
-
-
-	output.memory_value = load;
-
-	output.use_destination = true;
-	output.use_destination_1 = true;
-	output.use_destination_2 = true;
-
-	uint32_t iterator_change = data_1 +  offset * size_in_bytes; 
-
-	output.destination_1 = ZLX_ISA_Register_identifier_iterator_y; 
-	output.destination_1_data = iterator_change;
-	
-	output.destination_2 = ZLX_ISA_Register_identifier_accumulator;
-	output.destination_2_data = load;
-
-	return output;	
-}
-//stxa.s
-OPERATION(major_store_iterator_x_accumualtor)
-{
-
-	OPERATION_SETUP; 
-
-	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_iterator_x);
-
-	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
-	
-	uint32_t size = paramaters.imm2;
-
-	uint32_t size_in_bytes = imm2_size_to_bytes(size);
-
-
-	int32_t offset = MY_sign_extend32(paramaters.imm3, 3);
-
-	output.memory_operation = true;
-	output.memory_store = true;
-	output.memory_address = data_1;
-	
-	output.memory_value = data_2;
-	store_variable_size_data(memory, data_1, data_2, size_in_bytes);
-
-
-
-	output.use_destination = true;
-	output.use_destination_1 = true;
-
-	uint32_t iterator_change = data_1 +  offset * size_in_bytes; 
-
-	output.destination_1 = ZLX_ISA_Register_identifier_iterator_x; 
-	output.destination_1_data = iterator_change;
-	
-	return output;	
-}
-
-//stya.s
-OPERATION(major_store_iterator_y_accumualtor)
-{
-
-	OPERATION_SETUP; 
-
-	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_iterator_y);
-
-	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
-	
-	uint32_t size = paramaters.imm2;
-
-	uint32_t size_in_bytes = imm2_size_to_bytes(size);
-
-
-	int32_t offset = MY_sign_extend32(paramaters.imm3, 3);
-
-	output.memory_operation = true;
-	output.memory_store = true;
-	output.memory_address = data_1;
-	
-	output.memory_value = data_2;
-	store_variable_size_data(memory, data_1, data_2, size_in_bytes);
-
-
-
-	output.use_destination = true;
-	output.use_destination_1 = true;
-
-	uint32_t iterator_change = data_1 +  offset * size_in_bytes; 
-
-	output.destination_1 = ZLX_ISA_Register_identifier_iterator_y; 
-	output.destination_1_data = iterator_change;
-	
-	return output;	
-}
-
 //inc r1
 //r1 += 1
 OPERATION(major_increment)
@@ -1137,7 +1100,7 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output)
 //exact decoder postions to very
 
 
-void ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor)
+ZLX_EMU__CPU_output_t ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor)
 {
 	ZLX_EMU__CPU_parameters_t parameters = {};
 	ZLX_EMU__CPU_output_t output;
@@ -1235,12 +1198,7 @@ void ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor)
 
 
 	output = minor_operations[minor.operation](machine, parameters);
-	
-	ZLX_EMU_solve__CPU(machine->p__cpu, output);
-
-
-
-
+	return output;
 }
 
 

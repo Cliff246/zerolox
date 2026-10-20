@@ -41,8 +41,9 @@ typedef enum ZLX_ISA_Minor_operation
 	ZLX_ISA_Minor_operation_sta,
 	ZLX_ISA_Minor_operation_ast,	
 	ZLX_ISA_Minor_operation_stsa,
-	ZLX_ISA_Minor_operation_ldsa
-
+	ZLX_ISA_Minor_operation_ldsa,
+	ZLX_ISA_Minor_operation_ld_plus, //ld+
+	ZLX_ISA_Minor_operation_st_plus  //st+
 }ZLX_ISA_Minor_operation_t;
 
 
