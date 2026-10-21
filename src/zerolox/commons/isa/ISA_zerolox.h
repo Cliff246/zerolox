@@ -122,7 +122,31 @@ typedef enum ZLX_ISA_Major_operation
 	ZLX_ISA_Major_operation_st,
 
 }ZLX_ISA_Major_operation_t;
-
+/*
+ *add
+ *sub
+ *sll
+ *srl
+ *sra
+ /i don't want to copy riscv so, i will have to steal from something else
+ *xor
+ *or
+ *and
+ *xori
+ *ori
+ *andi
+ *bne
+ *beq
+ *call
+ *ret
+ *blt
+ *ge
+ *blt
+ *bgeu
+ *
+ *	ULTRA OPS
+ *
+ */
 
 typedef enum ZLX_ISA_Major_format_type
 {
