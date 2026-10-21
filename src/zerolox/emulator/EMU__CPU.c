@@ -559,8 +559,11 @@ OPERATION(minor_load_plus)
 
 	uint32_t size_in_bytes = imm2_size_to_bytes(size);
 
-
-	int32_t offset = paramaters.imm3; 
+	int32_t offset = MY_sign_extend32(paramaters.imm3, 3);
+	if(paramaters.imm3 == 0)
+		offset = 4;
+	else if(paramaters.imm3 == 5)
+		offset = 8;
 	output.memory_operation = true;
 	output.memory_load = true;
 	output.memory_address = data_1;
@@ -597,9 +600,13 @@ OPERATION(minor_store_plus)
 	uint32_t size = paramaters.imm2;
 
 	uint32_t size_in_bytes = imm2_size_to_bytes(size);
+	
 
-
-	int32_t offset = paramaters.imm3;
+	int32_t offset = MY_sign_extend32(paramaters.imm3, 3);
+	if(paramaters.imm3 == 0)
+		offset = 4;
+	else if(paramaters.imm3 == 5)
+		offset = 8;
 
 	output.memory_operation = true;
 	output.memory_store = true;
