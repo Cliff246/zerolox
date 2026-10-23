@@ -1309,7 +1309,7 @@ OPERATION(major_call)
 	output.use_destination = true;
 	output.use_destination_1 = true;
 	output.destination_1 = ZLX_ISA_Register_identifier_return_pointer ;
-	output.destination_1_data = pc +  paramaters.instruction_size;
+	output.destination_1_data = pc +  paramaters.instruction_size * 2;
 
 
 
@@ -1717,13 +1717,16 @@ ZLX_ISA_Instruction_t ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine)
 	uint32_t temporary_pc = cpu->program_counter + 2;
 
 	bool one_op = ZLX_ISA_decode_instruction(&instruction, parcels, &count, 0); 
-		
 	if(one_op == false)
 	{
+		if(count == 0)
+		{
+			MY_FAULT("could not decode instruction");
+		}
 		for(int i = 1; i < count; ++i)
 		{
 			parcels[i].parcel = ZLX_EMU_read_16_Memory(machine->p__memory, temporary_pc); 
-		
+			temporary_pc+= 2;		
 			bool stop_going = ZLX_ISA_decode_instruction(&instruction, parcels, &count, i); 
 			if(stop_going == true)
 			{
