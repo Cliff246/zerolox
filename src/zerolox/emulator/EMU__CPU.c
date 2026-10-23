@@ -1292,6 +1292,45 @@ OPERATION(major_branch_greater_than_equals_unsigned)
 
 }
 
+OPERATION(major_call)
+{
+	
+	OPERATION_SETUP;
+
+	uint32_t dest = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t pc = ZLX_EMU_get_pc__CPU(cpu);	
+
+	
+	output.pc_set_or_add = false;	
+	output.pc_changed = true;
+	output.pc_value = dest;
+
+	output.use_destination = true;
+	output.use_destination_1 = true;
+	output.destination_1 = ZLX_ISA_Register_identifier_return_pointer;
+	output.destination_1_data = pc;
+
+
+
+	return output;
+}
+
+OPERATION(major_return)
+{
+
+	OPERATION_SETUP;
+
+	uint32_t rp = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_return_pointer);	
+	
+	output.pc_set_or_add = false;	
+	output.pc_changed = true;
+	output.pc_value = rp;
+
+	
+	return output;
+
+}
+
 
 static ZLX_EMU__CPU_operation_t major_operations[] = 
 {
@@ -1501,6 +1540,13 @@ void ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine)
 void ZLX_EMU_step(ZLX_EMU_Machine_t *machine)
 {
 	ZLX_EMU__CPU_t *cpu = machine->p__cpu;
+}
+
+
+
+uint32_t ZLX_EMU_get_pc__CPU(ZLX_EMU__CPU_t *cpu)
+{
+	return cpu->program_counter;
 }
 
 

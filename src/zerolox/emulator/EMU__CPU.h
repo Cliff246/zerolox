@@ -106,6 +106,7 @@ void ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine);
 
 void ZLX_EMU_step(ZLX_EMU_Machine_t *machine);
 
+uint32_t ZLX_EMU_get_pc__CPU(ZLX_EMU__CPU_t *cpu);
 uint32_t ZLX_EMU_get_register__CPU(ZLX_EMU__CPU_t *cpu, uint8_t id);
 void ZLX_EMU_set_regiser__CPU(ZLX_EMU__CPU_t *cpu, uint8_t id, uint32_t value);
 
