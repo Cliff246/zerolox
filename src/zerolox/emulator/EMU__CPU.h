@@ -27,6 +27,7 @@ typedef struct ZLX_EMU__CPU_parameters
 	uint8_t imm2;	
 	uint8_t imm3;
 	uint8_t imm5;
+	uint8_t imm6;
 
 
 	//
@@ -38,7 +39,7 @@ typedef struct ZLX_EMU__CPU_parameters
 	uint16_t imm16;
 
 
-
+	uint32_t imm32;
 
 }ZLX_EMU__CPU_parameters_t;
 

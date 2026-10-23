@@ -1035,6 +1035,103 @@ OPERATION(major_add_immediate)
 	return output;
 }
 
+//r1 = 
+OPERATION(major_get16)
+{
+
+	OPERATION_SETUP; 
+
+	uint32_t set_to = paramaters.imm16;
+
+	output.use_destination = true;
+	output.use_destination_1 = true;
+	output.destination_1 = paramaters.source_1; 
+	output.destination_1_data = set_to;
+
+	return output;
+}
+
+OPERATION(major_get32)
+{
+	OPERATION_SETUP; 
+	uint32_t set_to = paramaters.imm32;
+	output.use_destination = true;
+	output.use_destination_1 = true;
+	output.destination_1 = paramaters.source_1; 
+	output.destination_1_data = set_to;
+
+	return output;
+}
+
+
+//major 3form
+OPERATION(major_3form)
+{
+	OPERATION_SETUP;
+	//[opcode][rs1][1] [imm5][rd][rs2]
+
+	
+	uint32_t rs1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);	
+	uint32_t rs2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_3);	
+
+	ZLX_ISA_Major_3form_t selector = (ZLX_ISA_Major_3form_t)paramaters.imm5;
+	
+	uint32_t result;
+
+	switch(selector)
+	{
+		
+		case ZLX_ISA_Major_operation_3form_add:
+
+			result = rs1 + rs2;
+			break;
+
+		case ZLX_ISA_Major_operation_3form_sub:
+			result = rs1 - rs2;
+			break;
+
+		case ZLX_ISA_Major_operation_3form_or:
+			result = rs1 | rs2;
+			break;
+		case ZLX_ISA_Major_operation_3form_and:
+			result = rs1 & rs2;
+			break;
+
+		case ZLX_ISA_Major_operation_3form_xor:
+			result = rs1 ^ rs2;
+			break;
+		case ZLX_ISA_Major_operation_3form_sll:
+			result = rs1 << rs2;
+			break;
+
+		case ZLX_ISA_Major_operation_3form_srl:
+			result = rs1 >> rs2;
+			break;
+		case ZLX_ISA_Major_operation_3form_sra:
+			result = ((int32_t) rs1 >> (int32_t) rs2);
+			break;
+		case ZLX_ISA_Major_operation_3form_sllu:
+			result = ((int32_t) rs1 << (int32_t) rs2);
+			break;
+
+		default: 
+			MY_FAULT("selector failed");
+			break;
+	}
+
+	output.use_destination = true;
+	output.use_destination_1 = true;
+	output.destination_1 = paramaters.source_2; 
+	output.destination_1_data = result;
+
+
+
+
+
+	return output;	
+}
+
+
 
 
 static ZLX_EMU__CPU_operation_t major_operations[] = 
@@ -1281,5 +1378,5 @@ void ZLX_EMU_set_regiser__CPU(ZLX_EMU__CPU_t *cpu, uint8_t id, uint32_t value)
 	{
 		cpu->a__registers[id] = value;	
 	}
-	ZLX_ISA_Major_operation_pushp,
+	
 }
