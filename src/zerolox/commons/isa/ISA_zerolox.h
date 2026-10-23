@@ -310,6 +310,7 @@ typedef struct ZLX_ISA_Major
 	ZLX_ISA_Major_format_type_t type;
 	union 
 	{
+		ZLX_ISA_Major_format_5_5551_t u__format_5_5551;
 		ZLX_ISA_Major_format_5_b5_t u__format_5_b5; 
 		ZLX_ISA_Major_format_5_655_t u__format_5_655;
 		ZLX_ISA_Major_format_5_952_t u__format_5_952;
