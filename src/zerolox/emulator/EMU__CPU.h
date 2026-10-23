@@ -98,6 +98,7 @@ typedef struct ZLX_EMU__CPU
 
 
 ZLX_EMU__CPU_output_t ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor);
+ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Major_t major);
 //this is all in that for a reason
 
 

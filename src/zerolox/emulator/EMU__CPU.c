@@ -1334,6 +1334,32 @@ OPERATION(major_return)
 
 static ZLX_EMU__CPU_operation_t major_operations[] = 
 {
+	[ZLX_ISA_Major_operation_pop8] = major_pop8,
+	[ZLX_ISA_Major_operation_pop16] = major_pop16,
+	[ZLX_ISA_Major_operation_pop32] = major_pop32,
+	[ZLX_ISA_Major_operation_popp] = major_popp,
+	[ZLX_ISA_Major_operation_push8] = major_push8,
+	[ZLX_ISA_Major_operation_push16] = major_push16,
+	[ZLX_ISA_Major_operation_push32] = major_push32,
+	[ZLX_ISA_Major_operation_pushp] = major_pushp,
+	[ZLX_ISA_Major_operation_addi] = major_add_immediate,
+	[ZLX_ISA_Major_operation_3form] = major_3form,
+	[ZLX_ISA_Major_operation_3form_immediate] = major_3form_immediate,
+	[ZLX_ISA_Major_operation_ld] = major_load,
+	[ZLX_ISA_Major_operation_st] = major_store,
+	[ZLX_ISA_Major_operation_beq] = major_branch_equals,
+	[ZLX_ISA_Major_operation_bneq] = major_branch_not_equals,
+	[ZLX_ISA_Major_operation_blt] = major_branch_less_than,
+	[ZLX_ISA_Major_operation_bge] = major_branch_greater_than_equals,
+	[ZLX_ISA_Major_operation_bltu] = major_branch_less_than_unsigned,
+	[ZLX_ISA_Major_operation_bgeu] = major_branch_greater_than_equals_unsigned,
+	[ZLX_ISA_Major_operation_inc] = major_increment,
+	[ZLX_ISA_Major_operation_dec] = major_decrement,
+	[ZLX_ISA_Major_operation_call] = major_call,
+	[ZLX_ISA_Major_operation_ret] = major_return,
+	[ZLX_ISA_Major_operation_get16] = major_get16,
+	[ZLX_ISA_Major_operation_get32] = major_get32
+
 
 };
 
@@ -1412,6 +1438,151 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output)
 
 
 //exact decoder postions to very
+ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Major_t major)
+{
+	ZLX_EMU__CPU_parameters_t parameters = {};
+	ZLX_EMU__CPU_output_t output;
+
+	switch(major.operation)
+	{
+		
+		case ZLX_ISA_Major_operation_ld:
+			parameters.source_1 = major.u__format_5_952.a5;
+			parameters.source_2 = major.u__format_5_952.c5; 
+			parameters.imm2 = major.u__format_5_952.d2;
+			parameters.imm9 = major.u__format_5_952.b9;
+
+			break;
+		case ZLX_ISA_Major_operation_st:
+			parameters.source_1 = major.u__format_5_952.a5;
+			parameters.source_2 = major.u__format_5_952.c5; 
+			parameters.imm2 = major.u__format_5_952.d2;
+			parameters.imm9 = major.u__format_5_952.b9;
+			break;
+		case ZLX_ISA_Major_operation_push8:
+			parameters.source_1 = major.u__foramt_5.a5;
+			break;
+		case ZLX_ISA_Major_operation_push16:
+			parameters.source_1 = major.u__foramt_5.a5;
+			break;
+
+		case ZLX_ISA_Major_operation_push32:
+			parameters.source_1 = major.u__foramt_5.a5;
+			break;
+
+		case ZLX_ISA_Major_operation_pushp:
+			parameters.source_1 = major.u__foramt_5.a5;
+			break;
+
+		case ZLX_ISA_Major_operation_pop8:
+			parameters.source_1 = major.u__foramt_5.a5;
+			break;
+
+		case ZLX_ISA_Major_operation_pop16:
+			parameters.source_1 = major.u__foramt_5.a5;
+
+			break;
+
+		case ZLX_ISA_Major_operation_pop32:
+			parameters.source_1 = major.u__foramt_5.a5;
+			break;
+
+		case ZLX_ISA_Major_operation_popp:
+			parameters.source_1 = major.u__foramt_5.a5;
+			break;
+
+		case ZLX_ISA_Major_operation_get16:
+			parameters.source_1 = major.u__format_5_f.a5;
+			parameters.imm16 = major.u__format_5_f.bf;
+			break;
+		case ZLX_ISA_Major_operation_get32:
+			parameters.source_1 = major.u__format_5_f_f.a5;
+			parameters.imm32 = major.u__format_5_f_f.bf << 16 | major.u__format_5_f_f.cf;
+			break;
+		case ZLX_ISA_Major_operation_3form:
+			parameters.source_1 = major.u__format_5_655.a5;
+			parameters.source_2 = major.u__format_5_655.c5;
+			parameters.source_3 = major.u__format_5_655.d5;
+			parameters.imm6 = major.u__format_5_655.b6;
+
+			break;
+
+		case ZLX_ISA_Major_operation_3form_immediate:
+			parameters.source_1 = major.u__format_5_655.a5;
+			parameters.source_2 = major.u__format_5_655.c5;
+			parameters.source_3 = major.u__format_5_655.d5;
+			parameters.imm6 = major.u__format_5_655.b6;
+			break;
+			
+		case ZLX_ISA_Major_operation_inc:
+			parameters.source_1 = major.u__foramt_5.a5;
+			break;
+
+
+		case ZLX_ISA_Major_operation_dec:
+			parameters.source_1 = major.u__foramt_5.a5;
+			break;
+
+
+		case ZLX_ISA_Major_operation_addi:
+
+			parameters.source_1 = major.u__format_5_b5.a5;
+			parameters.source_2 = major.u__format_5_b5.c5;
+			parameters.imm11 = major.u__format_5_b5.b11;
+			break;
+		case ZLX_ISA_Major_operation_bneq:
+			parameters.source_1 = major.u__format_5_b5.a5;
+			parameters.source_2 = major.u__format_5_b5.c5;
+			parameters.imm11 = major.u__format_5_b5.b11;
+			break;
+
+		case ZLX_ISA_Major_operation_beq:
+			parameters.source_1 = major.u__format_5_b5.a5;
+			parameters.source_2 = major.u__format_5_b5.c5;
+			parameters.imm11 = major.u__format_5_b5.b11;
+
+			break;
+		case ZLX_ISA_Major_operation_blt:
+			parameters.source_1 = major.u__format_5_b5.a5;
+			parameters.source_2 = major.u__format_5_b5.c5;
+			parameters.imm11 = major.u__format_5_b5.b11;
+			break;
+		case ZLX_ISA_Major_operation_bge:
+			parameters.source_1 = major.u__format_5_b5.a5;
+			parameters.source_2 = major.u__format_5_b5.c5;
+			parameters.imm11 = major.u__format_5_b5.b11;
+			break;
+		case ZLX_ISA_Major_operation_bltu:
+			parameters.source_1 = major.u__format_5_b5.a5;
+			parameters.source_2 = major.u__format_5_b5.c5;
+			parameters.imm11 = major.u__format_5_b5.b11;
+			break;
+		case ZLX_ISA_Major_operation_bgeu:
+			parameters.source_1 = major.u__format_5_b5.a5;
+			parameters.source_2 = major.u__format_5_b5.c5;
+			parameters.imm11 = major.u__format_5_b5.b11;
+			break;
+		case ZLX_ISA_Major_operation_call:
+			parameters.source_1 = major.u__foramt_5.a5;
+			break;
+
+
+		case ZLX_ISA_Major_operation_ret:
+			parameters.source_1 = major.u__foramt_5.a5;
+			break;
+
+
+
+
+		default:
+			MY_FAULT("major failed");
+			break;
+
+	}
+	output = major_operations[major.operation](machine, parameters);
+	return output;
+}
+
 
 
 ZLX_EMU__CPU_output_t ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor)
