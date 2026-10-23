@@ -963,7 +963,9 @@ OPERATION(major_pop32)
 
 }
 
-OPERATION(major_pop24)
+//pop.p r1
+//r1 = mem_p[sp - p]
+OPERATION(major_popp)
 {
 	OPERATION_SETUP; 
 
@@ -990,45 +992,7 @@ OPERATION(major_pop24)
 	return output;
 }
 
-//ldxa.s imm3
-//acc=mem_s[ix]; ix+=imm3*s
-OPERATION(major_load_iterator_x_accumualtor)
-{
 
-	OPERATION_SETUP; 
-
-	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_iterator_x);
-	
-	uint32_t size = paramaters.imm2;
-
-	uint32_t size_in_bytes = imm2_size_to_bytes(size);
-
-
-	int32_t offset = MY_sign_extend32(paramaters.imm3, 3);
-
-	output.memory_operation = true;
-	output.memory_load = true;
-	output.memory_address = data_1;
-	
-	uint32_t load = load_variable_size_data(memory, data_1, size_in_bytes);
-
-
-	output.memory_value = load;
-
-	output.use_destination = true;
-	output.use_destination_1 = true;
-	output.use_destination_2 = true;
-
-	uint32_t iterator_change = data_1 +  offset * size_in_bytes; 
-
-	output.destination_1 = ZLX_ISA_Register_identifier_iterator_x; 
-	output.destination_1_data = iterator_change;
-	
-	output.destination_2 = ZLX_ISA_Register_identifier_accumulator;
-	output.destination_2_data = load;
-
-	return output;	
-}
 //inc r1
 //r1 += 1
 OPERATION(major_increment)
@@ -1317,4 +1281,5 @@ void ZLX_EMU_set_regiser__CPU(ZLX_EMU__CPU_t *cpu, uint8_t id, uint32_t value)
 	{
 		cpu->a__registers[id] = value;	
 	}
+	ZLX_ISA_Major_operation_pushp,
 }
