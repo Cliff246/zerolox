@@ -1,5 +1,6 @@
 #include "EMU__CPU.h"
 #include <MY_commons.h>
+#include <_strings.h>
 #include "EMU_Machine.h"
 #include "EMU_Memory.h"
 #include "isa/ISA_zerolox.h"
@@ -1307,8 +1308,8 @@ OPERATION(major_call)
 
 	output.use_destination = true;
 	output.use_destination_1 = true;
-	output.destination_1 = ZLX_ISA_Register_identifier_return_pointer;
-	output.destination_1_data = pc;
+	output.destination_1 = ZLX_ISA_Register_identifier_return_pointer ;
+	output.destination_1_data = pc +  paramaters.instruction_size;
 
 
 
@@ -1363,7 +1364,7 @@ static ZLX_EMU__CPU_operation_t major_operations[] =
 
 };
 
-void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output)
+void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output, int instruction_size)
 {
 	
 	if(output.use_destination == true)
@@ -1409,8 +1410,8 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output)
 	}
 	else
 	{
-		MY_FAULT("add instruction increment i think");
-		MY_TODO;		
+		cpu->program_counter += instruction_size * 2; 
+
 	}
 
 }
@@ -1564,6 +1565,7 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 			break;
 		case ZLX_ISA_Major_operation_call:
 			parameters.source_1 = major.u__foramt_5.a5;
+			parameters.instruction_size = 1;
 			break;
 
 
@@ -1701,16 +1703,59 @@ ZLX_EMU__CPU_output_t ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 
 
 
-void ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine)
+ZLX_ISA_Instruction_t ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine)
 {
 
 	ZLX_EMU__CPU_t *cpu = machine->p__cpu;
+	ZLX_ISA_Instruction_t instruction;
+	ZLX_ISA_Parcel_t parcels[8];
+	
+
+	uint16_t first_parcel = ZLX_EMU_read_16_Memory(machine->p__memory, cpu->program_counter); 
+	parcels[0].parcel = first_parcel;	
+	int count = 0;
+	cpu->program_counter += 2;
+
+	bool one_op = ZLX_ISA_decode_instruction(&instruction, parcels, &count, 0); 
+	
+	if(one_op == false)
+	{
+		for(int i = 1; i < count; ++i)
+		{
+			parcels[i].parcel = ZLX_EMU_read_16_Memory(machine->p__memory, cpu->program_counter); 
+		
+			cpu->program_counter += 2;
+			bool stop_going = ZLX_ISA_decode_instruction(&instruction, parcels, &count, 0); 
+			if(stop_going == true)
+			{
+				break;
+			}
+		}	
+	}
+	return instruction;
+
 }
 
 
 void ZLX_EMU_step(ZLX_EMU_Machine_t *machine)
 {
 	ZLX_EMU__CPU_t *cpu = machine->p__cpu;
+
+
+
+	ZLX_ISA_Instruction_t instruction =	ZLX_EMU_decode_instruction(machine);
+
+	ZLX_EMU__CPU_output_t output;
+	if(instruction.type == ZLX_ISA_Major_type)
+	{
+		output = ZLX_EMU_major_execution(machine, instruction.u__major);
+	}
+	else if(instruction.type == ZLX_ISA_Minor_type)
+	{
+
+		output = ZLX_EMU_minor_execution(machine, instruction.u__minor);
+	}
+	ZLX_EMU_solve__CPU(cpu, output, instruction.size); 
 }
 
 

@@ -41,6 +41,8 @@ typedef struct ZLX_EMU__CPU_parameters
 
 	uint32_t imm32;
 
+	uint8_t instruction_size;
+
 }ZLX_EMU__CPU_parameters_t;
 
 //this is genuinely so stupid
@@ -74,7 +76,6 @@ typedef struct ZLX_EMU__CPU_output
 	uint32_t memory_value;
 
 
-
 }ZLX_EMU__CPU_output_t;;
 
 
@@ -103,7 +104,7 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 
 
 
-void ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine);
+ZLX_ISA_Instruction_t ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine);
 
 void ZLX_EMU_step(ZLX_EMU_Machine_t *machine);
 

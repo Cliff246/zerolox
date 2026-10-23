@@ -310,11 +310,11 @@ typedef struct ZLX_ISA_Major
 	ZLX_ISA_Major_format_type_t type;
 	union 
 	{
-		ZLX_ISA_Major_format_5_5551_t u__format_5_5551;
 		ZLX_ISA_Major_format_5_b5_t u__format_5_b5; 
 		ZLX_ISA_Major_format_5_655_t u__format_5_655;
 		ZLX_ISA_Major_format_5_952_t u__format_5_952;
 		ZLX_ISA_Major_format_5_53251_t u__format_5_53251;
+		ZLX_ISA_Major_format_5_5551_t u__format_5_5551;
 		ZLX_ISA_Major_format_32_t u__foramt_32;
 		ZLX_ISA_Major_format_5_t u__foramt_5;
 		ZLX_ISA_Major_format_5_f_t u__format_5_f;
@@ -344,7 +344,7 @@ typedef enum ZLX_ISA_Instruction_type
 typedef struct ZLX_ISA_Instruction
 {
 	ZLX_ISA_Instruction_type_t type;
-
+	uint8_t size;
 	union
 	{
 		ZLX_ISA_Major_t u__major;
