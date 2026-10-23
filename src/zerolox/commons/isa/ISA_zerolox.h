@@ -161,7 +161,6 @@ typedef enum ZLX_ISA_Major_operation
 	ZLX_ISA_Major_operation_get32,
 	ZLX_ISA_Major_operation_3form,
 	ZLX_ISA_Major_operation_3form_immediate,
-
 	ZLX_ISA_Major_operation_inc,
 	ZLX_ISA_Major_operation_dec,
 	ZLX_ISA_Major_operation_addi,
@@ -205,6 +204,14 @@ typedef enum ZLX_ISA_Major_operation
 typedef enum ZLX_ISA_Major_format_type
 {
 	ZLX_ISA_Major_format_type_5,
+	ZLX_ISA_Major_format_type_5_5551,
+	ZLX_ISA_Major_format_type_5_952,
+	ZLX_ISA_Major_format_type_32,
+	ZLX_ISA_Major_format_type_5_b5,
+	ZLX_ISA_Major_format_type_5_f,
+	ZLX_ISA_Major_format_type_5_f_f,
+	ZLX_ISA_Major_format_type_5_655,
+	ZLX_ISA_Major_format_type_5_53251,
 }ZLX_ISA_Major_format_type_t;
 
 
@@ -314,6 +321,10 @@ typedef struct ZLX_ISA_Major
 	};
 
 }ZLX_ISA_Major_t;
+
+
+extern ZLX_ISA_Major_format_type_t ZLX_ISA_Major_operation_formats[];
+extern uint8_t ZLX_ISA_Major_operation_size[];
 
 //
 
