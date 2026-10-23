@@ -124,7 +124,6 @@ typedef enum ZLX_ISA_Major_3form
 	ZLX_ISA_Major_operation_3form_add,
 	ZLX_ISA_Major_operation_3form_sub,
 	ZLX_ISA_Major_operation_3form_sll,
-	ZLX_ISA_Major_operation_3form_sllu,
 	ZLX_ISA_Major_operation_3form_srl,
 	ZLX_ISA_Major_operation_3form_sra,
 	ZLX_ISA_Major_operation_3form_xor,
@@ -132,6 +131,19 @@ typedef enum ZLX_ISA_Major_3form
 	ZLX_ISA_Major_operation_3form_and,
 
 }ZLX_ISA_Major_3form_t;
+
+typedef enum ZLX_ISA_Major_3form_immediate
+{
+	ZLX_ISA_Major_operation_3form_immediate_slli,
+	ZLX_ISA_Major_operation_3form_immediate_srli,
+	ZLX_ISA_Major_operation_3form_immediate_srai,
+	ZLX_ISA_Major_operation_3form_immediate_xori,
+	ZLX_ISA_Major_operation_3form_immediate_andi,
+	ZLX_ISA_Major_operation_3form_immediate_ori,
+	
+}ZLX_ISA_Major_3form_immediate_t;
+
+
 
 typedef enum ZLX_ISA_Major_operation
 {
@@ -150,12 +162,6 @@ typedef enum ZLX_ISA_Major_operation
 	ZLX_ISA_Major_operation_inc,
 	ZLX_ISA_Major_operation_dec,
 	ZLX_ISA_Major_operation_addi,
-	ZLX_ISA_Major_operation_sllu,
-	ZLX_ISA_Major_operation_srli,
-	ZLX_ISA_Major_operation_srai,
-	ZLX_ISA_Major_operation_xori,
-	ZLX_ISA_Major_operation_andi,
-	ZLX_ISA_Major_operation_ori,
 	ZLX_ISA_Major_operation_bne,
 	ZLX_ISA_Major_operation_beq,
 	ZLX_ISA_Major_operation_blt,
@@ -280,7 +286,7 @@ typedef struct ZLX_ISA_Major
 	union 
 	{
 		ZLX_ISA_Major_format_5_b5_t u__format_5_b5; 
-		ZLX_ISA_Major_format_5_655_t u__format_5_665;
+		ZLX_ISA_Major_format_5_655_t u__format_5_655;
 		ZLX_ISA_Major_format_5_952_t u__format_5_952;
 		ZLX_ISA_Major_format_5_53251_t u__format_5_53251;
 		ZLX_ISA_Major_format_32_t u__foramt_32;

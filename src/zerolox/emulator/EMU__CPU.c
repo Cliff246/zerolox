@@ -1068,13 +1068,13 @@ OPERATION(major_get32)
 OPERATION(major_3form)
 {
 	OPERATION_SETUP;
-	//[opcode][rs1][1] [imm5][rd][rs2]
+	//[opcode][rs1][1] [imm6{0:4}][rd][rs2][imm6{5}]
 
 	
 	uint32_t rs1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);	
 	uint32_t rs2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_3);	
 
-	ZLX_ISA_Major_3form_t selector = (ZLX_ISA_Major_3form_t)paramaters.imm5;
+	ZLX_ISA_Major_3form_t selector = (ZLX_ISA_Major_3form_t)paramaters.imm6;
 	
 	uint32_t result;
 
@@ -1101,37 +1101,196 @@ OPERATION(major_3form)
 			result = rs1 ^ rs2;
 			break;
 		case ZLX_ISA_Major_operation_3form_sll:
-			result = rs1 << rs2;
+			result = rs1 << (rs2 & 32);
 			break;
 
 		case ZLX_ISA_Major_operation_3form_srl:
-			result = rs1 >> rs2;
+			result = rs1 >> (rs2 & 31);
 			break;
 		case ZLX_ISA_Major_operation_3form_sra:
-			result = ((int32_t) rs1 >> (int32_t) rs2);
-			break;
-		case ZLX_ISA_Major_operation_3form_sllu:
-			result = ((int32_t) rs1 << (int32_t) rs2);
+			result = ((int32_t) rs1 >> (rs2  & 31));
 			break;
 
 		default: 
 			MY_FAULT("selector failed");
 			break;
 	}
-
 	output.use_destination = true;
 	output.use_destination_1 = true;
 	output.destination_1 = paramaters.source_2; 
 	output.destination_1_data = result;
-
-
-
-
-
 	return output;	
 }
 
 
+OPERATION(major_3form_immediate)
+{
+	OPERATION_SETUP;
+	//[opcode][rs1][1] [imm6][rd][imm5][imm6]
+
+	
+	uint32_t rs1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);	
+
+	ZLX_ISA_Major_3form_immediate_t selector = (ZLX_ISA_Major_3form_immediate_t)paramaters.source_3;
+	uint8_t imm6 = paramaters.imm6;	
+	uint32_t result;
+
+	switch(selector)
+	{
+		
+		case ZLX_ISA_Major_operation_3form_immediate_ori:
+			
+			result = rs1 | MY_sign_extend32(imm6, 6);
+			break;
+		case ZLX_ISA_Major_operation_3form_immediate_andi:
+			result = rs1 & MY_sign_extend32(imm6, 6);
+			break;
+		case ZLX_ISA_Major_operation_3form_immediate_xori:
+			result = rs1 ^ MY_sign_extend32(imm6, 6);
+			break;
+		case ZLX_ISA_Major_operation_3form_immediate_slli:
+			result = rs1 << imm6;
+			break;
+		case ZLX_ISA_Major_operation_3form_immediate_srli:
+			result = rs1 >> imm6;
+			break;
+		case ZLX_ISA_Major_operation_3form_immediate_srai:
+			result = (int32_t)rs1 >> imm6;
+			break;
+
+		default: 
+			MY_FAULT("selector failed");
+			break;
+	}
+	output.use_destination = true;
+	output.use_destination_1 = true;
+	output.destination_1 = paramaters.source_2; 
+	output.destination_1_data = result;
+	return output;	
+}
+
+OPERATION(major_branch_equals)
+{
+	OPERATION_SETUP;
+
+
+	uint32_t rs1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);	
+	uint32_t rs2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);	
+
+	uint32_t pc = MY_sign_extend32(paramaters.imm11 << 1, 12); 	
+
+
+	if(rs1 == rs2)
+	{
+		output.pc_set_or_add = true;	
+		output.pc_changed = true;
+		output.pc_value = pc;
+
+	}
+	return output;
+}
+
+
+OPERATION(major_branch_not_equals)
+{
+	OPERATION_SETUP;
+	uint32_t rs1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);	
+	uint32_t rs2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);	
+
+	uint32_t pc = MY_sign_extend32(paramaters.imm11 << 1, 12); 	
+
+
+	if(rs1 != rs2)
+	{
+		output.pc_set_or_add = true;	
+		output.pc_changed = true;
+		output.pc_value = pc;
+
+	}
+
+	return output;
+}
+
+OPERATION(major_branch_less_than)
+{
+	OPERATION_SETUP;
+	int32_t rs1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);	
+	int32_t rs2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);	
+
+	uint32_t pc = MY_sign_extend32(paramaters.imm11 << 1, 12); 	
+
+
+	if(rs1 < rs2)
+	{
+		output.pc_set_or_add = true;	
+		output.pc_changed = true;
+		output.pc_value = pc;
+
+	}
+
+	return output;
+}
+
+OPERATION(major_branch_greater_than_equals)
+{
+	OPERATION_SETUP;
+	int32_t rs1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);	
+	int32_t rs2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);	
+
+	uint32_t pc = MY_sign_extend32(paramaters.imm11 << 1, 12); 	
+
+
+	if(rs1 >= rs2)
+	{
+		output.pc_set_or_add = true;	
+		output.pc_changed = true;
+		output.pc_value = pc;
+
+	}
+
+	return output;
+}
+
+
+OPERATION(major_branch_less_than_unsigned)
+{
+	OPERATION_SETUP;
+	uint32_t rs1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);	
+	uint32_t rs2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);	
+
+	uint32_t pc = MY_sign_extend32(paramaters.imm11 << 1, 12); 	
+
+
+	if(rs1 < rs2)
+	{
+		output.pc_set_or_add = true;	
+		output.pc_changed = true;
+		output.pc_value = pc;
+
+	}
+
+	return output;
+}
+
+OPERATION(major_branch_greater_than_equals_unsigned)
+{
+	OPERATION_SETUP;
+	uint32_t rs1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);	
+	uint32_t rs2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);	
+
+	uint32_t pc = MY_sign_extend32(paramaters.imm11 << 1, 12); 	
+
+
+	if(rs1 >= rs2)
+	{
+		output.pc_set_or_add = true;	
+		output.pc_changed = true;
+		output.pc_value = pc;
+
+	}
+	return output;
+
+}
 
 
 static ZLX_EMU__CPU_operation_t major_operations[] = 
