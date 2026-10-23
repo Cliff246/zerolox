@@ -129,7 +129,7 @@ bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parc
 					*count = 0;
 					return false;
 			}
-
+			instruction->size = *count;
 			return true;
 		}
 

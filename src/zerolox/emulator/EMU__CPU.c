@@ -1714,18 +1714,17 @@ ZLX_ISA_Instruction_t ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine)
 	uint16_t first_parcel = ZLX_EMU_read_16_Memory(machine->p__memory, cpu->program_counter); 
 	parcels[0].parcel = first_parcel;	
 	int count = 0;
-	cpu->program_counter += 2;
+	uint32_t temporary_pc = cpu->program_counter + 2;
 
 	bool one_op = ZLX_ISA_decode_instruction(&instruction, parcels, &count, 0); 
-	
+		
 	if(one_op == false)
 	{
 		for(int i = 1; i < count; ++i)
 		{
-			parcels[i].parcel = ZLX_EMU_read_16_Memory(machine->p__memory, cpu->program_counter); 
+			parcels[i].parcel = ZLX_EMU_read_16_Memory(machine->p__memory, temporary_pc); 
 		
-			cpu->program_counter += 2;
-			bool stop_going = ZLX_ISA_decode_instruction(&instruction, parcels, &count, 0); 
+			bool stop_going = ZLX_ISA_decode_instruction(&instruction, parcels, &count, i); 
 			if(stop_going == true)
 			{
 				break;
