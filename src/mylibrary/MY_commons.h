@@ -18,4 +18,9 @@ void MY_fault(char *message, char *file, int32_t line);
 uint64_t MY_cap_to_bytes(int64_t data, uint8_t bytes);
 int32_t MY_sign_extend32(uint32_t imm, uint8_t bits);
 
+//cringe file reader before MY_File is built
+
+char *MY_read_file(char *path, uint64_t *size);
+
+
 #endif

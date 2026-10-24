@@ -55,3 +55,46 @@ int32_t MY_sign_extend32(uint32_t imm, uint8_t bits)
 	uint32_t sign = 1u << (bits - 1);
    	return (int32_t)((imm ^ sign) - sign);	
 }
+
+
+
+int64_t MY_get_length__STD_File(FILE *file)
+{
+	if(!file)
+	   return -1;	
+	int64_t original = ftell(file);
+	fseek(file, 0l, SEEK_END);
+	int64_t size = ftell(file);
+	fseek(file, original, SEEK_SET);
+	return size;
+}
+
+
+
+//
+char *MY_read_file(char *path, uint64_t *size)
+{
+	if(!path || !size)
+	{
+		MY_FAULT("gave a bad input");
+	}
+
+
+	FILE *fp = fopen(path, "rb");
+	if(!fp)
+		MY_FAULT("file could not be open");
+	
+	int64_t fsize = MY_get_length__STD_File(fp);
+	if(size < 0)
+		MY_FAULT("file could not get length");
+
+	char *string = malloc(fsize + 1);
+	if(!string)
+		MY_FAULT("malloc failed");
+	string[fsize] = 0;
+	fread(string, 1, fsize, fp);
+	*size = fsize;
+	fclose(fp);
+	return string;
+}
+

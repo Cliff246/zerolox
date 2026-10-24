@@ -647,7 +647,7 @@ OPERATION(minor_branch_temporary_equal_accumulator)
 	int register_id = paramaters.imm2 + 8;
 	uint32_t tmp = ZLX_EMU_get_register__CPU(cpu, register_id);
 
-	uint16_t pc = MY_sign_extend32(paramaters.imm8 << 1, 9);;
+	uint32_t pc = MY_sign_extend32(paramaters.imm8 << 1, 9);;
 	
 	if(tmp == acc)
 	{
@@ -668,7 +668,7 @@ OPERATION(minor_branch_temporary_not_equal_accumulator)
 	int register_id = paramaters.imm2 + 8;
 	uint32_t tmp = ZLX_EMU_get_register__CPU(cpu, register_id);
 
-	uint16_t pc = MY_sign_extend32(paramaters.imm8 << 1, 9);;
+	uint32_t pc = MY_sign_extend32(paramaters.imm8 << 1, 9);;
 	
 	if(tmp != acc)
 	{
