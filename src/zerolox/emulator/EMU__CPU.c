@@ -700,8 +700,8 @@ static ZLX_EMU__CPU_operation_t minor_operations[] =
 	[ZLX_ISA_Minor_operation_ld_plus] = minor_load_plus,
 	[ZLX_ISA_Minor_operation_st_plus] = minor_store_plus,
 	[ZLX_ISA_Minor_operation_bieqc] = minor_branch_compare_iterator,
-	[ZLX_ISA_Minor_operation_btneqa] = minor_branch_compare_iterator,
-	[ZLX_ISA_Minor_operation_bteqa] = minor_branch_compare_iterator,
+	[ZLX_ISA_Minor_operation_btneqa] = minor_branch_temporary_not_equal_accumulator,
+	[ZLX_ISA_Minor_operation_bteqa] = minor_branch_temporary_equal_accumulator,
 };
 
 //
@@ -1398,7 +1398,6 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output, int i
 	{
 		if(output.pc_set_or_add == false)
 		{
-
 			cpu->program_counter = output.pc_value; 
 		}
 		else
@@ -1440,7 +1439,6 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 {
 	ZLX_EMU__CPU_parameters_t parameters = {};
 	ZLX_EMU__CPU_output_t output;
-
 	switch(major.operation)
 	{
 		
@@ -1449,7 +1447,6 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 			parameters.source_2 = major.u__format_5_952.c5; 
 			parameters.imm2 = major.u__format_5_952.d2;
 			parameters.imm9 = major.u__format_5_952.b9;
-
 			break;
 		case ZLX_ISA_Major_operation_st:
 			parameters.source_1 = major.u__format_5_952.a5;
@@ -1463,32 +1460,24 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 		case ZLX_ISA_Major_operation_push16:
 			parameters.source_1 = major.u__foramt_5.a5;
 			break;
-
 		case ZLX_ISA_Major_operation_push32:
 			parameters.source_1 = major.u__foramt_5.a5;
 			break;
-
 		case ZLX_ISA_Major_operation_pushp:
 			parameters.source_1 = major.u__foramt_5.a5;
 			break;
-
 		case ZLX_ISA_Major_operation_pop8:
 			parameters.source_1 = major.u__foramt_5.a5;
 			break;
-
 		case ZLX_ISA_Major_operation_pop16:
 			parameters.source_1 = major.u__foramt_5.a5;
-
 			break;
-
 		case ZLX_ISA_Major_operation_pop32:
 			parameters.source_1 = major.u__foramt_5.a5;
 			break;
-
 		case ZLX_ISA_Major_operation_popp:
 			parameters.source_1 = major.u__foramt_5.a5;
 			break;
-
 		case ZLX_ISA_Major_operation_get16:
 			parameters.source_1 = major.u__format_5_f.a5;
 			parameters.imm16 = major.u__format_5_f.bf;
@@ -1663,6 +1652,16 @@ ZLX_EMU__CPU_output_t ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 		case ZLX_ISA_Minor_operation_bieqc:
 			parameters.imm2 = minor.u__format_28.a2;
 			parameters.imm8 = minor.u__format_28.b8;
+			break;
+		case ZLX_ISA_Minor_operation_bteqa:
+			parameters.imm2 = minor.u__format_28.a2;
+			parameters.imm8 = minor.u__format_28.b8;
+			break;
+
+		case ZLX_ISA_Minor_operation_btneqa:
+			parameters.imm2 = minor.u__format_28.a2;
+			parameters.imm8 = minor.u__format_28.b8;
+
 			break;
 		default:
 			printf("ZLX %d\n",minor.operation); 
