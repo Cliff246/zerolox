@@ -11,7 +11,12 @@ int main(int argc, char *argv[])
 	context = ZLX_EMU_init_Context();
 
 	ZLX_EMU_load_file_Context(context, "image.bin");
+	
 
+	while(true)
+	{
+
+	}
 
 }
 

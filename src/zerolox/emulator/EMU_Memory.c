@@ -35,10 +35,14 @@ void ZLX_EMU_set_Memory(ZLX_EMU_Memory_t *_memory, char *_buffer, uint64_t _size
 	
 	memcpy(_memory->ap__memory, _buffer, _size);
 	
-
-
 }
 
+
+void ZLX_EMU_free_Memory(ZLX_EMU_Memory_t *_memory)
+{
+	free(_memory->ap__memory);
+	free(_memory);
+}
 
 
 uint8_t ZLX_EMU_read_8_Memory(ZLX_EMU_Memory_t *memory, uint32_t address)

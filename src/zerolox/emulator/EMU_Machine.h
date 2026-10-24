@@ -19,7 +19,12 @@ typedef struct ZLX_EMU_Machine
 
 ZLX_EMU_Machine_t *ZLX_EMU_init_Machine();
 
-
+//loads a binary image into the machine 
 void ZLX_EMU_image_Machine(ZLX_EMU_Machine_t *machine, char *_image, uint64_t size);
+
+void ZLX_EMU_step_Machine(ZLX_EMU_Machine_t *machine);
+
+void ZLX_EMU_step_Machine(ZLX_EMU_Machine_t *machine);
+void ZLX_EMU_free_Machine(ZLX_EMU_Machine_t *machine);
 
 #endif

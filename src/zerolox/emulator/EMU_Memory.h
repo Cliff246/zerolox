@@ -18,6 +18,8 @@ ZLX_EMU_Memory_t *ZLX_EMU_init_Memory(uint64_t _size);
 
 void ZLX_EMU_set_Memory(ZLX_EMU_Memory_t *_memory, char *_buffer, uint64_t _size);
 
+void ZLX_EMU_free_Memory(ZLX_EMU_Memory_t *_memory);
+
 uint8_t ZLX_EMU_read_8_Memory(ZLX_EMU_Memory_t *memory, uint32_t address);
 uint16_t ZLX_EMU_read_16_Memory(ZLX_EMU_Memory_t *memory, uint32_t address);
 uint32_t ZLX_EMU_read_32_Memory(ZLX_EMU_Memory_t *memory, uint32_t address);

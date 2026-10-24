@@ -1726,27 +1726,11 @@ ZLX_EMU__CPU_t *ZLX_EMU_init__CPU(void)
 	return cpu;
 }
 
-void ZLX_EMU_step(ZLX_EMU_Machine_t *machine)
+
+void ZLX_EMU_free__CPU(ZLX_EMU__CPU_t *cpu)
 {
-	ZLX_EMU__CPU_t *cpu = machine->p__cpu;
-
-
-
-	ZLX_ISA_Instruction_t instruction =	ZLX_EMU_decode_instruction(machine);
-
-	ZLX_EMU__CPU_output_t output;
-	if(instruction.type == ZLX_ISA_Major_type)
-	{
-		output = ZLX_EMU_major_execution(machine, instruction.u__major);
-	}
-	else if(instruction.type == ZLX_ISA_Minor_type)
-	{
-
-		output = ZLX_EMU_minor_execution(machine, instruction.u__minor);
-	}
-	ZLX_EMU_solve__CPU(cpu, output, instruction.size); 
+	free(cpu);
 }
-
 
 
 uint32_t ZLX_EMU_get_pc__CPU(ZLX_EMU__CPU_t *cpu)

@@ -101,9 +101,12 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 
 ZLX_ISA_Instruction_t ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine);
 
-ZLX_EMU__CPU_t *ZLX_EMU_init__CPU(void);
 
-void ZLX_EMU_step(ZLX_EMU_Machine_t *machine);
+void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output, int instruction_size);
+ZLX_EMU__CPU_t *ZLX_EMU_init__CPU(void);
+void ZLX_EMU_free__CPU(ZLX_EMU__CPU_t *cpu);
+
+
 
 uint32_t ZLX_EMU_get_pc__CPU(ZLX_EMU__CPU_t *cpu);
 uint32_t ZLX_EMU_get_register__CPU(ZLX_EMU__CPU_t *cpu, uint8_t id);

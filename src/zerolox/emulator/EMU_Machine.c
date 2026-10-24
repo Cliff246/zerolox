@@ -34,3 +34,34 @@ void ZLX_EMU_image_Machine(ZLX_EMU_Machine_t *machine, char *_image, uint64_t si
 {
 	ZLX_EMU_set_Memory(machine->p__memory, _image, size);
 }
+
+void ZLX_EMU_step_Machine(ZLX_EMU_Machine_t *machine)
+{
+	ZLX_EMU__CPU_t *cpu = machine->p__cpu;
+
+
+
+	ZLX_ISA_Instruction_t instruction =	ZLX_EMU_decode_instruction(machine);
+
+	ZLX_EMU__CPU_output_t output;
+	if(instruction.type == ZLX_ISA_Major_type)
+	{
+		output = ZLX_EMU_major_execution(machine, instruction.u__major);
+	}
+	else if(instruction.type == ZLX_ISA_Minor_type)
+	{
+
+		output = ZLX_EMU_minor_execution(machine, instruction.u__minor);
+	}
+	ZLX_EMU_solve__CPU(cpu, output, instruction.size); 
+}
+
+
+void ZLX_EMU_free_Machine(ZLX_EMU_Machine_t *machine)
+{
+	ZLX_EMU_free_Memory(machine->p__memory);
+	ZLX_EMU_free__CPU(machine->p__cpu);
+	free(machine);
+}
+
+

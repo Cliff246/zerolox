@@ -23,8 +23,6 @@ ZLX_EMU_Context_t *ZLX_EMU_init_Context()
 void ZLX_EMU_load_file_Context(ZLX_EMU_Context_t *context, char *path)
 {
 
-
-
 	uint64_t size = 0;
 	char *data = MY_read_file(path, &size);
 
@@ -34,3 +32,17 @@ void ZLX_EMU_load_file_Context(ZLX_EMU_Context_t *context, char *path)
 
 }
 
+
+
+void ZLX_EMU_step_Context(ZLX_EMU_Context_t *context)
+{
+	ZLX_EMU_step_Machine(context->p__machine);
+}
+
+
+
+void ZLX_EMU_free_Context(ZLX_EMU_Context_t *context)
+{
+	ZLX_EMU_free_Machine(context->p__machine);
+	free(context);	
+}
