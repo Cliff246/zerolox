@@ -6,11 +6,9 @@
 ZLX_ISA_Minor_format_type_t ZLX_ISA_Minor_operation_formats[] = 
 {
 	[ZLX_ISA_Minor_operation_move] = ZLX_ISA_Minor_format_type_55,
-	[ZLX_ISA_Minor_operation_swap] = ZLX_ISA_Minor_format_type_55,
 	[ZLX_ISA_Minor_operation_add] = ZLX_ISA_Minor_format_type_55,
 	[ZLX_ISA_Minor_operation_adda] = ZLX_ISA_Minor_format_type_55,
 	[ZLX_ISA_Minor_operation_sub] = ZLX_ISA_Minor_format_type_55,
-	[ZLX_ISA_Minor_operation_addi] = ZLX_ISA_Minor_format_type_55,
 	[ZLX_ISA_Minor_operation_geta] = ZLX_ISA_Minor_format_type_a,
 	[ZLX_ISA_Minor_operation_get8] = ZLX_ISA_Minor_format_type_28, 
 	[ZLX_ISA_Minor_operation_b] = ZLX_ISA_Minor_format_type_a, 
@@ -25,6 +23,9 @@ ZLX_ISA_Minor_format_type_t ZLX_ISA_Minor_operation_formats[] =
 	[ZLX_ISA_Minor_operation_bieqc] = ZLX_ISA_Minor_format_type_28,
 	[ZLX_ISA_Minor_operation_ld_plus] = ZLX_ISA_Minor_format_type_235,
 	[ZLX_ISA_Minor_operation_st_plus] = ZLX_ISA_Minor_format_type_235,
+	[ZLX_ISA_Minor_operation_bteqa] = ZLX_ISA_Minor_format_type_28,
+	[ZLX_ISA_Minor_operation_btneqa] = ZLX_ISA_Minor_format_type_28,
+
 };
 
 

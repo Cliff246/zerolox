@@ -408,47 +408,9 @@ OPERATION(minor_store_stack_accumulator)
 	return output;	
 }
 
-OPERATION(minor_swap)
-{
-
-	OPERATION_SETUP;
-	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
-	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);
-
-
-	output.use_destination = true;
-	output.use_destination_1 = true;
-	output.use_destination_2 = true;
-
-	output.destination_1 = paramaters.source_1;
-	output.destination_1_data = data_2;
-
-	output.destination_2 = paramaters.source_2;
-	output.destination_2_data = data_1;
-	return output;
-}
-
 //m.addi r1, imm5
 //acc = r1 + imm5
-OPERATION(minor_addi)
-{
-	OPERATION_SETUP;
 
-
-	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
-
-	uint32_t imm5 = paramaters.imm5; 
-
-	output.use_destination = true;
-	output.use_destination_1 = true;
-
-	output.destination_1 = ZLX_ISA_Register_identifier_accumulator;
-   	output.destination_1_data =	data_1 + imm5; 
-
-
-	return output;	
-
-}
 
 OPERATION(minor_geta)
 {
@@ -671,21 +633,59 @@ OPERATION(minor_branch_compare_iterator)
 			output.pc_value = pc;
 		}
 	}
-
-	
 	return output;
-
 }
 
 
+OPERATION(minor_branch_temporary_equal_accumulator)
+{
+
+	OPERATION_SETUP;
+	uint32_t acc = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	if(paramaters.imm2 > 3)
+		MY_FAULT("fails");
+	int register_id = paramaters.imm2 + 8;
+	uint32_t tmp = ZLX_EMU_get_register__CPU(cpu, register_id);
+
+	uint16_t pc = MY_sign_extend32(paramaters.imm8 << 1, 9);;
+	
+	if(tmp == acc)
+	{
+		output.pc_set_or_add = true;	
+		output.pc_changed = true;
+		output.pc_value = pc;
+	
+	}
+
+	return output;
+}
+OPERATION(minor_branch_temporary_not_equal_accumulator)
+{
+	OPERATION_SETUP;
+	uint32_t acc = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	if(paramaters.imm2 > 3)
+		MY_FAULT("fails");
+	int register_id = paramaters.imm2 + 8;
+	uint32_t tmp = ZLX_EMU_get_register__CPU(cpu, register_id);
+
+	uint16_t pc = MY_sign_extend32(paramaters.imm8 << 1, 9);;
+	
+	if(tmp != acc)
+	{
+		output.pc_set_or_add = true;	
+		output.pc_changed = true;
+		output.pc_value = pc;
+	
+	}
+
+	return output;
+}
 static ZLX_EMU__CPU_operation_t minor_operations[] = 
 {
 	[ZLX_ISA_Minor_operation_move] = minor_move,
-	[ZLX_ISA_Minor_operation_swap] = minor_swap,
 	[ZLX_ISA_Minor_operation_add] = minor_add,
 	[ZLX_ISA_Minor_operation_adda] = minor_adda,
 	[ZLX_ISA_Minor_operation_sub] = minor_sub,
-	[ZLX_ISA_Minor_operation_addi] = minor_addi,
 	[ZLX_ISA_Minor_operation_geta] = minor_geta, 
 	[ZLX_ISA_Minor_operation_get8] = minor_get8,
 	[ZLX_ISA_Minor_operation_b] = minor_branch, 
@@ -700,6 +700,8 @@ static ZLX_EMU__CPU_operation_t minor_operations[] =
 	[ZLX_ISA_Minor_operation_ld_plus] = minor_load_plus,
 	[ZLX_ISA_Minor_operation_st_plus] = minor_store_plus,
 	[ZLX_ISA_Minor_operation_bieqc] = minor_branch_compare_iterator,
+	[ZLX_ISA_Minor_operation_btneqa] = minor_branch_compare_iterator,
+	[ZLX_ISA_Minor_operation_bteqa] = minor_branch_compare_iterator,
 };
 
 //
@@ -1102,7 +1104,7 @@ OPERATION(major_3form)
 			result = rs1 ^ rs2;
 			break;
 		case ZLX_ISA_Major_operation_3form_sll:
-			result = rs1 << (rs2 & 32);
+			result = rs1 << (rs2 & 31);
 			break;
 
 		case ZLX_ISA_Major_operation_3form_srl:
@@ -1389,10 +1391,8 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output, int i
 			{
 				MY_FAULT("cannot have w1 == w2");
 			}
-		}
-	
+		}	
 	}
-
 
 	if(output.pc_changed == true)
 	{
@@ -1404,14 +1404,11 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output, int i
 		else
 		{
 			cpu->program_counter += output.pc_value;
-	
 		}
-
 	}
 	else
 	{
 		cpu->program_counter += instruction_size * 2; 
-
 	}
 
 }
@@ -1498,27 +1495,23 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 			break;
 		case ZLX_ISA_Major_operation_get32:
 			parameters.source_1 = major.u__format_5_f_f.a5;
-			parameters.imm32 = major.u__format_5_f_f.bf << 16 | major.u__format_5_f_f.cf;
+			parameters.imm32 =((uint32_t) major.u__format_5_f_f.bf << 16) | major.u__format_5_f_f.cf;
 			break;
 		case ZLX_ISA_Major_operation_3form:
 			parameters.source_1 = major.u__format_5_655.a5;
 			parameters.source_2 = major.u__format_5_655.c5;
 			parameters.source_3 = major.u__format_5_655.d5;
 			parameters.imm6 = major.u__format_5_655.b6;
-
 			break;
-
 		case ZLX_ISA_Major_operation_3form_immediate:
 			parameters.source_1 = major.u__format_5_655.a5;
 			parameters.source_2 = major.u__format_5_655.c5;
 			parameters.source_3 = major.u__format_5_655.d5;
 			parameters.imm6 = major.u__format_5_655.b6;
 			break;
-			
 		case ZLX_ISA_Major_operation_inc:
 			parameters.source_1 = major.u__foramt_5.a5;
 			break;
-
 
 		case ZLX_ISA_Major_operation_dec:
 			parameters.source_1 = major.u__foramt_5.a5;
@@ -1567,14 +1560,9 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 			parameters.source_1 = major.u__foramt_5.a5;
 			parameters.instruction_size = 1;
 			break;
-
-
 		case ZLX_ISA_Major_operation_ret:
 			parameters.source_1 = major.u__foramt_5.a5;
 			break;
-
-
-
 
 		default:
 			MY_FAULT("major failed");
@@ -1601,33 +1589,20 @@ ZLX_EMU__CPU_output_t ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 			parameters.source_2 = minor.u__format_55.b5;
 			break;
 		
-		case ZLX_ISA_Minor_operation_swap:
-			//[5][5]
-			parameters.source_1 = minor.u__format_55.a5;		
-			parameters.source_2 = minor.u__format_55.b5;
-			break;
 		case ZLX_ISA_Minor_operation_add:
 			//[5][5]			
 			parameters.source_1 = minor.u__format_55.a5;		
 			parameters.source_2 = minor.u__format_55.b5;
-
 			break;
 		case ZLX_ISA_Minor_operation_adda:
 			//[5][5]			
 			//r1 = acc + r2
 			parameters.source_1 = minor.u__format_55.a5;		
 			parameters.source_2 = minor.u__format_55.b5;
-
 			break;
 		case ZLX_ISA_Minor_operation_sub:
 			parameters.source_1 = minor.u__format_55.a5;	
 			parameters.source_2 = minor.u__format_55.b5;
-			break;
-
-		case ZLX_ISA_Minor_operation_addi:
-			parameters.imm5 = minor.u__format_55.a5;	
-			parameters.source_1 = minor.u__format_55.b5;
-
 			break;
 		case ZLX_ISA_Minor_operation_geta:
 			parameters.imm10 = minor.u__format_a.aa;	

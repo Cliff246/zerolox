@@ -27,11 +27,9 @@ typedef enum ZLX_ISA_Register_identifier
 typedef enum ZLX_ISA_Minor_operation
 {
 	ZLX_ISA_Minor_operation_move,
-	ZLX_ISA_Minor_operation_swap,
 	ZLX_ISA_Minor_operation_add,
 	ZLX_ISA_Minor_operation_adda,
 	ZLX_ISA_Minor_operation_sub,
-	ZLX_ISA_Minor_operation_addi,
 	ZLX_ISA_Minor_operation_geta, 
 	ZLX_ISA_Minor_operation_get8,
 	ZLX_ISA_Minor_operation_b, 
@@ -46,6 +44,8 @@ typedef enum ZLX_ISA_Minor_operation
 	ZLX_ISA_Minor_operation_ld_plus, //ld+
 	ZLX_ISA_Minor_operation_st_plus,  //st+
 	ZLX_ISA_Minor_operation_bieqc,
+	ZLX_ISA_Minor_operation_bteqa,
+	ZLX_ISA_Minor_operation_btneqa,
 }ZLX_ISA_Minor_operation_t;
 
 
