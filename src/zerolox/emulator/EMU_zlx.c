@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
 	while(true)
 	{
-
+		ZLX_EMU_step_Context(context);
 	}
 
 }

@@ -24,7 +24,6 @@ void ZLX_EMU_image_Machine(ZLX_EMU_Machine_t *machine, char *_image, uint64_t si
 
 void ZLX_EMU_step_Machine(ZLX_EMU_Machine_t *machine);
 
-void ZLX_EMU_step_Machine(ZLX_EMU_Machine_t *machine);
 void ZLX_EMU_free_Machine(ZLX_EMU_Machine_t *machine);
 
 #endif
