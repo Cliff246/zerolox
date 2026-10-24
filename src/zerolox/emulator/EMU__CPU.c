@@ -476,6 +476,7 @@ OPERATION(minor_branch_accumulator_not_equals_zero)
 	}
 	return output;
 }
+//this is fine, it's unsigned for char's
 //m.get8 imm8
 //t[0-3] = imm8
 OPERATION(minor_get8)
@@ -507,7 +508,7 @@ OPERATION(minor_sub)
 	output.use_destination = true;
 	output.use_destination_1 = true;
 	output.destination_1 = ZLX_ISA_Register_identifier_accumulator;
-	output.destination_1_data = (data_2) - data_1;
+	output.destination_1_data = (data_1) - data_2;
 	return output;
 
 
@@ -1153,13 +1154,13 @@ OPERATION(major_3form_immediate)
 			result = rs1 ^ MY_sign_extend32(imm6, 6);
 			break;
 		case ZLX_ISA_Major_operation_3form_immediate_slli:
-			result = rs1 << imm6;
+			result = rs1 << (imm6 & 31);
 			break;
 		case ZLX_ISA_Major_operation_3form_immediate_srli:
-			result = rs1 >> imm6;
+			result = rs1 >> (imm6 & 31);
 			break;
 		case ZLX_ISA_Major_operation_3form_immediate_srai:
-			result = (int32_t)rs1 >> imm6;
+			result = (int32_t)rs1 >> (imm6 & 31);
 			break;
 
 		default: 
