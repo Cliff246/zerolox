@@ -86,11 +86,6 @@ typedef struct ZLX_EMU__CPU
 {
 	uint32_t a__registers[32];
 	uint32_t program_counter;
-
-
-
-	
-
 }ZLX_EMU__CPU_t;
 
 
@@ -105,6 +100,8 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 
 
 ZLX_ISA_Instruction_t ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine);
+
+ZLX_EMU__CPU_t *ZLX_EMU_init__CPU(void);
 
 void ZLX_EMU_step(ZLX_EMU_Machine_t *machine);
 

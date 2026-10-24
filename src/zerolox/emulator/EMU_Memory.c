@@ -2,7 +2,7 @@
 #include "EMU_Machine.h"
 #include <stdlib.h>
 #include <MY_commons.h>
-
+#include <string.h>
 
 
 
@@ -20,6 +20,23 @@ ZLX_EMU_Memory_t *ZLX_EMU_init_Memory(uint64_t _size)
 	memory->ap__memory = bytes;
 	memory->size = _size;
 	return memory;
+}
+
+
+
+void ZLX_EMU_set_Memory(ZLX_EMU_Memory_t *_memory, char *_buffer, uint64_t _size)
+{
+	if(!_memory || !_buffer) 
+		MY_FAULT("bad arguments")
+	
+	if(_memory->size < _size)
+		MY_FAULT("file is too big for memory");
+		
+	
+	memcpy(_memory->ap__memory, _buffer, _size);
+	
+
+
 }
 
 

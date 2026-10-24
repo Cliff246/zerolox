@@ -1,6 +1,7 @@
 #include "EMU__CPU.h"
 #include <MY_commons.h>
 #include <_strings.h>
+#include <stdlib.h>
 #include "EMU_Machine.h"
 #include "EMU_Memory.h"
 #include "isa/ISA_zerolox.h"
@@ -1712,6 +1713,18 @@ ZLX_ISA_Instruction_t ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine)
 
 }
 
+ZLX_EMU__CPU_t *ZLX_EMU_init__CPU(void)
+{
+	ZLX_EMU__CPU_t *cpu = calloc(1, sizeof(ZLX_EMU__CPU_t));
+	if(!cpu)
+		MY_FAULT("cpu failed to malloc");	
+	cpu->program_counter = 0;
+	for(int i = 0; i < 32; ++i)
+	{
+		cpu->a__registers[i] = 0;
+	}
+	return cpu;
+}
 
 void ZLX_EMU_step(ZLX_EMU_Machine_t *machine)
 {

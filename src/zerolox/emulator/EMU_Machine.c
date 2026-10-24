@@ -1,5 +1,6 @@
 #include "EMU_Machine.h"
 #include "EMU_Memory.h"
+#include "EMU__CPU.h"
 #include <stdlib.h>
 #include <MY_commons.h>
 
@@ -19,7 +20,17 @@ ZLX_EMU_Machine_t *ZLX_EMU_init_Machine()
 
 	machine->p__memory = memory;
 
-	MY_TODO;
-		
+	ZLX_EMU__CPU_t *cpu = ZLX_EMU_init__CPU();
+	if(!cpu)
+		MY_FAULT("cpu could not be allocated");
+	machine->p__cpu = cpu;
+
+
 	return machine;
+}
+
+
+void ZLX_EMU_image_Machine(ZLX_EMU_Machine_t *machine, char *_image, uint64_t size)
+{
+	ZLX_EMU_set_Memory(machine->p__memory, _image, size);
 }

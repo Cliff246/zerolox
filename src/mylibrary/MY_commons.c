@@ -85,14 +85,17 @@ char *MY_read_file(char *path, uint64_t *size)
 		MY_FAULT("file could not be open");
 	
 	int64_t fsize = MY_get_length__STD_File(fp);
-	if(size < 0)
+	if(fsize < 0)
 		MY_FAULT("file could not get length");
 
 	char *string = malloc(fsize + 1);
 	if(!string)
 		MY_FAULT("malloc failed");
 	string[fsize] = 0;
-	fread(string, 1, fsize, fp);
+	if(fread(string, 1, fsize, fp) != fsize)
+	{
+		MY_FAULT("fread failed");
+	}
 	*size = fsize;
 	fclose(fp);
 	return string;

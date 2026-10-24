@@ -19,4 +19,7 @@ typedef struct ZLX_EMU_Machine
 
 ZLX_EMU_Machine_t *ZLX_EMU_init_Machine();
 
+
+void ZLX_EMU_image_Machine(ZLX_EMU_Machine_t *machine, char *_image, uint64_t size);
+
 #endif
