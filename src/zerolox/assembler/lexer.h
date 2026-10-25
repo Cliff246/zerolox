@@ -83,26 +83,26 @@ extern char *ZLX_ASM_token_type_names[];
 
 typedef struct ZLX_ASM_token
 {
-	ZLX_ASM_token_type_t m_type;
-	int m_start;
-	int m_length;
-	int m_column;
-	int m_row;
+	ZLX_ASM_token_type_t type;
+	int start;
+	int length;
+	int column;
+	int row;
 }ZLX_ASM_token_t;
 
 typedef struct ZLX_ASM_lexer
 {
-	char *m_string;
-	int m_string_length;
+	char *ap__string;
+	int string_length;
 
-	int m_token_allocated;
-	int m_token_count;
-	ZLX_ASM_token_t *m_token_buffer;
+	int token_allocated;
+	int token_count;
+	ZLX_ASM_token_t *ap__token_buffer;
 
-	int m_position;
-	int m_row, m_column;
-	int m_trow, m_tcolumn;
-	bool m_print_each;
+	int position;
+	int row, column;
+	int trow, tcolumn;
+	bool print_each;
 }ZLX_ASM_lexer_t;
 
 ZLX_ASM_lexer_t *ZLX_ASM_initialize_lexer(char *_string);

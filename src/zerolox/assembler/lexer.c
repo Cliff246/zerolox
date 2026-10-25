@@ -15,64 +15,64 @@ char *ZLX_ASM_token_type_names[] =
 
 static void allocate_tokens(ZLX_ASM_lexer_t *lexer)
 {
-	if(lexer->m_token_allocated == 0)
+	if(lexer->token_allocated == 0)
 	{
-		lexer->m_token_allocated = BASE_TOKENS_ALLOCATE;
-		lexer->m_token_count = 0;
+		lexer->token_allocated = BASE_TOKENS_ALLOCATE;
+		lexer->token_count = 0;
 
-		lexer->m_token_buffer = malloc(sizeof(ZLX_ASM_token_t) * lexer->m_token_allocated);
-		if(!lexer->m_token_buffer)
+		lexer->ap__token_buffer = malloc(sizeof(ZLX_ASM_token_t) * lexer->token_allocated);
+		if(!lexer->ap__token_buffer)
 			exit(1);
 
 	}
 	else
 	{
-		if(lexer->m_token_allocated > (INT_MAX - 1) / 2)
+		if(lexer->token_allocated > (INT_MAX - 1) / 2)
 		{
 			exit(1);
 		}
-		lexer->m_token_allocated = (lexer->m_token_allocated * 2) + 1;
-		void *temp = realloc(lexer->m_token_buffer, sizeof(ZLX_ASM_token_t) *  lexer->m_token_allocated);
+		lexer->token_allocated = (lexer->token_allocated * 2) + 1;
+		void *temp = realloc(lexer->ap__token_buffer, sizeof(ZLX_ASM_token_t) *  lexer->token_allocated);
 		if(temp == NULL)
 			exit(1);
-		lexer->m_token_buffer = temp;
+		lexer->ap__token_buffer = temp;
 	}
 }
 
 
 static void add_token(ZLX_ASM_lexer_t *lexer, ZLX_ASM_token_t token)
 {
-	if(lexer->m_token_count >= lexer->m_token_allocated)
+	if(lexer->token_count >= lexer->token_allocated)
 	{
 		allocate_tokens(lexer);
 	}
-	lexer->m_token_buffer[lexer->m_token_count++] = token;
+	lexer->ap__token_buffer[lexer->token_count++] = token;
 }
 
 static void print_token(ZLX_ASM_lexer_t *lexer, int position)
 {
-	if(position < lexer->m_token_count && position >= 0)
+	if(position < lexer->token_count && position >= 0)
 	{
-		ZLX_ASM_token_t token = lexer->m_token_buffer[position];
-		if(token.m_start < 0)
+		ZLX_ASM_token_t token = lexer->ap__token_buffer[position];
+		if(token.start < 0)
 		{
 			return;
 		}
-		if(token.m_length + token.m_start > lexer->m_string_length)
+		if(token.length + token.start > lexer->string_length)
 		{
 			return;
 		}
-		printf("token %s{%d:%d} [%d,%d]: <",ZLX_ASM_token_type_names[token.m_type], token.m_row, token.m_column,  token.m_start, token.m_length);
-		for(int i = token.m_start; i < token.m_length + token.m_start; ++i)
+		printf("token %s{%d:%d} [%d,%d]: <",ZLX_ASM_token_type_names[token.type], token.row, token.column,  token.start, token.length);
+		for(int i = token.start; i < token.length + token.start; ++i)
 		{
-			if(lexer->m_string[i] == '\n')
+			if(lexer->ap__string[i] == '\n')
 			{
 				putchar('\\');
 				putchar('n');
 			}
 			else
 			{
-				putchar(lexer->m_string[i]);
+				putchar(lexer->ap__string[i]);
 			}
 		}
 		printf(">\n");
@@ -82,7 +82,7 @@ static void print_token(ZLX_ASM_lexer_t *lexer, int position)
 
 static ZLX_ASM_token_t init_token(ZLX_ASM_token_type_t type, int start, int stop, int _column, int _row)
 {
-	return (ZLX_ASM_token_t){.m_type = type, .m_start = start, .m_length = stop - start, .m_column = _column, .m_row = _row};
+	return (ZLX_ASM_token_t){.type = type, .start = start, .length = stop - start, .column = _column, .row = _row};
 
 }
 
@@ -91,12 +91,12 @@ static ZLX_ASM_token_t init_token(ZLX_ASM_token_type_t type, int start, int stop
 static char peek(ZLX_ASM_lexer_t *lexer)
 {
 
-	if(lexer->m_position >= lexer->m_string_length)
+	if(lexer->position >= lexer->string_length)
 		return 0;
 	else
 	{
-		char ch = lexer->m_string[lexer->m_position];
-		if(lexer->m_print_each == true)
+		char ch = lexer->ap__string[lexer->position];
+		if(lexer->print_each == true)
 		{
 			printf("%c", ch);
 		}
@@ -108,38 +108,38 @@ static char peek(ZLX_ASM_lexer_t *lexer)
 static char advance(ZLX_ASM_lexer_t *lexer)
 {
 	char consumed = peek(lexer);
-	if(lexer->m_position >= lexer->m_string_length)
+	if(lexer->position >= lexer->string_length)
 	{
 		return 0;
 	}
-	lexer->m_position++;
+	lexer->position++;
 	char pk = peek(lexer);
 	if(consumed == '\n')
 	{
-		lexer->m_row++;
-		lexer->m_column = 0;
+		lexer->row++;
+		lexer->column = 0;
 	}
 	else if(consumed == '\t')
 	{
-		lexer->m_column += 4;
+		lexer->column += 4;
 	}
 	else
 	{
-		lexer->m_column++;
+		lexer->column++;
 	}
 	return pk;
 }
 
 static int position(ZLX_ASM_lexer_t *lexer)
 {
-	return lexer->m_position;
+	return lexer->position;
 }
 
 
 static void add_token_start_word(ZLX_ASM_lexer_t *lexer, ZLX_ASM_token_type_t type, int start)
 {
 	int stop = position(lexer);
-	ZLX_ASM_token_t range = init_token(type, start, stop, lexer->m_tcolumn, lexer->m_trow);
+	ZLX_ASM_token_t range = init_token(type, start, stop, lexer->tcolumn, lexer->trow);
 
 	add_token(lexer, range);
 }
@@ -175,21 +175,21 @@ static void has_character_ctype_or_string(ZLX_ASM_lexer_t *lexer, int (*ctype)(i
 
 int ZLX_ASM_get_token_string(ZLX_ASM_lexer_t *_lexer, int _position, char *_buffer, int _blength)
 {
-	if(_position < _lexer->m_token_count && _position >= 0)
+	if(_position < _lexer->token_count && _position >= 0)
 	{
-		ZLX_ASM_token_t token = _lexer->m_token_buffer[_position];
-		if(token.m_start < 0)
+		ZLX_ASM_token_t token = _lexer->ap__token_buffer[_position];
+		if(token.start < 0)
 		{
 			return -1;
 		}
-		if(token.m_length + token.m_start > _lexer->m_string_length || token.m_length >= _blength)
+		if(token.length + token.start > _lexer->string_length || token.length >= _blength)
 		{
 			return -1;
 		}
 		int c = 0;
-		for(int i = token.m_start; i < token.m_length + token.m_start && c < _blength; ++i, ++c)
+		for(int i = token.start; i < token.length + token.start && c < _blength; ++i, ++c)
 		{
-			_buffer[c] = _lexer->m_string[i];
+			_buffer[c] = _lexer->ap__string[i];
 		}
 		_buffer[c] = '\0';
 		return c;
@@ -200,7 +200,7 @@ int ZLX_ASM_get_token_string(ZLX_ASM_lexer_t *_lexer, int _position, char *_buff
 void ZLX_ASM_print_lexer(ZLX_ASM_lexer_t *lexer)
 {
 
-	for(int i = 0; i < lexer->m_token_count; ++i)
+	for(int i = 0; i < lexer->token_count; ++i)
 	{
 		print_token(lexer, i);
 	}
@@ -210,12 +210,12 @@ void ZLX_ASM_print_lexer(ZLX_ASM_lexer_t *lexer)
 int ZLX_ASM_get_substring(ZLX_ASM_lexer_t *_lexer, int _start, int _length, char *_buffer, int _blength)
 {
 	if(_start < 0 || _length < 0 || _blength <= _length ||
-		_start > _lexer->m_string_length ||
-		_length > _lexer->m_string_length - _start)
+		_start > _lexer->string_length ||
+		_length > _lexer->string_length - _start)
 	{
 		return -1;
 	}
-	memcpy(_buffer, _lexer->m_string + _start, (size_t)_length);
+	memcpy(_buffer, _lexer->ap__string + _start, (size_t)_length);
 	_buffer[_length] = '\0';
 	int c = _length;
 	return c;
@@ -229,7 +229,7 @@ ZLX_ASM_lexer_t *ZLX_ASM_initialize_lexer(char *_string)
 	ZLX_ASM_lexer_t *lexer = (ZLX_ASM_lexer_t *)malloc(sizeof(ZLX_ASM_lexer_t));
 	if(!lexer)
 		exit(1);
-	lexer->m_token_allocated = 0;
+	lexer->token_allocated = 0;
 	allocate_tokens(lexer);
 
 	size_t length = strlen(_string);
@@ -240,17 +240,17 @@ ZLX_ASM_lexer_t *ZLX_ASM_initialize_lexer(char *_string)
 	char *copy = malloc(length + 1);
 	if(!copy)
 	{
-		free(lexer->m_token_buffer);
+		free(lexer->ap__token_buffer);
 		free(lexer);
 		exit(1);
 	}
 	memcpy(copy, _string, length + 1);
-	lexer->m_string_length = strlen(copy);
-	lexer->m_string = copy;
-	lexer->m_position = 0;
-	lexer->m_row = 1;
-	lexer->m_column = 0;
-	lexer->m_print_each = false;
+	lexer->string_length = strlen(copy);
+	lexer->ap__string = copy;
+	lexer->position = 0;
+	lexer->row = 1;
+	lexer->column = 0;
+	lexer->print_each = false;
 	return lexer;
 }
 
@@ -258,10 +258,10 @@ void ZLX_ASM_lex(ZLX_ASM_lexer_t *_lexer)
 {
 
 
-	while(_lexer->m_position < _lexer->m_string_length)
+	while(_lexer->position < _lexer->string_length)
 	{
-		_lexer->m_tcolumn = _lexer->m_column;
-		_lexer->m_trow = _lexer->m_row;
+		_lexer->tcolumn = _lexer->column;
+		_lexer->trow = _lexer->row;
 		int start = position(_lexer);
 		char current = peek(_lexer);
 		char scroll = advance(_lexer);
@@ -298,7 +298,7 @@ void ZLX_ASM_lex(ZLX_ASM_lexer_t *_lexer)
 				continue;
 			}
 			stop = position(_lexer);
-			ZLX_ASM_token_t range = init_token(ZLX_ASM_TOKEN_STRING, start + 1, stop - 1, _lexer->m_tcolumn, _lexer->m_trow);
+			ZLX_ASM_token_t range = init_token(ZLX_ASM_TOKEN_STRING, start + 1, stop - 1, _lexer->tcolumn, _lexer->trow);
 			add_token(_lexer, range);
 
 		}
@@ -466,13 +466,13 @@ void ZLX_ASM_lex(ZLX_ASM_lexer_t *_lexer)
 			else if(scroll == ':')
 			{
 				//printf("found this\n");
-				//_lexer->m_print_each = true;
+				//_lexer->print_each = true;
 				advance(_lexer);
 				while(scroll != '\0' && scroll != '\n' )
 				{
 					scroll = advance(_lexer);
 				}
-				//_lexer->m_print_each = false;
+				//_lexer->print_each = false;
 
 			}
 			else
@@ -671,7 +671,7 @@ void ZLX_ASM_free_lexer(ZLX_ASM_lexer_t *_lexer)
 	{
 		return;
 	}
-	free(_lexer->m_string);
-	free(_lexer->m_token_buffer);
+	free(_lexer->ap__string);
+	free(_lexer->ap__token_buffer);
 	free(_lexer);
 }
