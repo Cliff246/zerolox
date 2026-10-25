@@ -1,5 +1,5 @@
-#ifndef ZLX_ASM_LEXER_H
-#define ZLX_ASM_LEXER_H
+#ifndef MY_LEXER_H
+#define MY_LEXER_H
 
 #include <string.h>
 #include <stdlib.h>
@@ -8,7 +8,7 @@
 #include <ctype.h>
 
 
-#define ZLX_ASM_TOKEN_TYPE_LIST(X)			\
+#define MY_TOKEN_TYPE_LIST(X)			\
 	X(EMPTY)							\
 	X(INVALID)							\
 	X(WORD)								\
@@ -66,49 +66,49 @@
 	X(AT)								\
 	X(HASHTAG)							\
 
-#define ZLX_ASM_TOKEN_TYPE_ENUM_NAME(X) ZLX_ASM_TOKEN_ ## X
-#define ZLX_ASM_TOKEN_TYPE_ENUM(X) ZLX_ASM_TOKEN_TYPE_ENUM_NAME(X),
+#define MY_TOKEN_TYPE_ENUM_NAME(X) MY_TOKEN_ ## X
+#define MY_TOKEN_TYPE_ENUM(X) MY_TOKEN_TYPE_ENUM_NAME(X),
 
 
-typedef enum ZLX_ASM_token_type
+typedef enum MY_token_type
 {
-	ZLX_ASM_TOKEN_TYPE_LIST(ZLX_ASM_TOKEN_TYPE_ENUM)
-}ZLX_ASM_token_type_t;
+	MY_TOKEN_TYPE_LIST(MY_TOKEN_TYPE_ENUM)
+}MY_token_type_t;
 
-#define ZLX_ASM_TOKEN_TYPE_STRING(X) ("ZLX_ASM_TOKEN_"#X),
+#define MY_TOKEN_TYPE_STRING(X) ("MY_TOKEN_"#X),
 
-extern char *ZLX_ASM_token_type_names[];
+extern char *MY_token_type_names[];
 
 
 
-typedef struct ZLX_ASM_token
+typedef struct MY_token
 {
-	ZLX_ASM_token_type_t type;
+	MY_token_type_t type;
 	int start;
 	int length;
 	int column;
 	int row;
-}ZLX_ASM_token_t;
+}MY_token_t;
 
-typedef struct ZLX_ASM_lexer
+typedef struct MY_lexer
 {
 	char *ap__string;
 	int string_length;
 
 	int token_allocated;
 	int token_count;
-	ZLX_ASM_token_t *ap__token_buffer;
+	MY_token_t *ap__token_buffer;
 
 	int position;
 	int row, column;
 	int trow, tcolumn;
 	bool print_each;
-}ZLX_ASM_lexer_t;
+}MY_lexer_t;
 
-ZLX_ASM_lexer_t *ZLX_ASM_initialize_lexer(char *_string);
-int ZLX_ASM_get_token_string(ZLX_ASM_lexer_t *_lexer, int _position, char *_buffer, int _blength);
-int ZLX_ASM_get_substring(ZLX_ASM_lexer_t *_lexer, int _start, int _length, char *_buffer, int _blength);
-void ZLX_ASM_lex(ZLX_ASM_lexer_t *_lexer);
-void ZLX_ASM_print_lexer(ZLX_ASM_lexer_t *lexer);
-void ZLX_ASM_free_lexer(ZLX_ASM_lexer_t *_lexer);
+MY_lexer_t *MY_initialize_lexer(char *_string);
+int MY_get_token_string(MY_lexer_t *_lexer, int _position, char *_buffer, int _blength);
+int MY_get_substring(MY_lexer_t *_lexer, int _start, int _length, char *_buffer, int _blength);
+void MY_lex(MY_lexer_t *_lexer);
+void MY_print_lexer(MY_lexer_t *lexer);
+void MY_free_lexer(MY_lexer_t *_lexer);
 #endif

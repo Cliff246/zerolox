@@ -3,6 +3,7 @@
 set(MY_LIBRARY_CFILES ${MY_LIBRARY_CFILES}
 
 	${CMAKE_CURRENT_SOURCE_DIR}/MY_commons.c
+	${CMAKE_CURRENT_SOURCE_DIR}/MY_lexer.c
 )
 
 add_library(MY_library ${MY_LIBRARY_CFILES})
