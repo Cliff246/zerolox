@@ -1,6 +1,7 @@
 set(ASM_CFILE ${ASM_CFILE}
 
-	${CMAKE_CURRENT_SOURCE_DIR}/ASM_main.cc
+	${CMAKE_CURRENT_SOURCE_DIR}/ASM_main.c
+	${CMAKE_CURRENT_SOURCE_DIR}/lexer.c
 )
 
 add_executable(ZLX_asm ${ASM_CFILE})
@@ -20,3 +21,4 @@ target_include_directories(ZLX_asm
 	ZLX_commons
 	MY_library
 )
+

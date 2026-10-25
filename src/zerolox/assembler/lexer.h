@@ -1,15 +1,14 @@
-#ifndef __HEART_LEXER_HEADER__
-#define __HEART_LEXER_HEADER__
+#ifndef ZLX_ASM_LEXER_H
+#define ZLX_ASM_LEXER_H
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <ctype.h>
-#include "HRT_commons.h"
 
 
-#define HRT_TOKEN_TYPE_LIST(X)			\
+#define ZLX_ASM_TOKEN_TYPE_LIST(X)			\
 	X(EMPTY)							\
 	X(INVALID)							\
 	X(WORD)								\
@@ -67,49 +66,49 @@
 	X(AT)								\
 	X(HASHTAG)							\
 
-#define HRT_TOKEN_TYPE_ENUM_NAME(X) HRT_TOKEN_ ## X
-#define HRT_TOKEN_TYPE_ENUM(X) HRT_TOKEN_TYPE_ENUM_NAME(X),
+#define ZLX_ASM_TOKEN_TYPE_ENUM_NAME(X) ZLX_ASM_TOKEN_ ## X
+#define ZLX_ASM_TOKEN_TYPE_ENUM(X) ZLX_ASM_TOKEN_TYPE_ENUM_NAME(X),
 
 
-typedef enum HRT_Token_type
+typedef enum ZLX_ASM_token_type
 {
-	HRT_TOKEN_TYPE_LIST(HRT_TOKEN_TYPE_ENUM)
-}HRT_Token_type_t;
+	ZLX_ASM_TOKEN_TYPE_LIST(ZLX_ASM_TOKEN_TYPE_ENUM)
+}ZLX_ASM_token_type_t;
 
-#define HRT_TOKEN_TYPE_STRING(X) ("HRT_TOKEN_"#X),
+#define ZLX_ASM_TOKEN_TYPE_STRING(X) ("ZLX_ASM_TOKEN_"#X),
 
-extern char *HRT_token_types_String[];
+extern char *ZLX_ASM_token_type_names[];
 
 
 
-typedef struct HRT_Token
+typedef struct ZLX_ASM_token
 {
-	HRT_Token_type_t m_type;
+	ZLX_ASM_token_type_t m_type;
 	int m_start;
 	int m_length;
 	int m_column;
 	int m_row;
-}HRT_Token_t;
+}ZLX_ASM_token_t;
 
-typedef struct HRT_Lexer
+typedef struct ZLX_ASM_lexer
 {
 	char *m_string;
 	int m_string_length;
 
 	int m_token_allocated;
 	int m_token_count;
-	HRT_Token_t *m_token_buffer;
+	ZLX_ASM_token_t *m_token_buffer;
 
 	int m_position;
 	int m_row, m_column;
 	int m_trow, m_tcolumn;
 	bool m_print_each;
-}HRT_Lexer_t;
+}ZLX_ASM_lexer_t;
 
-HRT_Lexer_t *HRT_initialize_Lexer(char *_string);
-int HRT_get_token_string_Lexer(HRT_Lexer_t *_lexer, int _position, char *_buffer, int _blength);
-int HRT_get_substring_Lexer(HRT_Lexer_t *_lexer, int _start, int _length, char *_buffer, int _blength);
-void HRT_lex_Lexer(HRT_Lexer_t *_lexer);
-void HRT_print_Lexer(HRT_Lexer_t *lexer);
-void HRT_free_Lexer(HRT_Lexer_t *_lexer);
+ZLX_ASM_lexer_t *ZLX_ASM_initialize_lexer(char *_string);
+int ZLX_ASM_get_token_string(ZLX_ASM_lexer_t *_lexer, int _position, char *_buffer, int _blength);
+int ZLX_ASM_get_substring(ZLX_ASM_lexer_t *_lexer, int _start, int _length, char *_buffer, int _blength);
+void ZLX_ASM_lex(ZLX_ASM_lexer_t *_lexer);
+void ZLX_ASM_print_lexer(ZLX_ASM_lexer_t *lexer);
+void ZLX_ASM_free_lexer(ZLX_ASM_lexer_t *_lexer);
 #endif

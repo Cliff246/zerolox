@@ -3,31 +3,36 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 
 #define BASE_TOKENS_ALLOCATE 10
 
-char *HRT_token_types_String[] =
+char *ZLX_ASM_token_type_names[] =
 {
-	HRT_TOKEN_TYPE_LIST(HRT_TOKEN_TYPE_STRING)
+	ZLX_ASM_TOKEN_TYPE_LIST(ZLX_ASM_TOKEN_TYPE_STRING)
 };
 
 
-void allocate_tokens(HRT_Lexer_t *lexer)
+static void allocate_tokens(ZLX_ASM_lexer_t *lexer)
 {
 	if(lexer->m_token_allocated == 0)
 	{
-		lexer->m_token_allocated = 10;
+		lexer->m_token_allocated = BASE_TOKENS_ALLOCATE;
 		lexer->m_token_count = 0;
 
-		lexer->m_token_buffer = malloc(sizeof(HRT_Token_t) * lexer->m_token_allocated);
+		lexer->m_token_buffer = malloc(sizeof(ZLX_ASM_token_t) * lexer->m_token_allocated);
 		if(!lexer->m_token_buffer)
 			exit(1);
 
 	}
 	else
 	{
+		if(lexer->m_token_allocated > (INT_MAX - 1) / 2)
+		{
+			exit(1);
+		}
 		lexer->m_token_allocated = (lexer->m_token_allocated * 2) + 1;
-		void *temp = realloc(lexer->m_token_buffer, sizeof(HRT_Token_t) *  lexer->m_token_allocated);
+		void *temp = realloc(lexer->m_token_buffer, sizeof(ZLX_ASM_token_t) *  lexer->m_token_allocated);
 		if(temp == NULL)
 			exit(1);
 		lexer->m_token_buffer = temp;
@@ -35,7 +40,7 @@ void allocate_tokens(HRT_Lexer_t *lexer)
 }
 
 
-void add_token(HRT_Lexer_t *lexer, HRT_Token_t token)
+static void add_token(ZLX_ASM_lexer_t *lexer, ZLX_ASM_token_t token)
 {
 	if(lexer->m_token_count >= lexer->m_token_allocated)
 	{
@@ -44,11 +49,11 @@ void add_token(HRT_Lexer_t *lexer, HRT_Token_t token)
 	lexer->m_token_buffer[lexer->m_token_count++] = token;
 }
 
-void print_token(HRT_Lexer_t *lexer, int position)
+static void print_token(ZLX_ASM_lexer_t *lexer, int position)
 {
 	if(position < lexer->m_token_count && position >= 0)
 	{
-		HRT_Token_t token = lexer->m_token_buffer[position];
+		ZLX_ASM_token_t token = lexer->m_token_buffer[position];
 		if(token.m_start < 0)
 		{
 			return;
@@ -57,7 +62,7 @@ void print_token(HRT_Lexer_t *lexer, int position)
 		{
 			return;
 		}
-		printf("token %s{%d:%d} [%d,%d]: <",HRT_token_types_String[token.m_type], token.m_row, token.m_column,  token.m_start, token.m_length);
+		printf("token %s{%d:%d} [%d,%d]: <",ZLX_ASM_token_type_names[token.m_type], token.m_row, token.m_column,  token.m_start, token.m_length);
 		for(int i = token.m_start; i < token.m_length + token.m_start; ++i)
 		{
 			if(lexer->m_string[i] == '\n')
@@ -75,15 +80,15 @@ void print_token(HRT_Lexer_t *lexer, int position)
 
 }
 
-HRT_Token_t init_token(HRT_Token_type_t type, int start, int stop, int _column, int _row)
+static ZLX_ASM_token_t init_token(ZLX_ASM_token_type_t type, int start, int stop, int _column, int _row)
 {
-	return (HRT_Token_t){.m_type = type, .m_start = start, .m_length = stop - start, .m_column = _column, .m_row = _row};
+	return (ZLX_ASM_token_t){.m_type = type, .m_start = start, .m_length = stop - start, .m_column = _column, .m_row = _row};
 
 }
 
 
 
-char peek(HRT_Lexer_t *lexer)
+static char peek(ZLX_ASM_lexer_t *lexer)
 {
 
 	if(lexer->m_position >= lexer->m_string_length)
@@ -100,19 +105,23 @@ char peek(HRT_Lexer_t *lexer)
 	}
 }
 
-char advance(HRT_Lexer_t *lexer)
+static char advance(ZLX_ASM_lexer_t *lexer)
 {
+	char consumed = peek(lexer);
+	if(lexer->m_position >= lexer->m_string_length)
+	{
+		return 0;
+	}
 	lexer->m_position++;
-
-	char pk =  peek(lexer);
-	if(pk == '\n')
+	char pk = peek(lexer);
+	if(consumed == '\n')
 	{
 		lexer->m_row++;
 		lexer->m_column = 0;
 	}
-	else if(pk == '\t')
+	else if(consumed == '\t')
 	{
-		lexer->m_column+=4;
+		lexer->m_column += 4;
 	}
 	else
 	{
@@ -121,31 +130,31 @@ char advance(HRT_Lexer_t *lexer)
 	return pk;
 }
 
-int position(HRT_Lexer_t *lexer)
+static int position(ZLX_ASM_lexer_t *lexer)
 {
 	return lexer->m_position;
 }
 
 
-void add_token_start_word(HRT_Lexer_t *lexer, HRT_Token_type_t type, int start)
+static void add_token_start_word(ZLX_ASM_lexer_t *lexer, ZLX_ASM_token_type_t type, int start)
 {
 	int stop = position(lexer);
-	HRT_Token_t range = init_token(type, start, stop, lexer->m_tcolumn, lexer->m_trow);
+	ZLX_ASM_token_t range = init_token(type, start, stop, lexer->m_tcolumn, lexer->m_trow);
 
 	add_token(lexer, range);
 }
 
 
-void has_character_ctype(HRT_Lexer_t *lexer, int (*ctype)(int c))
+static void has_character_ctype(ZLX_ASM_lexer_t *lexer, int (*ctype)(int c))
 {
 	char scroll = peek(lexer);
-	while(ctype(scroll))
+	while(ctype((unsigned char)scroll))
 	{
 		scroll = advance(lexer);
 	}
 }
 
-void has_character_string(HRT_Lexer_t *lexer, char *string)
+static void has_character_string(ZLX_ASM_lexer_t *lexer, char *string)
 {
 	char scroll = peek(lexer);
 	while(strchr(string, scroll) && scroll != 0)
@@ -154,26 +163,26 @@ void has_character_string(HRT_Lexer_t *lexer, char *string)
 	}
 }
 
-void has_character_ctype_or_string(HRT_Lexer_t *lexer, int (*ctype)(int c), char *string)
+static void has_character_ctype_or_string(ZLX_ASM_lexer_t *lexer, int (*ctype)(int c), char *string)
 {
 	char scroll = peek(lexer);
-	while(ctype(scroll) || (strchr(string, scroll) && scroll != 0))
+	while(ctype((unsigned char)scroll) || (strchr(string, scroll) && scroll != 0))
 	{
 		scroll = advance(lexer);
 	}
 }
 
 
-int HRT_get_token_string_Lexer(HRT_Lexer_t *_lexer, int _position, char *_buffer, int _blength)
+int ZLX_ASM_get_token_string(ZLX_ASM_lexer_t *_lexer, int _position, char *_buffer, int _blength)
 {
 	if(_position < _lexer->m_token_count && _position >= 0)
 	{
-		HRT_Token_t token = _lexer->m_token_buffer[_position];
+		ZLX_ASM_token_t token = _lexer->m_token_buffer[_position];
 		if(token.m_start < 0)
 		{
 			return -1;
 		}
-		if(token.m_length + token.m_start > _lexer->m_string_length || token.m_length > _blength)
+		if(token.m_length + token.m_start > _lexer->m_string_length || token.m_length >= _blength)
 		{
 			return -1;
 		}
@@ -188,7 +197,7 @@ int HRT_get_token_string_Lexer(HRT_Lexer_t *_lexer, int _position, char *_buffer
 	return -1;
 }
 
-void HRT_print_Lexer(HRT_Lexer_t *lexer)
+void ZLX_ASM_print_lexer(ZLX_ASM_lexer_t *lexer)
 {
 
 	for(int i = 0; i < lexer->m_token_count; ++i)
@@ -198,38 +207,44 @@ void HRT_print_Lexer(HRT_Lexer_t *lexer)
 }
 
 
-int HRT_get_substring_Lexer(HRT_Lexer_t *_lexer, int _start, int _length, char *_buffer, int _blength)
+int ZLX_ASM_get_substring(ZLX_ASM_lexer_t *_lexer, int _start, int _length, char *_buffer, int _blength)
 {
-	if(_start < 0)
+	if(_start < 0 || _length < 0 || _blength <= _length ||
+		_start > _lexer->m_string_length ||
+		_length > _lexer->m_string_length - _start)
 	{
 		return -1;
 	}
-	int total = _start + _length;
-	if(total >= _lexer->m_string_length || _length > _blength)
-	{
-		return -1;
-	}
-	int c = 0;
-	for(int i = _start; i < _length && c < _blength; ++c, ++i)
-	{
-		_buffer[c] = _lexer->m_string[i];
-	}
-	_buffer[c]= '\0';
+	memcpy(_buffer, _lexer->m_string + _start, (size_t)_length);
+	_buffer[_length] = '\0';
+	int c = _length;
 	return c;
 }
 
 
-HRT_Lexer_t *HRT_initialize_Lexer(char *_string)
+ZLX_ASM_lexer_t *ZLX_ASM_initialize_lexer(char *_string)
 {
 	if(!_string)
 		exit(1);
-	HRT_Lexer_t *lexer = (HRT_Lexer_t *)malloc(sizeof(HRT_Lexer_t));
+	ZLX_ASM_lexer_t *lexer = (ZLX_ASM_lexer_t *)malloc(sizeof(ZLX_ASM_lexer_t));
 	if(!lexer)
 		exit(1);
 	lexer->m_token_allocated = 0;
 	allocate_tokens(lexer);
 
-	char *copy = strdup(_string);
+	size_t length = strlen(_string);
+	if(length > INT_MAX)
+	{
+		exit(1);
+	}
+	char *copy = malloc(length + 1);
+	if(!copy)
+	{
+		free(lexer->m_token_buffer);
+		free(lexer);
+		exit(1);
+	}
+	memcpy(copy, _string, length + 1);
 	lexer->m_string_length = strlen(copy);
 	lexer->m_string = copy;
 	lexer->m_position = 0;
@@ -239,13 +254,9 @@ HRT_Lexer_t *HRT_initialize_Lexer(char *_string)
 	return lexer;
 }
 
-void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
+void ZLX_ASM_lex(ZLX_ASM_lexer_t *_lexer)
 {
-	if(peek(_lexer) == '\n')
-	{
-		_lexer->m_row++;
-	}
-	bool has_need_space = false;
+
 
 	while(_lexer->m_position < _lexer->m_string_length)
 	{
@@ -259,16 +270,16 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 		if(current == ' ' || current == '\t')
 		{
 		}
-		else if(current == '\n' )
+		else if(current == '\n' || current == '\r')
 		{
 
 		}
 
-		else if(isalpha(current) || current == '_' && has_need_space == false)
+		else if(isalpha((unsigned char)current) || current == '_')
 		{
 			has_character_ctype_or_string(_lexer, isalnum, "_");
 
-			add_token_start_word(_lexer, HRT_TOKEN_WORD, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_WORD, start);
 		}
 		else if(current == '\"')
 		{
@@ -283,11 +294,11 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 			else
 			{
 				stop = position(_lexer);
-				printf("STRING OVERLAP %d %d\n", start, stop);
-				exit(1);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_INVALID, start);
+				continue;
 			}
 			stop = position(_lexer);
-			HRT_Token_t range = init_token(HRT_TOKEN_STRING, start + 1, stop - 1, _lexer->m_tcolumn, _lexer->m_trow);
+			ZLX_ASM_token_t range = init_token(ZLX_ASM_TOKEN_STRING, start + 1, stop - 1, _lexer->m_tcolumn, _lexer->m_trow);
 			add_token(_lexer, range);
 
 		}
@@ -296,14 +307,14 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 			if(scroll == '=')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_EXCLAIM_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_EXCLAIM_EQUALS, start);
 
 			}
 			else
-				add_token_start_word(_lexer, HRT_TOKEN_EXCLAIM, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_EXCLAIM, start);
 
 		}
-		else if(isdigit(current))
+		else if(isdigit((unsigned char)current))
 		{
 			bool has_hexcode = false, has_zero_start = false;
 			if(scroll == 'x' || scroll == 'X')
@@ -323,32 +334,32 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 				//printf("%c\n", scroll);
 				if(!strchr(hex_chars, scroll) || scroll == 0)
 				{
-					add_token_start_word(_lexer, HRT_TOKEN_INVALID, start);
+					add_token_start_word(_lexer, ZLX_ASM_TOKEN_INVALID, start);
 
 				}
 				else
 				{
 					has_character_string(_lexer, (char *)hex_chars);
 
-					add_token_start_word(_lexer, HRT_TOKEN_HEXDECIMAL, start);
+					add_token_start_word(_lexer, ZLX_ASM_TOKEN_HEXDECIMAL, start);
 				}
 			}
 			else if(has_hexcode && !has_zero_start)
 			{
-				add_token_start_word(_lexer, HRT_TOKEN_INVALID, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_INVALID, start);
 			}
 			else if(scroll == '.')
 			{
 				//floating point
 				advance(_lexer);
 				has_character_ctype(_lexer, isdigit);
-				add_token_start_word(_lexer, HRT_TOKEN_FLOAT, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_FLOAT, start);
 			}
 			else
 			{
 				//integer
 				bool has_found_dot = false;
-				while(isdigit(scroll) && scroll != '\0' && scroll != '\n')
+				while(isdigit((unsigned char)scroll) && scroll != '\0' && scroll != '\n')
 				{
 				 	scroll = advance(_lexer);
 					if(scroll == '.')
@@ -358,47 +369,46 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 				{
 					advance(_lexer);
 					has_character_ctype(_lexer, isdigit);
-					add_token_start_word(_lexer, HRT_TOKEN_FLOAT, start);
+					add_token_start_word(_lexer, ZLX_ASM_TOKEN_FLOAT, start);
 
 				}
 				else
 				{
-					add_token_start_word(_lexer, HRT_TOKEN_INT, start);
+					add_token_start_word(_lexer, ZLX_ASM_TOKEN_INT, start);
 				}
 			}
 
-			has_need_space = true;
 
 		}
 		else if(current == '.')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_PERIOD, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_PERIOD, start);
 		}
 		else if(current == '(')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_PARENTHESIS_OPEN, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_PARENTHESIS_OPEN, start);
 		}
 		else if(current == ')')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_PARENTHESIS_CLOSED, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_PARENTHESIS_CLOSED, start);
 		}
 		else if(current == '[')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_SQUAREBRACE_OPEN, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_SQUAREBRACE_OPEN, start);
 		}
 		else if(current == ']')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_SQUAREBRACE_CLOSED, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_SQUAREBRACE_CLOSED, start);
 
 		}
 		else if(current == '{')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_CURLYBRACE_CLOSED, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_CURLYBRACE_OPEN, start);
 
 		}
 		else if(current == '}')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_CURLYBRACE_CLOSED, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_CURLYBRACE_CLOSED, start);
 
 		}
 		else if(current == '+')
@@ -406,18 +416,18 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 			if(scroll == '=')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_ADD_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_ADD_EQUALS, start);
 
 			}
-			else if(scroll == '-')
+			else if(scroll == '+')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_ADD_ADD, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_ADD_ADD, start);
 
 			}
 			else
 			{
-				add_token_start_word(_lexer, HRT_TOKEN_ADD, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_ADD, start);
 			}
 		}
 		else if(current == '-')
@@ -425,18 +435,18 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 			if(scroll == '=')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_MINUS_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_MINUS_EQUALS, start);
 
 			}
 			else if(scroll == '-')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_MINUS_MINUS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_MINUS_MINUS, start);
 
 			}
 			else
 			{
-				add_token_start_word(_lexer, HRT_TOKEN_MINUS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_MINUS, start);
 			}
 		}
 		else if(current == '/')
@@ -444,13 +454,13 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 			if(scroll == '/')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_SLASH_SLASH, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_SLASH_SLASH, start);
 
 			}
 			else if(scroll == '=')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_SLASH_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_SLASH_EQUALS, start);
 
 			}
 			else if(scroll == ':')
@@ -467,7 +477,7 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 			}
 			else
 			{
-				add_token_start_word(_lexer, HRT_TOKEN_SLASH, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_SLASH, start);
 
 			}
 		}
@@ -476,44 +486,44 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 			if(scroll == '*')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_STAR_STAR, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_STAR_STAR, start);
 
 			}
 			else if(scroll == '=')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_STAR_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_STAR_EQUALS, start);
 
 			}
 			else
 			{
-				add_token_start_word(_lexer, HRT_TOKEN_STAR, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_STAR, start);
 			}
 		}
 		else if(current == ',')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_COMMA, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_COMMA, start);
 
 		}
 		else if(current == ':')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_COLON, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_COLON, start);
 
 		}
 
 		else if(current == ';')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_SEMICOLON, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_SEMICOLON, start);
 
 		}
 		else if(current == '@')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_AT, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_AT, start);
 
 		}
 		else if(current == '#')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_HASHTAG, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_HASHTAG, start);
 
 		}
 		else if(current == '=')
@@ -521,16 +531,16 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 			if(scroll == '=')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_EQUALS_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_EQUALS_EQUALS, start);
 			}
 			else if(scroll == '>')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_EQUALS_LESS_THAN, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_EQUALS_LESS_THAN, start);
 			}
 			else
 			{
-				add_token_start_word(_lexer, HRT_TOKEN_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_EQUALS, start);
 			}
 		}
 		else if(current == '<')
@@ -539,7 +549,7 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 			{
 
 				scroll = advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_LESS_THAN_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_LESS_THAN_EQUALS, start);
 
 			}
 			else if(scroll == '<')
@@ -548,21 +558,21 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 				if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, HRT_TOKEN_LESS_THAN_LESS_THAN_EQUALS, start);
+					add_token_start_word(_lexer, ZLX_ASM_TOKEN_LESS_THAN_LESS_THAN_EQUALS, start);
 
 				}
 				else
-					add_token_start_word(_lexer, HRT_TOKEN_LESS_THAN_LESS_THAN, start);
+					add_token_start_word(_lexer, ZLX_ASM_TOKEN_LESS_THAN_LESS_THAN, start);
 			}
 			else
-				add_token_start_word(_lexer, HRT_TOKEN_LESS_THAN, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_LESS_THAN, start);
 		}
 		else if(current == '>')
 		{
 			if(scroll == '=')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_GREATER_THAN_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_GREATER_THAN_EQUALS, start);
 			}
 			else if(scroll == '>')
 			{
@@ -570,30 +580,30 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 				if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, HRT_TOKEN_GREATER_THAN_GREATER_THAN_EQUALS, start);
+					add_token_start_word(_lexer, ZLX_ASM_TOKEN_GREATER_THAN_GREATER_THAN_EQUALS, start);
 
 				}
 				else
-					add_token_start_word(_lexer, HRT_TOKEN_GREATER_THAN_GREATER_THAN, start);
+					add_token_start_word(_lexer, ZLX_ASM_TOKEN_GREATER_THAN_GREATER_THAN, start);
 			}
 			else
-				add_token_start_word(_lexer, HRT_TOKEN_GREATER_THAN, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_GREATER_THAN, start);
 		}
 		else if(current == '&')
 		{
 			if(scroll == '&')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_AMPERSAND_AMPERSAND, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_AMPERSAND_AMPERSAND, start);
 			}
 			else if(scroll == '=')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_AMPERSAND_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_AMPERSAND_EQUALS, start);
 			}
 			else
 			{
-				add_token_start_word(_lexer, HRT_TOKEN_AMPERSAND, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_AMPERSAND, start);
 			}
 		}
 		else if(current == '|')
@@ -601,53 +611,52 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 			if(scroll == '|')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_VERTICAL_LINE_VERTICAL_LINE, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_VERTICAL_LINE_VERTICAL_LINE, start);
 			}
 			else if(scroll == '=')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_VERTICAL_LINE_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_VERTICAL_LINE_EQUALS, start);
 			}
 			else
 			{
-				add_token_start_word(_lexer, HRT_TOKEN_VERTICAL_LINE, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_VERTICAL_LINE, start);
 			}
 		}
 		else if(current == '%')
 		{
-			if(current == '=')
+			if(scroll == '=')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_MODULO_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_MODULO_EQUALS, start);
 
 			}
 			else
 			{
-				add_token_start_word(_lexer, HRT_TOKEN_MODULO, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_MODULO, start);
 
 			}
 		}
 		else if(current == '^')
 		{
-			if(current == '=')
+			if(scroll == '=')
 			{
 				advance(_lexer);
-				add_token_start_word(_lexer, HRT_TOKEN_HAT_EQUALS, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_HAT_EQUALS, start);
 			}
 			else
 			{
-				add_token_start_word(_lexer, HRT_TOKEN_HAT, start);
+				add_token_start_word(_lexer, ZLX_ASM_TOKEN_HAT, start);
 
 			}
 		}
 		else if(current == '?')
 		{
-			add_token_start_word(_lexer, HRT_TOKEN_QUESTION_MARK, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_QUESTION_MARK, start);
 		}
 		else
 		{
-			has_need_space = false;
-			add_token_start_word(_lexer, HRT_TOKEN_INVALID, start);
+			add_token_start_word(_lexer, ZLX_ASM_TOKEN_INVALID, start);
 
 		}
 		//advance(lexer);
@@ -656,8 +665,12 @@ void HRT_lex_Lexer(HRT_Lexer_t *_lexer)
 
 }
 
-void HRT_free_Lexer(HRT_Lexer_t *_lexer)
+void ZLX_ASM_free_lexer(ZLX_ASM_lexer_t *_lexer)
 {
+	if(!_lexer)
+	{
+		return;
+	}
 	free(_lexer->m_string);
 	free(_lexer->m_token_buffer);
 	free(_lexer);
