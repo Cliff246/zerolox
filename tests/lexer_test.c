@@ -1,7 +1,8 @@
-#include "lexer.h"
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include "../zerolox/assembler/ASM_lexer.h"
+
 
 static void check_tokens(void)
 {
