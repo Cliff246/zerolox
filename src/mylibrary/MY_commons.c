@@ -1,7 +1,9 @@
 #include "MY_commons.h"
+#include <_stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int32_t MY_get_filename_start(char *path)
 {
@@ -56,6 +58,78 @@ int32_t MY_sign_extend32(uint32_t imm, uint8_t bits)
    	return (int32_t)((imm ^ sign) - sign);	
 }
 
+
+void *MY_realloc(void *ptr, uint64_t grow, uint64_t size)
+{
+	if(size == 0 || grow == 0)
+	{
+		MY_FAULT("bad arguments for realloc");
+	}
+	void *new = NULL;
+	if(ptr == NULL)
+	{
+		new = malloc(grow * size);
+		if(!new)
+			MY_FAULT("malloc failed");
+		return ptr;
+	}
+	else
+	{
+
+		void *copy = realloc(ptr, grow * size);
+		if(!copy)
+		{
+			MY_FAULT("failed to realloc");
+			return ptr;
+		}
+
+		return copy;
+	}
+
+
+}
+
+
+int64_t MY_split_string(char *input, char ***buffer, char delim)
+{
+
+	int64_t count = 0; 
+	int64_t alloc = 16;	
+	char **splits = MY_realloc(NULL, alloc, sizeof(char **));
+	char *last = input;
+	//i need to make an alloc or list thing, fuck
+	for(char *scroll = input; *scroll != 0; scroll++)
+	{
+		if(*scroll == delim)
+		{
+			int32_t size = scroll - last;
+			char *sub = malloc(size + 1);
+			if(sub == NULL)
+				MY_FAULT("malloc failed");
+			memcpy(sub, last, size);
+			sub[size] = 0; 	
+			if(count == alloc)
+				splits = MY_realloc(splits, alloc = alloc * 2 + 1, sizeof(char **));	
+			splits[count++] = sub;
+		}
+	}
+	
+	*buffer = splits; 
+	return count;
+}
+
+
+void MY_free_string_array(char **strings, uint64_t count)
+{
+	for(int i = 0; i < count; ++i)
+	{
+		if(strings[i] != NULL)
+		{
+			free(strings[i]);
+		}
+	}
+	free(strings);
+}
 
 
 int64_t MY_get_length__STD_File(FILE *file)

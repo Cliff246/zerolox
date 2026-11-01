@@ -44,6 +44,10 @@ typedef enum ZLX_ISA_Register_identifier
 	ZLX_ISA_Register_identifier_argument_7 = 31,
 }ZLX_ISA_Register_identifier_t;
 
+extern char *ZLX_ISA_Register_string[];
+
+ZLX_ISA_Register_identifier_t ZLX_ISA_get_register_number(char *string);
+
 //
 //---------------------------------------------------------------------------
 //

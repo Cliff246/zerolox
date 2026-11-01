@@ -7,6 +7,14 @@
 #include <string.h>
 #include <sys/_types/_sigaltstack.h>
 
+
+//TODO
+void ZLX_ISA_free_Argument(ZLX_ISA_Argument_t *argument)
+{
+	MY_TODO;
+	free(argument);
+}
+
 ZLX_ISA_Statement_t *ZLX_ISA_init_Statement(void)
 {
 	ZLX_ISA_Statement_t *statement = malloc(sizeof(ZLX_ISA_Statement_t));
@@ -31,12 +39,8 @@ void ZLX_ISA_free_Statement(ZLX_ISA_Statement_t *statement)
 	{
 		for(int i = 0; i < statement->arguments_count; ++i)
 		{
-	
-			if(statement->pap__arguments == NULL)
-			{
-				MY_FAULT("broken argument");	
-			}
-			free(statement->pap__arguments[i]);
+			if(statement->pap__arguments)
+				ZLX_ISA_free_Argument(statement->pap__arguments[i]);	
 		}
 	}
 	if(statement->pap__arguments != NULL)
@@ -53,26 +57,26 @@ void ZLX_ISA_free_Statement(ZLX_ISA_Statement_t *statement)
 
 ZLX_ISA_Mnemonic_t ZLX_ISA_mnemonics[] = 
 {
-	[ZLX_ISA_Minor_operation_move] = {.type = ZLX_ISA_Minor_type, .form = ZLX_ISA_Pattern_form_2_register, .a__mnemonic = "mv"},
-	[ZLX_ISA_Minor_operation_add] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "add"},
-	[ZLX_ISA_Minor_operation_adda] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "adda"},
-	[ZLX_ISA_Minor_operation_sub] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "sub"},
-	[ZLX_ISA_Minor_operation_geta] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "geta"}, 
-	[ZLX_ISA_Minor_operation_get8] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "get8"},
-	[ZLX_ISA_Minor_operation_b] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "b"}, 
-	[ZLX_ISA_Minor_operation_baeqz] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "baeqz"},
-	[ZLX_ISA_Minor_operation_baneqz] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "baneqz"},
-	[ZLX_ISA_Minor_operation_lda] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "lda"},  
-	[ZLX_ISA_Minor_operation_ald] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "ald"},
-	[ZLX_ISA_Minor_operation_sta] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "sta"},
-	[ZLX_ISA_Minor_operation_ast] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "ast"},	
-	[ZLX_ISA_Minor_operation_stsa] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "stsa"},
-	[ZLX_ISA_Minor_operation_ldsa] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "ldsa"},
-	[ZLX_ISA_Minor_operation_ld_plus] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "ldpa"}, 
-	[ZLX_ISA_Minor_operation_st_plus] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "stpa"},  
-	[ZLX_ISA_Minor_operation_bieqc] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "bieqc"},
-	[ZLX_ISA_Minor_operation_bteqa] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "bteqa"},
-	[ZLX_ISA_Minor_operation_btneqa] = {.type = ZLX_ISA_Minor_type, .a__mnemonic = "btneqa"},
+	{.type = ZLX_ISA_Minor_type, .form = ZLX_ISA_Pattern_form_2_register, .a__mnemonic = "mv", .opcode = ZLX_ISA_Minor_operation_move},
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "add", .opcode = ZLX_ISA_Minor_operation_add },
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "adda",.opcode = ZLX_ISA_Minor_operation_adda},
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "sub", .opcode = ZLX_ISA_Minor_operation_sub},
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "geta", .opcode = ZLX_ISA_Minor_operation_geta}, 
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "get8", .opcode = ZLX_ISA_Minor_operation_geta},
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "b", .opcode = ZLX_ISA_Minor_operation_b}, 
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "baeqz", .opcode = ZLX_ISA_Minor_operation_baeqz },
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "baneqz", .opcode = ZLX_ISA_Minor_operation_baneqz},
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "lda", .opcode = ZLX_ISA_Minor_operation_lda},  
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "ald", .opcode = ZLX_ISA_Minor_operation_ald},
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "sta", .opcode = ZLX_ISA_Minor_operation_sta},
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "ast", .opcode =ZLX_ISA_Minor_operation_ast},	
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "stsa", .opcode = ZLX_ISA_Minor_operation_stsa},
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "ldsa",.opcode = ZLX_ISA_Minor_operation_ldsa},
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "ldpa", .opcode = ZLX_ISA_Minor_operation_ld_plus}, 
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "stpa", .opcode = ZLX_ISA_Minor_operation_st_plus},  
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "bieqc", .opcode = ZLX_ISA_Minor_operation_bieqc},
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "bteqa", .opcode = ZLX_ISA_Minor_operation_bteqa},
+	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "btneqa", .opcode = ZLX_ISA_Minor_operation_btneqa},
 
 };
 
@@ -83,28 +87,86 @@ ZLX_ISA_Instruction_t ZLX_ISA_decode_syntax(ZLX_ISA_Statement_t statement)
 	{
 		MY_FAULT("statements are true strings")
 	}
-	int32_t overlap[32] = {-1};
 	
 
-	uint32_t found_operations = 0;
-	for(int32_t i = 0; i < MY_ARRAY_SIZE(ZLX_ISA_mnemonics); ++i)
+	char **splits = NULL;
+	int splits_count = MY_split_string(statement.a__mnemonic, &splits, '.');	
+
+	
+	#define MAX_OVERLAPS 4	
+	
+	int32_t overlap[splits_count][MAX_OVERLAPS];
+	memset(overlap, 0, splits_count * MAX_OVERLAPS * sizeof(int32_t));
+	uint32_t found_mnemonic = 0;	
+
+	for(int p = 0; p < splits_count; ++p)
 	{
-		
-		int compare = strcmp(statement.a__mnemonic, ZLX_ISA_mnemonics[i].a__mnemonic);
-		if(compare == 0)
+		for(int32_t i = 0; i < MY_ARRAY_SIZE(ZLX_ISA_mnemonics); ++i)	
 		{
-			overlap[found_operations++] = i;
+		
+		
+			int compare = strcmp(splits[p], ZLX_ISA_mnemonics[i].a__mnemonic);
+			if(compare == 0)
+			{
+				if(found_mnemonic == MAX_OVERLAPS)
+				{
+					//fix this, add more overlap capaacity 
+					MY_TODO;
+
+				}
+				overlap[p][found_mnemonic++] = i;
+			}
 		}
 	}
+	if(found_mnemonic == 0)
+	{
+		MY_FAULT("invalid operation");
+	}
+	else if(found_mnemonic == 1)
+	{
 
+	}
 	
-
-
 	ZLX_ISA_Instruction_t inst;
+	MY_TODO;
 
-
-
+	#undef MAX_OVERLAPS
 	return inst;
 }
 
 
+ZLX_ISA_Instruction_t ZLX_ISA_55_minor(ZLX_ISA_Statement_t statement, int32_t index)
+{
+	ZLX_ISA_Mnemonic_t mnemonic = ZLX_ISA_mnemonics[index];
+	
+	ZLX_ISA_Instruction_t instruction = {0};
+
+	if(statement.arguments_count != 2)
+	{
+		MY_FAULT("2 form minors must have 2 arguments");
+	}
+	if(statement.pap__arguments[0]->type != ZLX_ISA_Argument_type_register)
+	{
+		MY_FAULT("argument 1 is not a source register");
+	}
+	if(statement.pap__arguments[1]->type != ZLX_ISA_Argument_type_register)
+	{
+
+		MY_FAULT("argument 2 is not a source register");
+	}
+
+	char *source1 = statement.pap__arguments[0]->up__string;
+	char *source2 = statement.pap__arguments[1]->up__string;
+
+	ZLX_ISA_Register_identifier_t r1 = ZLX_ISA_get_register_number(source1);
+	ZLX_ISA_Register_identifier_t r2 = ZLX_ISA_get_register_number(source2);
+
+
+	instruction.size = 1;
+	instruction.type = ZLX_ISA_Minor_type; 
+	instruction.u__minor.type = ZLX_ISA_Minor_format_type_55;
+	instruction.u__minor.operation = ZLX_ISA_mnemonics[index].opcode;
+	instruction.u__minor.u__format_55.a5 = r1;
+	instruction.u__minor.u__format_55.b5 = r2;
+	return instruction;
+}

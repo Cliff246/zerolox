@@ -1,7 +1,63 @@
 #include "ISA_zerolox.h"
+#include "MY_commons.h"
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
+
+
+char *ZLX_ISA_Register_string[] = 
+{
+	[ZLX_ISA_Register_identifier_zero]= "z0",
+	[ZLX_ISA_Register_identifier_accumulator] = "ac",
+	[ZLX_ISA_Register_identifier_stack_pointer] = "sp",
+	[ZLX_ISA_Register_identifier_return_pointer] = "rp",
+	[ZLX_ISA_Register_identifier_iterator_x] = "ix",
+	[ZLX_ISA_Register_identifier_iterator_y] = "iy",
+	[ZLX_ISA_Register_identifier_counter_x] = "cx",
+	[ZLX_ISA_Register_identifier_counter_y] = "cy",
+	[ZLX_ISA_Register_identifier_temporary_0] = "t0",
+	[ZLX_ISA_Register_identifier_temporary_1] = "t1",
+	[ZLX_ISA_Register_identifier_temporary_2] = "t2",
+	[ZLX_ISA_Register_identifier_temporary_3] = "t3",
+	[ZLX_ISA_Register_identifier_temporary_4] = "t4",
+	[ZLX_ISA_Register_identifier_temporary_5] = "t5",
+	[ZLX_ISA_Register_identifier_saved_0] = "s0",
+	[ZLX_ISA_Register_identifier_saved_1] = "s1",
+	[ZLX_ISA_Register_identifier_saved_2] = "s2",
+	[ZLX_ISA_Register_identifier_saved_3] = "s3",
+	[ZLX_ISA_Register_identifier_saved_4] = "s4",
+	[ZLX_ISA_Register_identifier_saved_5] = "s5",
+	[ZLX_ISA_Register_identifier_saved_6] = "s6",
+	[ZLX_ISA_Register_identifier_saved_7] = "s7",
+	[ZLX_ISA_Register_identifier_saved_8] = "s8",
+	[ZLX_ISA_Register_identifier_saved_9] = "s9",
+	[ZLX_ISA_Register_identifier_argument_0] = "a0",
+	[ZLX_ISA_Register_identifier_argument_1] = "a1",
+	[ZLX_ISA_Register_identifier_argument_2] = "a2",
+	[ZLX_ISA_Register_identifier_argument_3] = "a3",
+	[ZLX_ISA_Register_identifier_argument_4] = "a4",
+	[ZLX_ISA_Register_identifier_argument_5] = "a5",
+	[ZLX_ISA_Register_identifier_argument_6] = "a6",
+	[ZLX_ISA_Register_identifier_argument_7] = "a7",
+
+};
+
+ZLX_ISA_Register_identifier_t ZLX_ISA_get_register_number(char *string)
+{
+	int found = -1;
+	for(int i = 0; i < 32; ++i)
+	{
+		if(strcmp(string, ZLX_ISA_Register_string[i]) == 0)
+		{
+			found = i;
+			break;
+		}
+	}
+	if(found == -1)
+		MY_FAULT("string is not a register");
+	return (ZLX_ISA_Register_identifier_t) found;
+}
 
 ZLX_ISA_Minor_format_type_t ZLX_ISA_Minor_operation_formats[] = 
 {
