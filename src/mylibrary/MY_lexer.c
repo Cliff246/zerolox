@@ -277,7 +277,7 @@ void MY_lex(MY_lexer_t *_lexer)
 
 		else if(isalpha((unsigned char)current) || current == '_')
 		{
-			has_character_ctype_or_string(_lexer, isalnum, "_");
+			has_character_ctype_or_string(_lexer, isalnum, "_+-");
 
 			add_token_start_word(_lexer, MY_TOKEN_WORD, start);
 		}

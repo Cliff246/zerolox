@@ -15,3 +15,8 @@ target_include_directories(ZLX_commons
 	${CMAKE_CURRENT_SOURCE_DIR}/
 )
 
+
+target_link_libraries(ZLX_commons
+
+	MY_library
+)
