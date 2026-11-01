@@ -15,6 +15,11 @@ void MY_fault(char *message, char *file, int32_t line);
 #define MY_FAULT(X) { MY_fault(X, __FILE__, __LINE__); } 
 
 
+#define MY_SET_BIT(n, k) (n | (1 << (k - 1)))
+#define MY_CLR_BIT(n, k) (n & (~(1 << (k - 1))))
+#define MY_GET_BIT(n, k) ((n >> k) & 1)
+#define MY_ARRAY_SIZE(ary) sizeof(ary)/sizeof(*ary)
+
 uint64_t MY_cap_to_bytes(int64_t data, uint8_t bytes);
 int32_t MY_sign_extend32(uint32_t imm, uint8_t bits);
 
