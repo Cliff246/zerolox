@@ -1469,43 +1469,29 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output, int i
 	
 	if(output.use_destination == true)
 	{
-		bool use_d1 = false, use_d2 = false, use_d3 = false;
+		if(output.use_destination_1 && output.use_destination_2 &&
+		   output.destination_1 == output.destination_2 && output.destination_1 != ZLX_ISA_Register_identifier_zero)
+			MY_FAULT("cannot have w1 == w2");
+		if(output.use_destination_1 && output.use_destination_3 &&
+		   output.destination_1 == output.destination_3 && output.destination_1 != ZLX_ISA_Register_identifier_zero)
+			MY_FAULT("cannot have w3 == w1");
+		if(output.use_destination_2 && output.use_destination_3 &&
+		   output.destination_2 == output.destination_3 && output.destination_2 != ZLX_ISA_Register_identifier_zero)
+			MY_FAULT("cannot have w3 == w2");
+
 		if(output.use_destination_1 == true)
 		{
-			use_d1 = true;
 			ZLX_EMU_set_regiser__CPU(cpu, output.destination_1, output.destination_1_data);
 		}
 
 		if(output.use_destination_2 == true)
 		{
-			use_d2 = true;
-
 			ZLX_EMU_set_regiser__CPU(cpu, output.destination_2, output.destination_2_data);
 		}
 		if(output.use_destination_3 == true)
 		{
-			use_d3 = true;
-
-			ZLX_EMU_set_regiser__CPU(cpu, output.destination_2, output.destination_3_data);
-		
-		}		
-		if(use_d1 == use_d2 || use_d3 == use_d1 || use_d3 == use_d2)
-		{
-			if(output.destination_1 == output.destination_2 && output.destination_1 != ZLX_ISA_Register_identifier_zero)
-			{
-				MY_FAULT("cannot have w1 == w2");
-			}
-			if(output.destination_3 == output.destination_1 && output.destination_1 != ZLX_ISA_Register_identifier_zero)
-			{
-
-				MY_FAULT("cannot have w3 == w1");
-			}
-			if(output.destination_3 == output.destination_2 && output.destination_2 != ZLX_ISA_Register_identifier_zero)
-			{
-
-				MY_FAULT("cannot have w3 == w2");
-			}
-		}	
+			ZLX_EMU_set_regiser__CPU(cpu, output.destination_3, output.destination_3_data);
+		}
 	}
 
 	if(output.pc_changed == true)
