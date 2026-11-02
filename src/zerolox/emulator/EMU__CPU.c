@@ -1353,9 +1353,9 @@ OPERATION(major_callp)
 	output.pc_value = dest;
 
 	output.use_destination = true;
-	output.use_destination_1 = true;
-	output.destination_1 = ZLX_ISA_Register_identifier_return_pointer ;
-	output.destination_1_data = pc +  paramaters.instruction_size * 2;
+	output.use_destination_2 = true;
+	output.destination_2 = ZLX_ISA_Register_identifier_return_pointer ;
+	output.destination_2_data = pc +  paramaters.instruction_size * 2;
 
 	
 	uint32_t stack_change = data_2 - 3;
