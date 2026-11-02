@@ -1326,10 +1326,17 @@ OPERATION(major_return)
 	OPERATION_SETUP;
 
 	uint32_t rp = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_return_pointer);	
-	
+		
 	output.pc_set_or_add = false;	
 	output.pc_changed = true;
 	output.pc_value = rp;
+
+	uint32_t data = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	output.use_destination = true;
+	output.use_destination_1 = true;
+	output.destination_1 = paramaters.source_1;
+	output.destination_1_data = data;
+
 
 	
 	return output;
@@ -1405,13 +1412,20 @@ OPERATION(major_returnp)
 	output.destination_1 = ZLX_ISA_Register_identifier_stack_pointer; 
 	output.destination_1_data = data_1 + 3;
 	
+
+	uint32_t data = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_Register_identifier_accumulator);
+	output.use_destination_3 = true;
+	output.destination_3 = paramaters.source_1;
+	output.destination_3_data = data;
+
+
+
 	output.destination_2 = ZLX_ISA_Register_identifier_return_pointer; 
 	output.destination_2_data = load;
 
 	return output;
 
 	
-	return output;
 
 
 }
@@ -1455,7 +1469,7 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output, int i
 	
 	if(output.use_destination == true)
 	{
-		bool use_d1 = false, use_d2 = false;
+		bool use_d1 = false, use_d2 = false, use_d3 = false;
 		if(output.use_destination_1 == true)
 		{
 			use_d1 = true;
@@ -1468,12 +1482,28 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output, int i
 
 			ZLX_EMU_set_regiser__CPU(cpu, output.destination_2, output.destination_2_data);
 		}
+		if(output.use_destination_3 == true)
+		{
+			use_d3 = true;
+
+			ZLX_EMU_set_regiser__CPU(cpu, output.destination_2, output.destination_3_data);
 		
-		if(use_d1 == use_d2)
+		}		
+		if(use_d1 == use_d2 || use_d3 == use_d1 || use_d3 == use_d2)
 		{
 			if(output.destination_1 == output.destination_2 && output.destination_1 != ZLX_ISA_Register_identifier_zero)
 			{
 				MY_FAULT("cannot have w1 == w2");
+			}
+			if(output.destination_3 == output.destination_1 && output.destination_1 != ZLX_ISA_Register_identifier_zero)
+			{
+
+				MY_FAULT("cannot have w3 == w1");
+			}
+			if(output.destination_3 == output.destination_2 && output.destination_2 != ZLX_ISA_Register_identifier_zero)
+			{
+
+				MY_FAULT("cannot have w3 == w2");
 			}
 		}	
 	}

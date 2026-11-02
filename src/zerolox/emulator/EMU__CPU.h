@@ -54,12 +54,15 @@ typedef struct ZLX_EMU__CPU_output
 	bool use_destination;
 	bool use_destination_1;
 	bool use_destination_2;
+	bool use_destination_3;
 
 	uint8_t destination_1;
 	uint8_t destination_2;
+	uint8_t destination_3;
 
 	uint32_t destination_1_data;	
 	uint32_t destination_2_data;	
+	uint32_t destination_3_data;	
 
 	
 	bool pc_changed;
