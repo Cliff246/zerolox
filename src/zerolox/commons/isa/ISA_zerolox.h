@@ -201,7 +201,10 @@ typedef enum ZLX_ISA_Major_operation
 	ZLX_ISA_Major_operation_call,
 	ZLX_ISA_Major_operation_ret,
 
+	ZLX_ISA_Major_operation_callp,
 
+	ZLX_ISA_Major_operation_retp,
+	
 }ZLX_ISA_Major_operation_t;
 /*
  *add
