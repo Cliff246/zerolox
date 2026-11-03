@@ -34,4 +34,22 @@ class DesignCases(unittest.TestCase):
         _, symbols = link(assemble('!db "A\\xff"\nend:'))
         self.assertEqual(symbols['end']['value'], 3)
 
+    def test_memory_forms_and_forward_data(self):
+        source = ('ld.16 t0, [ac, 2s]\n'
+                  'st.16 ac, [t0, 2s]\n'
+                  'st.16 t0, [ac, 2s]\n'
+                  'st.16 t0, [t1, -1]\n'
+                  '!dw &end\nend:\n')
+        listing, symbols = link(assemble(source))
+        self.assertEqual([x[2] for x in listing],
+                         ['m.ald.16', 'm.sta.16', 'm.ast.16', 'n.st.16'])
+        self.assertEqual(symbols['end']['value'], 14)
+
+    def test_example_program(self):
+        from pathlib import Path
+        source = Path(__file__).with_name('program.zlx').read_text()
+        listing, symbols = link(assemble(source))
+        self.assertGreater(len(listing), 10)
+        self.assertEqual(symbols['values']['value'] % 4, 0)
+
 if __name__ == '__main__': unittest.main()

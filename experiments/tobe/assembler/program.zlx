@@ -1,0 +1,40 @@
+; A syntax exercise, not a runnable program or a proposed ABI.
+; The register names and control flow are only here to make the file realistic.
+
+ENTRY_COUNT = 4
+ENTRY_BYTES = 1w
+TOTAL_BYTES = $ENTRY_COUNT * $ENTRY_BYTES
+DEVICE_OFFSET = 3s
+
+%align 4
+entry:
+    mv t0, a0
+    mv t1, a1
+    add ac, t0, t1
+    add t2, ac, t1
+    add t3, t0, t1
+
+    ; Accumulator as destination, source, and memory base.
+    ld.16 ac, [t0, $DEVICE_OFFSET]
+    ld.16 t2, [ac, 2s]
+    st.16 ac, [t0, 2s]
+    st.16 t2, [ac, 2s]
+    ld.32 t3, [t0, -8]
+    st.32 t3, [t0, 3]
+
+check:
+    beqz #done
+    bnez #check
+    b #done
+
+%align 4
+values:
+    !dw { 0b1010, $TOTAL_BYTES, &message, &done }
+message:
+    !db "hello, zerolox\n"
+    !db { 'O', 'K', 0 }
+
+%align 2
+done:
+    mv a0, ac
+    b #done
