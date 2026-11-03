@@ -1,5 +1,6 @@
 """Experimental flat-image encoding, matching the current C decoder."""
 import ast
+import extra
 from linker import link
 from model import Error, mnemonic
 from syntax import split_args
@@ -15,6 +16,9 @@ def parcel(value):
 
 def encode(rec, chosen, symbols, pc):
     args=rec['args']; op=mnemonic(rec); base=chosen.rsplit('.',1)[0]
+    if op in extra.names():
+        form,fields=extra.parse(op,args,symbols,pc)
+        return extra.encode(form,fields)
     if chosen in ('m.mv','m.add','m.adda','m.sub'):
         if op in ('add','n.add','sub','n.sub'):
             d,a,b=map(reg,args)

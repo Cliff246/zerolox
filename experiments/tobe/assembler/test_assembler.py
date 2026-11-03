@@ -81,6 +81,11 @@ class DesignCases(unittest.TestCase):
             ('m.geta 80\nm.get8 t1, 42\nst.8 t1, [ac, 2]\nld.8 t2, [ac, 2]\n', 4, {10:42}),
             ('m.get8 t0, 12\nm.get8 t1, 5\nsub ac, t0, t1\nsub t2, t0, t1\nxor t3, t0, t1\nand t4, t0, t1\nor t5, t0, t1\n', 7, {1:7,10:7,11:9,12:4,13:13}),
             ('m.get8 t0, 12\nm.get8 t1, 2\nsll t2, t0, t1\nsrl t3, t0, t1\nsra t4, t0, t1\n', 5, {10:48,11:3,12:3}),
+            ('n.get32 t0, 0x12345678\nn.get16 t1, 65535\naddi t2, t1, -2\ninc t2\ndec t2\n', 5, {8:0x12345678,9:65535,10:65533}),
+            ('m.get8 t0, 12\nslli t1, t0, 2\nsrli t2, t0, 1\nxori t3, t0, 3\nori t4, t0, 3\nandi t5, t0, 3\n', 6, {9:48,10:6,11:15,12:15,13:0}),
+            ('m.get8 t0, 5\nm.get8 t1, 5\nbeq t0, t1, #target\nm.geta 99\ntarget:\nm.geta 7\n', 4, {1:7}),
+            ('m.get8 t0, 90\nmv sp, t0\nm.get8 t1, 77\npush.8 t1\npop.8 t2\n', 5, {2:90,10:77}),
+            ('m.get8 t0, 80\nm.geta 41\nm.stplus.8 t0, 1\nm.geta 42\nm.stplus.8 t0, 1\nm.get8 t0, 80\nm.ldplus.8 t0, 1\n', 7, {1:41,8:81}),
         ]
         with tempfile.TemporaryDirectory() as directory:
             image_path=Path(directory)/'image.bin'
@@ -90,5 +95,22 @@ class DesignCases(unittest.TestCase):
                     result=subprocess.run([emulator,str(image_path),str(steps)],check=True,capture_output=True,text=True)
                     registers=dict(line.split('=',1) for line in result.stdout.splitlines() if line.startswith('r'))
                     for register,value in expected.items(): self.assertEqual(int(registers[f'r{register}']),value)
+
+    def test_all_extra_forms_encode(self):
+        import extra
+        samples={
+            'get16':'t0, 42', 'get32':'t0, 42', 'addi':'t0, t1, -1',
+            **{x:'t0, t1, 1' for x in extra.IMM},
+            **{x:'t0, t1, 2' for x in extra.BRANCH},
+            **{x:'t0' for x in extra.ONE},
+            **{'m.'+x+'.'+w:'0' for x in ('ldsa','stsa') for w in extra.WIDTH},
+            **{'m.'+x+'.'+w:'t0, 1' for x in ('ldplus','stplus') for w in extra.WIDTH},
+            'm.bieqc':'0, 2','m.bteqa':'t0, 2','m.btneqa':'t0, 2',
+        }
+        for op in sorted(extra.names()):
+            args=samples.get(op, samples.get(op.removeprefix('n.')))
+            with self.subTest(op=op):
+                self.assertIsNotNone(args)
+                self.assertGreaterEqual(len(build_image(assemble(op+' '+args))),2)
 
 if __name__ == '__main__': unittest.main()
