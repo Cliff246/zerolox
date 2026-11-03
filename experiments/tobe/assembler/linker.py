@@ -6,6 +6,16 @@ from values import expr, reg, data_size
 
 def select(rec,symbols,pc):
     op,args=rec['op'],rec['args']
+    if op=='m.geta':
+        if len(args)!=1: raise Error('m.geta requires one immediate')
+        value=expr(args[0],symbols,pc)
+        if not -512<=value<=511: raise Error('m.geta immediate outside -512..511')
+        return op,2
+    if op=='m.get8':
+        if len(args)!=2 or reg(args[0]) not in range(8,12): raise Error('m.get8 requires t0..t3 and an immediate')
+        value=expr(args[1],symbols,pc)
+        if not 0<=value<=255: raise Error('m.get8 immediate outside 0..255')
+        return op,2
     if op in ('mv', 'm.mv'):
         if len(args)!=2: raise Error(f'{op} requires two registers')
         list(map(reg,args)); return 'm.mv',2

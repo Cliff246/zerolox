@@ -57,7 +57,7 @@ def assemble(source, filename='<input>'):
                 elif op in ('@jumpto','%align'):
                     if len(args)!=1: raise Error(f'{op} requires one value')
                     rec.update(kind=op[1:],value=args[0])
-                elif op in ('add','m.add','m.adda','n.add','mv','m.mv','b','m.b','beqz','bnez','m.baeqz','m.baneqz') or re.fullmatch(r'(?:m\.(?:lda|ald|sta|ast)|n\.(?:ld|st)|ld|st)\.(?:8|16|32|p)',op):
+                elif op in ('add','m.add','m.adda','n.add','mv','m.mv','m.geta','m.get8','b','m.b','beqz','bnez','m.baeqz','m.baneqz') or re.fullmatch(r'(?:m\.(?:lda|ald|sta|ast)|n\.(?:ld|st)|ld|st)\.(?:8|16|32|p)',op):
                     rec.update(kind='instruction',op=op,args=args)
                 else: raise Error(f'unknown operation {op}')
             records.append(rec)
