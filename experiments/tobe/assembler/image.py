@@ -1,11 +1,11 @@
 """Experimental flat-image encoding, matching the current C decoder."""
 import ast
 from linker import link
-from model import Error
+from model import Error, mnemonic
 from syntax import split_args
 from values import expr, reg, data_size
 
-MINOR = {'m.mv':0, 'm.add':1, 'm.adda':2, 'm.geta':4, 'm.get8':5,
+MINOR = {'m.mv':0, 'm.add':1, 'm.adda':2, 'm.sub':3, 'm.geta':4, 'm.get8':5,
          'm.b':6, 'm.baeqz':7, 'm.baneqz':8,
          'm.lda':9, 'm.ald':10, 'm.sta':11, 'm.ast':12}
 WIDTH = {'8':0, '16':1, '32':2, 'p':3}
@@ -14,11 +14,11 @@ def parcel(value):
     return value.to_bytes(2,'little')
 
 def encode(rec, chosen, symbols, pc):
-    args=rec['args']; op=rec['op']; base=chosen.rsplit('.',1)[0]
-    if chosen in ('m.mv','m.add','m.adda'):
-        if op in ('add','n.add'):
+    args=rec['args']; op=mnemonic(rec); base=chosen.rsplit('.',1)[0]
+    if chosen in ('m.mv','m.add','m.adda','m.sub'):
+        if op in ('add','n.add','sub','n.sub'):
             d,a,b=map(reg,args)
-            a,b=(a,b) if chosen=='m.add' else (d,b)
+            a,b=(a,b) if chosen in ('m.add','m.sub') else (d,b)
         else: a,b=map(reg,args)
         return parcel((MINOR[chosen]<<11)|(a<<6)|(b<<1)|1)
     if chosen in ('m.geta','m.b','m.baeqz','m.baneqz'):
@@ -27,9 +27,10 @@ def encode(rec, chosen, symbols, pc):
         return parcel((MINOR[chosen]<<11)|((v & 1023)<<1)|1)
     if chosen=='m.get8':
         return parcel((MINOR[chosen]<<11)|((reg(args[0])-8)<<9)|(expr(args[1],symbols,pc)<<1)|1)
-    if chosen=='n.add':
+    if chosen in ('n.add','n.sub','n.sll','n.srl','n.sra','n.xor','n.or','n.and'):
         d,a,b=map(reg,args)
-        return parcel((12<<6)|(a<<1))+parcel((d<<6)|(b<<1))
+        selector={'n.add':0,'n.sub':1,'n.sll':2,'n.srl':3,'n.sra':4,'n.xor':5,'n.or':6,'n.and':7}[chosen]
+        return parcel((12<<6)|(a<<1))+parcel((selector<<11)|(d<<6)|(b<<1))
     if base in ('m.lda','m.ald','m.sta','m.ast','n.ld','n.st'):
         fields=split_args(args[-1][1:-1]); address=reg(fields[0]); offset=expr(fields[1],symbols,pc) if len(fields)==2 else 0
         width=chosen.rsplit('.',1)[1]; size={'8':1,'16':2,'32':4,'p':3}[width]

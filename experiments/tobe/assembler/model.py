@@ -9,3 +9,7 @@ REGISTERS.update({f'r{i}': i for i in range(32)})
 
 class Error(Exception): pass
 
+def mnemonic(record):
+    """Render the operation and explicit form constraint for selection."""
+    return (record['form'] + '.' if record['form'] else '') + record['operation'] + ('.' + record['width'] if record['width'] else '')
+

@@ -1,11 +1,19 @@
 """Experimental instruction selection and iterative layout."""
 import re
-from model import Error
+from model import Error, mnemonic
 from syntax import split_args
 from values import expr, reg, data_size
 
 def select(rec,symbols,pc):
-    op,args=rec['op'],rec['args']
+    op,args=mnemonic(rec),rec['args']
+    if op in ('sub','m.sub','n.sub','sll','srl','sra','xor','or','and','n.sll','n.srl','n.sra','n.xor','n.or','n.and'):
+        if op=='m.sub':
+            if len(args)!=2: raise Error('m.sub requires two registers')
+            list(map(reg,args)); return op,2
+        if len(args)!=3: raise Error(f'{op} requires three registers')
+        d,a,b=map(reg,args)
+        if op=='sub' and d==1: return 'm.sub',2
+        return 'n.'+op.removeprefix('n.'),4
     if op=='m.geta':
         if len(args)!=1: raise Error('m.geta requires one immediate')
         value=expr(args[0],symbols,pc)
@@ -57,6 +65,8 @@ def select(rec,symbols,pc):
     return f"n.{'ld' if form in ('ld','n.ld') else 'st'}.{width}",4
 
 def link(obj):
+    if obj.get('format') != 'zerolox-experiment-2':
+        raise Error('unsupported experimental object format')
     records=obj['records']; sizes=[4 if r['kind']=='instruction' else 0 for r in records]; seen=set()
     for iteration in range(100):
         key=tuple(sizes)

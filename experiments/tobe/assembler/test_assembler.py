@@ -11,6 +11,13 @@ class DesignCases(unittest.TestCase):
         self.assertEqual(a, link(json.loads(json.dumps(obj))))
         self.assertEqual([x[2] for x in a[0]], ['m.add','m.adda','n.add','m.lda.16','n.ld.16','n.ld.32'])
 
+    def test_form_constraint_is_preserved(self):
+        records=assemble('add ac, t0, t1\nm.add t0, t1\nn.add ac, t0, t1')['records']
+        self.assertEqual([(r['operation'],r['form']) for r in records],
+                         [('add',None),('add','m'),('add','n')])
+        self.assertEqual([x[2] for x in link(assemble('add ac, t0, t1\nm.add t0, t1\nn.add ac, t0, t1'))[0]],
+                         ['m.add','m.add','n.add'])
+
     def test_strict_minor_and_types(self):
         for source in ('m.lda.16 [r8, 3]', 'X = r1 + 10\nld.8 ac, [r8, $X]', 'ld.8 ac, [r8, r9]'):
             with self.subTest(source=source), self.assertRaises(Error): link(assemble(source))
@@ -72,6 +79,8 @@ class DesignCases(unittest.TestCase):
             ('m.geta 0\nbeqz #target\nm.geta 99\ntarget:\nm.geta 7\n', 3, {1:7}),
             ('m.get8 t0, 80\nm.get8 t1, 77\nst.8 t1, [t0, -1]\nld.8 ac, [t0, -1]\n', 4, {1:77}),
             ('m.geta 80\nm.get8 t1, 42\nst.8 t1, [ac, 2]\nld.8 t2, [ac, 2]\n', 4, {10:42}),
+            ('m.get8 t0, 12\nm.get8 t1, 5\nsub ac, t0, t1\nsub t2, t0, t1\nxor t3, t0, t1\nand t4, t0, t1\nor t5, t0, t1\n', 7, {1:7,10:7,11:9,12:4,13:13}),
+            ('m.get8 t0, 12\nm.get8 t1, 2\nsll t2, t0, t1\nsrl t3, t0, t1\nsra t4, t0, t1\n', 5, {10:48,11:3,12:3}),
         ]
         with tempfile.TemporaryDirectory() as directory:
             image_path=Path(directory)/'image.bin'
