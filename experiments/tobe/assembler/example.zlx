@@ -1,0 +1,15 @@
+; Illustrative zerolox syntax. rN is a prototype physical-register alias.
+!eq COUNT, 3
+
+start:
+    add ac, r8, r9
+    add r8, ac, r9
+    add r8, r9, r10
+    ld.16 ac, [r8, 3s]
+    ld.16 ac, [r8, 3]
+    ld.32 ac, [r8, -8]
+    ld.p ac, [r8, $COUNT * 1p]
+    b #start
+
+message:
+    !db "hello", 0
