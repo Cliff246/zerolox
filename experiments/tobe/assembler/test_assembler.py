@@ -11,16 +11,27 @@ class DesignCases(unittest.TestCase):
         self.assertEqual([x[2] for x in a[0]], ['m.add','m.adda','n.add','m.lda.16','n.ld.16','n.ld.32'])
 
     def test_strict_minor_and_types(self):
-        for source in ('m.lda.16 [r8, 3]', '!eq X, r1 + 10\nld.8 ac, [r8, $X]', 'ld.8 ac, [r8, r9]'):
+        for source in ('m.lda.16 [r8, 3]', 'X = r1 + 10\nld.8 ac, [r8, $X]', 'ld.8 ac, [r8, r9]'):
             with self.subTest(source=source), self.assertRaises(Error): link(assemble(source))
 
     def test_bytes_and_branch(self):
-        listing, symbols = link(assemble('start:\nb #start\n!db "hi", 0\nend:\n'))
+        listing, symbols = link(assemble('start:\nb #start\n!db "hi"\nend:\n'))
         self.assertEqual(listing[0][:3], (0,2,'m.b'))
         self.assertEqual(symbols['end']['value'], 5)
 
     def test_odd_instruction_rejected(self):
         with self.assertRaisesRegex(Error, 'odd byte index'):
             link(assemble('!db 1\nadd ac, r8, r9'))
+
+    def test_data_and_alignment(self):
+        _, symbols = link(assemble('COUNT = 3\n!db { 65, 66, 0 }\n%align 4\nword:\n!dw { 0b1010, $COUNT * 10 + 5 }\nend:\n'))
+        self.assertEqual(symbols['word']['value'], 4)
+        self.assertEqual(symbols['end']['value'], 12)
+
+    def test_string_rules(self):
+        for source in ('!dw "hello"', '!db "é"', '!db 256', '!dw 4294967296', '!db u8"hi"'):
+            with self.subTest(source=source), self.assertRaises(Error): link(assemble(source))
+        _, symbols = link(assemble('!db "A\\xff"\nend:'))
+        self.assertEqual(symbols['end']['value'], 3)
 
 if __name__ == '__main__': unittest.main()

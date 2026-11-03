@@ -24,8 +24,8 @@ def split_args(s):
             elif c == '\\': escape = True
             elif c == quote: quote = None
         elif c in "'\"": quote = c
-        elif c in '([': depth += 1
-        elif c in ')]':
+        elif c in '([{': depth += 1
+        elif c in ')]}':
             depth -= 1
             if depth < 0: raise Error('unmatched closing bracket')
         elif c == ',' and depth == 0:
@@ -87,18 +87,18 @@ def assemble(source, filename='<input>'):
                 name=line[:-1]
                 if name.lower() in REGISTERS or name in names: raise Error(f'duplicate or reserved symbol {name}')
                 names.add(name); rec.update(kind='label',name=name)
+            elif (definition := re.fullmatch(r'([A-Za-z_][A-Za-z_0-9]*)\s*=\s*(.+)', line)):
+                name, value = definition.groups()
+                if name.lower() in REGISTERS or name in names: raise Error(f'duplicate or reserved symbol {name}')
+                names.add(name); rec.update(kind='constant',name=name,value=value)
             else:
-                op, _, tail = line.partition(' ')
+                pieces = line.split(None, 1)
+                op, tail = pieces[0], pieces[1] if len(pieces) == 2 else ''
                 op=op.lower(); args=split_args(tail.strip())
-                if op == '!eq':
-                    if len(args)!=2 or not re.fullmatch(r'[A-Za-z_][A-Za-z_0-9]*',args[0]): raise Error('expected !eq NAME, expression')
-                    name=args[0]
-                    if name.lower() in REGISTERS or name in names: raise Error(f'duplicate or reserved symbol {name}')
-                    names.add(name); rec.update(kind='constant',name=name,value=args[1])
-                elif op == '!db':
-                    if not args: raise Error('!db requires data')
-                    rec.update(kind='data',args=args)
-                elif op in ('@jumpto','@align'):
+                if op in ('!db', '!dw'):
+                    if not args: raise Error(f'{op} requires data')
+                    rec.update(kind='data',width=1 if op=='!db' else 4,args=args)
+                elif op in ('@jumpto','%align'):
                     if len(args)!=1: raise Error(f'{op} requires one value')
                     rec.update(kind=op[1:],value=args[0])
                 elif op in ('add','m.add','m.adda','n.add','b','m.b') or re.fullmatch(r'(?:m\.lda|n\.ld|ld)\.(?:8|16|32|p)',op):
@@ -113,20 +113,31 @@ def reg(s):
     try: return REGISTERS[s.lower()]
     except KeyError: raise Error(f'expected register, got {s}') from None
 
-def data_bytes(args,symbols,here):
-    result=[]
-    for arg in args:
-        if arg.startswith(('"',"'")):
+def data_size(args, width, symbols, here):
+    """Validate data and return its size; multi-byte endianness is not decided."""
+    def item(arg):
+        if arg.startswith('{') and arg.endswith('}'):
+            members=split_args(arg[1:-1])
+            if not members: raise Error('empty data list')
+            return sum(item(member) for member in members)
+        if arg.startswith(('"', "'")):
             try: value=ast.literal_eval(arg)
-            except (SyntaxError,ValueError): raise Error('invalid string literal') from None
-            if not isinstance(value,str): raise Error('expected string')
-            try: result.extend(value.encode('ascii'))
-            except UnicodeEncodeError: raise Error('prototype strings must be ASCII') from None
-        else:
-            v=expr(arg,symbols,here)
-            if not 0 <= v <= 255: raise Error(f'byte value {v} outside 0..255')
-            result.append(v)
-    return bytes(result)
+            except (SyntaxError,ValueError): raise Error('invalid character or string literal') from None
+            if not isinstance(value,str): raise Error('expected character or string')
+            if arg[0]=="'":
+                if len(value)!=1 or ord(value)>255: raise Error('character literal must be one byte')
+                return width
+            if width!=1: raise Error('byte string requires !db')
+            if any(ord(c)>255 for c in value): raise Error('byte string contains a non-byte character')
+            # Unescaped non-ASCII text is rejected; byte escapes such as \xff are allowed.
+            if any(ord(c)>127 for c in arg): raise Error('plain strings require ASCII text or byte escapes')
+            return len(value)+1
+        if arg.startswith(('u8"','u16"','u32"')):
+            raise Error('Unicode string encoding is not specified in this prototype')
+        v=expr(arg,symbols,here)
+        if not 0 <= v < (1 << (8*width)): raise Error(f'value {v} outside unsigned {width*8}-bit range')
+        return width
+    return sum(item(arg) for arg in args)
 
 def select(rec,symbols,pc):
     op,args=rec['op'],rec['args']
@@ -176,7 +187,7 @@ def link(obj):
             try:
                 if kind=='label': symbols[r['name']]={'kind':'label','value':pc}
                 elif kind=='instruction': pc+=sizes[i]
-                elif kind=='data': pc+=len(data_bytes(r['args'],symbols,pc))
+                elif kind=='data': pc+=data_size(r['args'],r['width'],symbols,pc)
                 elif kind=='align':
                     n=expr(r['value'],symbols,pc)
                     if n<=0: raise Error('alignment must be positive')
