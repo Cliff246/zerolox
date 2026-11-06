@@ -11,13 +11,15 @@
 //TODO
 void ZLX_SYTX_free_Argument(ZLX_SYTX_Argument_t *argument)
 {
-	MY_TODO;
+	if(!argument)
+		return;
+	// Text payload ownership is not defined yet; do not free up__string here.
 	free(argument);
 }
 
 ZLX_SYTX_Statement_t *ZLX_SYTX_init_Statement(void)
 {
-	ZLX_SYTX_Statement_t *statement = malloc(sizeof(ZLX_SYTX_Statement_t));
+	ZLX_SYTX_Statement_t *statement = calloc(1, sizeof(*statement));
 	if(!statement)
 		MY_FAULT("malloc failed");
 
@@ -138,7 +140,7 @@ ZLX_PSUDO_Operation_t ZLX_SYTX_decode_syntax(ZLX_SYTX_Statement_t statement)
 }
 
 
-ZLX_PSUDO_Operation_t ZLX_SYTX_55_minor(ZLX_SYTX_Statement_t statement, int32_t index)
+ZLX_PSUDO_Operation_t ZLX_SYTX_2_registers_minor(ZLX_SYTX_Statement_t statement, int32_t index)
 {
 
 	ZLX_SYTX_Mnemonic_t mnemonic = ZLX_SYTX_mnemonics[index];
