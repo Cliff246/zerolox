@@ -2,8 +2,8 @@
 #define ZLX_SYTX_SYNTAX_HEADER
 
 #include "isa/ISA_zerolox.h"
-#include "pseudo/PSUDO_operation.h"
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 
@@ -66,9 +66,6 @@ typedef struct ZLX_SYTX_Mnemonic
 
 extern ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[];
 
-ZLX_PSUDO_Operation_t ZLX_SYTX_decode_syntax(ZLX_SYTX_Statement_t statement);
-
-//this is not really done yet but still
-ZLX_PSUDO_Operation_t ZLX_SYTX_2_registers_minor(ZLX_SYTX_Statement_t statement, int32_t index);
+extern const size_t ZLX_SYTX_mnemonics_count;
 
 #endif
