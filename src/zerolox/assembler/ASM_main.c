@@ -1,11 +1,22 @@
 #include <stdint.h>
 #include "MY_commons.h"
+#include "ASM_assembler.h"
+
+const char *my_bitchass_const_path = "asm.asm";
 
 int32_t main(int32_t argc, char *argv[])
 {
-	
 
-	MY_TODO;	
+	
+	
+	ZLX_ASM_Assembler_t *assembler = ZLX_ASM_init_Assembler();
+
+	if(!ZLX_ASM_load_file_Assembler(assembler, my_bitchass_const_path))
+	{
+		MY_FAULT("failed to load file");
+	}
+	
+	ZLX_ASM_lex_Assembler(assembler);
 
 	return 0;
 }
