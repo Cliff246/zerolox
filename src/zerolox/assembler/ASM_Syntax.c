@@ -5,7 +5,7 @@
 
 //this is not really done yet but still
 
-ZLX_PSUDO_Operation_t ZLX_ASM_decode_syntax(ZLX_SYTX_Statement_t statement)
+ZLX_PSUDO_Operation_t ZLX_ASM_decode_syntax(ZLX_ASM_Statement_t statement)
 {
 	if(statement.a__mnemonic[ZLX_SYTX_MNEMONIC_SIZE - 1] != 0)
 	{
@@ -59,7 +59,7 @@ ZLX_PSUDO_Operation_t ZLX_ASM_decode_syntax(ZLX_SYTX_Statement_t statement)
 }
 
 
-ZLX_PSUDO_Operation_t ZLX_ASM_2_registers_minor(ZLX_SYTX_Statement_t statement, int32_t index)
+ZLX_PSUDO_Operation_t ZLX_ASM_2_registers_minor(ZLX_ASM_Statement_t statement, int32_t index)
 {
 
 	ZLX_ISA_Instruction_t instruction = {0};
@@ -68,11 +68,11 @@ ZLX_PSUDO_Operation_t ZLX_ASM_2_registers_minor(ZLX_SYTX_Statement_t statement, 
 	{
 		MY_FAULT("2 form minors must have 2 arguments");
 	}
-	if(statement.pap__arguments[0]->type != ZLX_SYTX_Argument_type_register)
+	if(statement.pap__arguments[0]->type != ZLX_ASM_Argument_type_register)
 	{
 		MY_FAULT("argument 1 is not a source register");
 	}
-	if(statement.pap__arguments[1]->type != ZLX_SYTX_Argument_type_register)
+	if(statement.pap__arguments[1]->type != ZLX_ASM_Argument_type_register)
 	{
 
 		MY_FAULT("argument 2 is not a source register");

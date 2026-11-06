@@ -7,55 +7,6 @@
 #include <string.h>
 
 
-//TODO
-void ZLX_SYTX_free_Argument(ZLX_SYTX_Argument_t *argument)
-{
-	if(!argument)
-		return;
-	// Text payload ownership is not defined yet; do not free up__string here.
-	free(argument);
-}
-
-ZLX_SYTX_Statement_t *ZLX_SYTX_init_Statement(void)
-{
-	ZLX_SYTX_Statement_t *statement = calloc(1, sizeof(*statement));
-	if(!statement)
-		MY_FAULT("malloc failed");
-
-
-
-
-
-	return statement;
-}
-
-
-void ZLX_SYTX_free_Statement(ZLX_SYTX_Statement_t *statement)
-{
-	if(!statement)
-	{
-		return;
-	}
-	if(statement->arguments_count > 0)
-	{
-		for(int i = 0; i < statement->arguments_count; ++i)
-		{
-			if(statement->pap__arguments)
-				ZLX_SYTX_free_Argument(statement->pap__arguments[i]);	
-		}
-	}
-	if(statement->pap__arguments != NULL)
-	{
-		free(statement->pap__arguments);
-	}	
-	free(statement);
-	return;
-}
-
-
-
-
-
 ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[] = 
 {
 	{.type = ZLX_ISA_Minor_type, .form = ZLX_SYTX_Pattern_form_2_register, .a__mnemonic = "mv", .opcode = ZLX_ISA_Minor_operation_move},
