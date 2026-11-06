@@ -69,6 +69,6 @@ extern ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[];
 ZLX_PSUDO_Operation_t ZLX_SYTX_decode_syntax(ZLX_SYTX_Statement_t statement);
 
 //this is not really done yet but still
-ZLX_PSUDO_Operation_t ZLX_SYTX_55_minor(ZLX_SYTX_Statement_t statement, int32_t index);
+ZLX_PSUDO_Operation_t ZLX_SYTX_2_registers_minor(ZLX_SYTX_Statement_t statement, int32_t index)
 
 #endif
