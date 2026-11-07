@@ -8,42 +8,42 @@
 
 char *ZLX_ISA_Register_string[] = 
 {
-	[ZLX_ISA_Register_identifier_zero]= "z0",
-	[ZLX_ISA_Register_identifier_accumulator] = "ac",
-	[ZLX_ISA_Register_identifier_stack_pointer] = "sp",
-	[ZLX_ISA_Register_identifier_return_pointer] = "rp",
-	[ZLX_ISA_Register_identifier_iterator_x] = "ix",
-	[ZLX_ISA_Register_identifier_iterator_y] = "iy",
-	[ZLX_ISA_Register_identifier_counter_x] = "cx",
-	[ZLX_ISA_Register_identifier_counter_y] = "cy",
-	[ZLX_ISA_Register_identifier_temporary_0] = "t0",
-	[ZLX_ISA_Register_identifier_temporary_1] = "t1",
-	[ZLX_ISA_Register_identifier_temporary_2] = "t2",
-	[ZLX_ISA_Register_identifier_temporary_3] = "t3",
-	[ZLX_ISA_Register_identifier_temporary_4] = "t4",
-	[ZLX_ISA_Register_identifier_temporary_5] = "t5",
-	[ZLX_ISA_Register_identifier_saved_0] = "s0",
-	[ZLX_ISA_Register_identifier_saved_1] = "s1",
-	[ZLX_ISA_Register_identifier_saved_2] = "s2",
-	[ZLX_ISA_Register_identifier_saved_3] = "s3",
-	[ZLX_ISA_Register_identifier_saved_4] = "s4",
-	[ZLX_ISA_Register_identifier_saved_5] = "s5",
-	[ZLX_ISA_Register_identifier_saved_6] = "s6",
-	[ZLX_ISA_Register_identifier_saved_7] = "s7",
-	[ZLX_ISA_Register_identifier_saved_8] = "s8",
-	[ZLX_ISA_Register_identifier_saved_9] = "s9",
-	[ZLX_ISA_Register_identifier_argument_0] = "a0",
-	[ZLX_ISA_Register_identifier_argument_1] = "a1",
-	[ZLX_ISA_Register_identifier_argument_2] = "a2",
-	[ZLX_ISA_Register_identifier_argument_3] = "a3",
-	[ZLX_ISA_Register_identifier_argument_4] = "a4",
-	[ZLX_ISA_Register_identifier_argument_5] = "a5",
-	[ZLX_ISA_Register_identifier_argument_6] = "a6",
-	[ZLX_ISA_Register_identifier_argument_7] = "a7",
+	[ZLX_ISA_register_identifier_zero]= "z0",
+	[ZLX_ISA_register_identifier_accumulator] = "ac",
+	[ZLX_ISA_register_identifier_stack_pointer] = "sp",
+	[ZLX_ISA_register_identifier_return_pointer] = "rp",
+	[ZLX_ISA_register_identifier_iterator_x] = "ix",
+	[ZLX_ISA_register_identifier_iterator_y] = "iy",
+	[ZLX_ISA_register_identifier_counter_x] = "cx",
+	[ZLX_ISA_register_identifier_counter_y] = "cy",
+	[ZLX_ISA_register_identifier_temporary_0] = "t0",
+	[ZLX_ISA_register_identifier_temporary_1] = "t1",
+	[ZLX_ISA_register_identifier_temporary_2] = "t2",
+	[ZLX_ISA_register_identifier_temporary_3] = "t3",
+	[ZLX_ISA_register_identifier_temporary_4] = "t4",
+	[ZLX_ISA_register_identifier_temporary_5] = "t5",
+	[ZLX_ISA_register_identifier_saved_0] = "s0",
+	[ZLX_ISA_register_identifier_saved_1] = "s1",
+	[ZLX_ISA_register_identifier_saved_2] = "s2",
+	[ZLX_ISA_register_identifier_saved_3] = "s3",
+	[ZLX_ISA_register_identifier_saved_4] = "s4",
+	[ZLX_ISA_register_identifier_saved_5] = "s5",
+	[ZLX_ISA_register_identifier_saved_6] = "s6",
+	[ZLX_ISA_register_identifier_saved_7] = "s7",
+	[ZLX_ISA_register_identifier_saved_8] = "s8",
+	[ZLX_ISA_register_identifier_saved_9] = "s9",
+	[ZLX_ISA_register_identifier_argument_0] = "a0",
+	[ZLX_ISA_register_identifier_argument_1] = "a1",
+	[ZLX_ISA_register_identifier_argument_2] = "a2",
+	[ZLX_ISA_register_identifier_argument_3] = "a3",
+	[ZLX_ISA_register_identifier_argument_4] = "a4",
+	[ZLX_ISA_register_identifier_argument_5] = "a5",
+	[ZLX_ISA_register_identifier_argument_6] = "a6",
+	[ZLX_ISA_register_identifier_argument_7] = "a7",
 
 };
 
-ZLX_ISA_Register_identifier_t ZLX_ISA_get_register_number(char *string)
+ZLX_ISA_register_identifier_t ZLX_ISA_get_register_number(char *string)
 {
 	int found = -1;
 	for(int i = 0; i < 32; ++i)
@@ -56,77 +56,77 @@ ZLX_ISA_Register_identifier_t ZLX_ISA_get_register_number(char *string)
 	}
 	if(found == -1)
 		MY_FAULT("string is not a register");
-	return (ZLX_ISA_Register_identifier_t) found;
+	return (ZLX_ISA_register_identifier_t) found;
 }
 
-ZLX_ISA_Minor_format_type_t ZLX_ISA_Minor_operation_formats[] = 
+ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[] = 
 {
-	[ZLX_ISA_Minor_operation_move] = ZLX_ISA_Minor_format_type_55,
-	[ZLX_ISA_Minor_operation_add] = ZLX_ISA_Minor_format_type_55,
-	[ZLX_ISA_Minor_operation_adda] = ZLX_ISA_Minor_format_type_55,
-	[ZLX_ISA_Minor_operation_sub] = ZLX_ISA_Minor_format_type_55,
-	[ZLX_ISA_Minor_operation_geta] = ZLX_ISA_Minor_format_type_a,
-	[ZLX_ISA_Minor_operation_get8] = ZLX_ISA_Minor_format_type_28, 
-	[ZLX_ISA_Minor_operation_b] = ZLX_ISA_Minor_format_type_a, 
-	[ZLX_ISA_Minor_operation_baeqz] = ZLX_ISA_Minor_format_type_a,
-	[ZLX_ISA_Minor_operation_baneqz] = ZLX_ISA_Minor_format_type_a,
-	[ZLX_ISA_Minor_operation_lda] = ZLX_ISA_Minor_format_type_235, 
-	[ZLX_ISA_Minor_operation_ald] = ZLX_ISA_Minor_format_type_235,
-	[ZLX_ISA_Minor_operation_sta] = ZLX_ISA_Minor_format_type_235,
-	[ZLX_ISA_Minor_operation_ast] = ZLX_ISA_Minor_format_type_235,
-	[ZLX_ISA_Minor_operation_ldsa] = ZLX_ISA_Minor_format_type_28,
-	[ZLX_ISA_Minor_operation_stsa] = ZLX_ISA_Minor_format_type_28,
-	[ZLX_ISA_Minor_operation_bieqc] = ZLX_ISA_Minor_format_type_28,
-	[ZLX_ISA_Minor_operation_ld_plus] = ZLX_ISA_Minor_format_type_235,
-	[ZLX_ISA_Minor_operation_st_plus] = ZLX_ISA_Minor_format_type_235,
-	[ZLX_ISA_Minor_operation_bteqa] = ZLX_ISA_Minor_format_type_28,
-	[ZLX_ISA_Minor_operation_btneqa] = ZLX_ISA_Minor_format_type_28,
+	[ZLX_ISA_minor_operation_move] = ZLX_ISA_minor_format_type_55,
+	[ZLX_ISA_minor_operation_add] = ZLX_ISA_minor_format_type_55,
+	[ZLX_ISA_minor_operation_adda] = ZLX_ISA_minor_format_type_55,
+	[ZLX_ISA_minor_operation_sub] = ZLX_ISA_minor_format_type_55,
+	[ZLX_ISA_minor_operation_geta] = ZLX_ISA_minor_format_type_a,
+	[ZLX_ISA_minor_operation_get8] = ZLX_ISA_minor_format_type_28, 
+	[ZLX_ISA_minor_operation_b] = ZLX_ISA_minor_format_type_a, 
+	[ZLX_ISA_minor_operation_baeqz] = ZLX_ISA_minor_format_type_a,
+	[ZLX_ISA_minor_operation_baneqz] = ZLX_ISA_minor_format_type_a,
+	[ZLX_ISA_minor_operation_lda] = ZLX_ISA_minor_format_type_235, 
+	[ZLX_ISA_minor_operation_ald] = ZLX_ISA_minor_format_type_235,
+	[ZLX_ISA_minor_operation_sta] = ZLX_ISA_minor_format_type_235,
+	[ZLX_ISA_minor_operation_ast] = ZLX_ISA_minor_format_type_235,
+	[ZLX_ISA_minor_operation_ldsa] = ZLX_ISA_minor_format_type_28,
+	[ZLX_ISA_minor_operation_stsa] = ZLX_ISA_minor_format_type_28,
+	[ZLX_ISA_minor_operation_bieqc] = ZLX_ISA_minor_format_type_28,
+	[ZLX_ISA_minor_operation_ld_plus] = ZLX_ISA_minor_format_type_235,
+	[ZLX_ISA_minor_operation_st_plus] = ZLX_ISA_minor_format_type_235,
+	[ZLX_ISA_minor_operation_bteqa] = ZLX_ISA_minor_format_type_28,
+	[ZLX_ISA_minor_operation_btneqa] = ZLX_ISA_minor_format_type_28,
 
 };
 
 
-ZLX_ISA_Major_format_type_t ZLX_ISA_Major_operation_formats[] = 
+ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[] = 
 {
-	[ZLX_ISA_Major_operation_ld] = ZLX_ISA_Major_format_type_5_952 ,
-	[ZLX_ISA_Major_operation_st] = ZLX_ISA_Major_format_type_5_952 ,
-	[ZLX_ISA_Major_operation_push8] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_push16] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_push32] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_pushp] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_pop8] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_pop16] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_pop32] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_popp] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_get16] = ZLX_ISA_Major_format_type_5_f,
-	[ZLX_ISA_Major_operation_get32] = ZLX_ISA_Major_format_type_5_f_f,
-	[ZLX_ISA_Major_operation_3form] = ZLX_ISA_Major_format_type_5_655,
-	[ZLX_ISA_Major_operation_3form_immediate] = ZLX_ISA_Major_format_type_5_655,
-	[ZLX_ISA_Major_operation_inc] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_dec] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_addi] = ZLX_ISA_Major_format_type_5_b5,
-	[ZLX_ISA_Major_operation_bneq] = ZLX_ISA_Major_format_type_5_b5,
-	[ZLX_ISA_Major_operation_beq] = ZLX_ISA_Major_format_type_5_b5,
-	[ZLX_ISA_Major_operation_blt] = ZLX_ISA_Major_format_type_5_b5,
-	[ZLX_ISA_Major_operation_bge] = ZLX_ISA_Major_format_type_5_b5,
-	[ZLX_ISA_Major_operation_bltu] = ZLX_ISA_Major_format_type_5_b5,
-	[ZLX_ISA_Major_operation_bgeu] = ZLX_ISA_Major_format_type_5_b5,
-	[ZLX_ISA_Major_operation_call] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_ret] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_callp] = ZLX_ISA_Major_format_type_5,
-	[ZLX_ISA_Major_operation_retp] = ZLX_ISA_Major_format_type_5,
+	[ZLX_ISA_major_operation_ld] = ZLX_ISA_major_format_type_5_952 ,
+	[ZLX_ISA_major_operation_st] = ZLX_ISA_major_format_type_5_952 ,
+	[ZLX_ISA_major_operation_push8] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_push16] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_push32] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_pushp] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_pop8] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_pop16] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_pop32] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_popp] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_get16] = ZLX_ISA_major_format_type_5_f,
+	[ZLX_ISA_major_operation_get32] = ZLX_ISA_major_format_type_5_f_f,
+	[ZLX_ISA_major_operation_3form] = ZLX_ISA_major_format_type_5_655,
+	[ZLX_ISA_major_operation_3form_immediate] = ZLX_ISA_major_format_type_5_655,
+	[ZLX_ISA_major_operation_inc] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_dec] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_addi] = ZLX_ISA_major_format_type_5_b5,
+	[ZLX_ISA_major_operation_bneq] = ZLX_ISA_major_format_type_5_b5,
+	[ZLX_ISA_major_operation_beq] = ZLX_ISA_major_format_type_5_b5,
+	[ZLX_ISA_major_operation_blt] = ZLX_ISA_major_format_type_5_b5,
+	[ZLX_ISA_major_operation_bge] = ZLX_ISA_major_format_type_5_b5,
+	[ZLX_ISA_major_operation_bltu] = ZLX_ISA_major_format_type_5_b5,
+	[ZLX_ISA_major_operation_bgeu] = ZLX_ISA_major_format_type_5_b5,
+	[ZLX_ISA_major_operation_call] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_ret] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_callp] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_retp] = ZLX_ISA_major_format_type_5,
 };
 
 uint8_t ZLX_ISA_Major_operation_size[] = 
 {
-	[ZLX_ISA_Major_format_type_5] = 1,
-	[ZLX_ISA_Major_format_type_5_5551] = 2,
-	[ZLX_ISA_Major_format_type_5_952] = 2,
-	[ZLX_ISA_Major_format_type_32] = 1,
-	[ZLX_ISA_Major_format_type_5_b5] = 2,
-	[ZLX_ISA_Major_format_type_5_f] = 2,
-	[ZLX_ISA_Major_format_type_5_f_f] = 3,
-	[ZLX_ISA_Major_format_type_5_655] = 2,
-	[ZLX_ISA_Major_format_type_5_53251] = 2
+	[ZLX_ISA_major_format_type_5] = 1,
+	[ZLX_ISA_major_format_type_5_5551] = 2,
+	[ZLX_ISA_major_format_type_5_952] = 2,
+	[ZLX_ISA_major_format_type_32] = 1,
+	[ZLX_ISA_major_format_type_5_b5] = 2,
+	[ZLX_ISA_major_format_type_5_f] = 2,
+	[ZLX_ISA_major_format_type_5_f_f] = 3,
+	[ZLX_ISA_major_format_type_5_655] = 2,
+	[ZLX_ISA_major_format_type_5_53251] = 2
 };
 
 
@@ -160,26 +160,26 @@ bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parc
 				return false;
 			}
 
-			instruction->type = ZLX_ISA_Minor_type;
-			instruction->u__minor.operation = (ZLX_ISA_Minor_operation_t)opcode;
-			ZLX_ISA_Minor_format_type_t type = ZLX_ISA_Minor_operation_formats[opcode];
+			instruction->type = ZLX_ISA_instruction_type_minor;
+			instruction->u__minor.operation = (ZLX_ISA_minor_operation_t)opcode;
+			ZLX_ISA_minor_format_type_t type = ZLX_ISA_Minor_operation_formats[opcode];
 			instruction->u__minor.type = type;
 			*count = 1;
 
 			switch(type)
 			{
-				case ZLX_ISA_Minor_format_type_a:
+				case ZLX_ISA_minor_format_type_a:
 					instruction->u__minor.u__format_a.aa = (first >> 1) & 0x3FF;
 					break;
-				case ZLX_ISA_Minor_format_type_55:
+				case ZLX_ISA_minor_format_type_55:
 					instruction->u__minor.u__format_55.a5 = (first >> 6) & 0x1F;
 					instruction->u__minor.u__format_55.b5 = (first >> 1) & 0x1F;
 					break;
-				case ZLX_ISA_Minor_format_type_28:
+				case ZLX_ISA_minor_format_type_28:
 					instruction->u__minor.u__format_28.a2 = (first >> 9) & 0x3;
 					instruction->u__minor.u__format_28.b8 = (first >> 1) & 0xFF;
 					break;
-				case ZLX_ISA_Minor_format_type_235:
+				case ZLX_ISA_minor_format_type_235:
 					instruction->u__minor.u__format_235.a2 = (first >> 9) & 0x3;
 					instruction->u__minor.u__format_235.b3 = (first >> 6) & 0x7;
 					instruction->u__minor.u__format_235.c5 = (first >> 1) & 0x1F;
@@ -200,9 +200,9 @@ bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parc
 			return false;
 		}
 
-		instruction->type = ZLX_ISA_Major_type;
-		instruction->u__major.operation = (ZLX_ISA_Major_operation_t)opcode;
-		ZLX_ISA_Major_format_type_t type = ZLX_ISA_Major_operation_formats[opcode];
+		instruction->type = ZLX_ISA_instruction_type_major;
+		instruction->u__major.operation = (ZLX_ISA_major_operation_t)opcode;
+		ZLX_ISA_major_format_type_t type = ZLX_ISA_Major_operation_formats[opcode];
 		instruction->u__major.type = type;
 
 		if((uint32_t)type >= sizeof(ZLX_ISA_Major_operation_size) / sizeof(ZLX_ISA_Major_operation_size[0]))
@@ -224,7 +224,7 @@ bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parc
 	else
 	{
 		// The caller appends parcels in order. Decode when the final one arrives.
-		if(instruction->type != ZLX_ISA_Major_type || position + 1 != *count)
+		if(instruction->type != ZLX_ISA_instruction_type_major || position + 1 != *count)
 		{
 			return false;
 		}
@@ -236,49 +236,49 @@ bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parc
 
 	switch(instruction->u__major.type)
 	{
-		case ZLX_ISA_Major_format_type_5:
+		case ZLX_ISA_major_format_type_5:
 			instruction->u__major.u__foramt_5.a5 = a5;
 			break;
-		case ZLX_ISA_Major_format_type_32:
+		case ZLX_ISA_major_format_type_32:
 			instruction->u__major.u__foramt_32.a3 = (first >> 3) & 0x7;
 			instruction->u__major.u__foramt_32.b2 = (first >> 1) & 0x3;
 			break;
-		case ZLX_ISA_Major_format_type_5_5551:
+		case ZLX_ISA_major_format_type_5_5551:
 			instruction->u__major.u__format_5_5551.a5 = a5;
 			instruction->u__major.u__format_5_5551.b5 = (second >> 11) & 0x1F;
 			instruction->u__major.u__format_5_5551.c5 = (second >> 6) & 0x1F;
 			instruction->u__major.u__format_5_5551.d5 = (second >> 1) & 0x1F;
 			instruction->u__major.u__format_5_5551.e1 = second & 1;
 			break;
-		case ZLX_ISA_Major_format_type_5_952:
+		case ZLX_ISA_major_format_type_5_952:
 			instruction->u__major.u__format_5_952.a5 = a5;
 			instruction->u__major.u__format_5_952.b9 =
 				((second >> 11) & 0x1F) | (((second >> 6) & 0x7) << 5) | ((second & 1) << 8);
 			instruction->u__major.u__format_5_952.c5 = (second >> 1) & 0x1F;
 			instruction->u__major.u__format_5_952.d2 = (second >> 9) & 0x3;
 			break;
-		case ZLX_ISA_Major_format_type_5_b5:
+		case ZLX_ISA_major_format_type_5_b5:
 			instruction->u__major.u__format_5_b5.a5 = a5;
 			instruction->u__major.u__format_5_b5.b11 =
 				((second >> 11) & 0x1F) | (((second >> 6) & 0x1F) << 5) | ((second & 1) << 10);
 			instruction->u__major.u__format_5_b5.c5 = (second >> 1) & 0x1F;
 			break;
-		case ZLX_ISA_Major_format_type_5_f:
+		case ZLX_ISA_major_format_type_5_f:
 			instruction->u__major.u__format_5_f.a5 = a5;
 			instruction->u__major.u__format_5_f.bf = second;
 			break;
-		case ZLX_ISA_Major_format_type_5_f_f:
+		case ZLX_ISA_major_format_type_5_f_f:
 			instruction->u__major.u__format_5_f_f.a5 = a5;
 			instruction->u__major.u__format_5_f_f.bf = second;
 			instruction->u__major.u__format_5_f_f.cf = third;
 			break;
-		case ZLX_ISA_Major_format_type_5_655:
+		case ZLX_ISA_major_format_type_5_655:
 			instruction->u__major.u__format_5_655.a5 = a5;
 			instruction->u__major.u__format_5_655.b6 = ((second >> 11) & 0x1F) | ((second & 1) << 5);
 			instruction->u__major.u__format_5_655.c5 = (second >> 6) & 0x1F;
 			instruction->u__major.u__format_5_655.d5 = (second >> 1) & 0x1F;
 			break;
-		case ZLX_ISA_Major_format_type_5_53251:
+		case ZLX_ISA_major_format_type_5_53251:
 			instruction->u__major.u__format_5_53251.a5 = a5;
 			instruction->u__major.u__format_5_53251.b5 = (second >> 11) & 0x1F;
 			instruction->u__major.u__format_5_53251.c3 = (second >> 8) & 0x7;

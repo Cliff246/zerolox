@@ -8,84 +8,84 @@
 
 
 		
-typedef enum ZLX_ISA_Register_identifier
+typedef enum ZLX_ISA_register_identifier
 {
-	ZLX_ISA_Register_identifier_zero = 0,
-	ZLX_ISA_Register_identifier_accumulator = 1,
-	ZLX_ISA_Register_identifier_stack_pointer = 2,
-	ZLX_ISA_Register_identifier_return_pointer = 3,
-	ZLX_ISA_Register_identifier_iterator_x = 4,
-	ZLX_ISA_Register_identifier_iterator_y = 5,
-	ZLX_ISA_Register_identifier_counter_x = 6,
-	ZLX_ISA_Register_identifier_counter_y = 7,
-	ZLX_ISA_Register_identifier_temporary_0 = 8,
-	ZLX_ISA_Register_identifier_temporary_1 = 9,
-	ZLX_ISA_Register_identifier_temporary_2 = 10,
-	ZLX_ISA_Register_identifier_temporary_3 = 11,
-	ZLX_ISA_Register_identifier_temporary_4 = 12,
-	ZLX_ISA_Register_identifier_temporary_5 = 13,
-	ZLX_ISA_Register_identifier_saved_0 = 14,
-	ZLX_ISA_Register_identifier_saved_1 = 15,
-	ZLX_ISA_Register_identifier_saved_2 = 16,
-	ZLX_ISA_Register_identifier_saved_3 = 17,
-	ZLX_ISA_Register_identifier_saved_4 = 18,
-	ZLX_ISA_Register_identifier_saved_5 = 19,
-	ZLX_ISA_Register_identifier_saved_6 = 20,
-	ZLX_ISA_Register_identifier_saved_7 = 21,
-	ZLX_ISA_Register_identifier_saved_8 = 22,
-	ZLX_ISA_Register_identifier_saved_9 = 23,
-	ZLX_ISA_Register_identifier_argument_0 = 24,
-	ZLX_ISA_Register_identifier_argument_1 = 25,
-	ZLX_ISA_Register_identifier_argument_2 = 26,
-	ZLX_ISA_Register_identifier_argument_3 = 27,
-	ZLX_ISA_Register_identifier_argument_4 = 28,
-	ZLX_ISA_Register_identifier_argument_5 = 29,
-	ZLX_ISA_Register_identifier_argument_6 = 30,
-	ZLX_ISA_Register_identifier_argument_7 = 31,
-}ZLX_ISA_Register_identifier_t;
+	ZLX_ISA_register_identifier_zero = 0,
+	ZLX_ISA_register_identifier_accumulator = 1,
+	ZLX_ISA_register_identifier_stack_pointer = 2,
+	ZLX_ISA_register_identifier_return_pointer = 3,
+	ZLX_ISA_register_identifier_iterator_x = 4,
+	ZLX_ISA_register_identifier_iterator_y = 5,
+	ZLX_ISA_register_identifier_counter_x = 6,
+	ZLX_ISA_register_identifier_counter_y = 7,
+	ZLX_ISA_register_identifier_temporary_0 = 8,
+	ZLX_ISA_register_identifier_temporary_1 = 9,
+	ZLX_ISA_register_identifier_temporary_2 = 10,
+	ZLX_ISA_register_identifier_temporary_3 = 11,
+	ZLX_ISA_register_identifier_temporary_4 = 12,
+	ZLX_ISA_register_identifier_temporary_5 = 13,
+	ZLX_ISA_register_identifier_saved_0 = 14,
+	ZLX_ISA_register_identifier_saved_1 = 15,
+	ZLX_ISA_register_identifier_saved_2 = 16,
+	ZLX_ISA_register_identifier_saved_3 = 17,
+	ZLX_ISA_register_identifier_saved_4 = 18,
+	ZLX_ISA_register_identifier_saved_5 = 19,
+	ZLX_ISA_register_identifier_saved_6 = 20,
+	ZLX_ISA_register_identifier_saved_7 = 21,
+	ZLX_ISA_register_identifier_saved_8 = 22,
+	ZLX_ISA_register_identifier_saved_9 = 23,
+	ZLX_ISA_register_identifier_argument_0 = 24,
+	ZLX_ISA_register_identifier_argument_1 = 25,
+	ZLX_ISA_register_identifier_argument_2 = 26,
+	ZLX_ISA_register_identifier_argument_3 = 27,
+	ZLX_ISA_register_identifier_argument_4 = 28,
+	ZLX_ISA_register_identifier_argument_5 = 29,
+	ZLX_ISA_register_identifier_argument_6 = 30,
+	ZLX_ISA_register_identifier_argument_7 = 31,
+}ZLX_ISA_register_identifier_t;
 
 extern char *ZLX_ISA_Register_string[];
 
-ZLX_ISA_Register_identifier_t ZLX_ISA_get_register_number(char *string);
+ZLX_ISA_register_identifier_t ZLX_ISA_get_register_number(char *string);
 
 //
 //---------------------------------------------------------------------------
 //
 
-typedef enum ZLX_ISA_Minor_operation
+typedef enum ZLX_ISA_minor_operation
 {
-	ZLX_ISA_Minor_operation_move,
-	ZLX_ISA_Minor_operation_add,
-	ZLX_ISA_Minor_operation_adda,
-	ZLX_ISA_Minor_operation_sub,
-	ZLX_ISA_Minor_operation_geta, 
-	ZLX_ISA_Minor_operation_get8,
-	ZLX_ISA_Minor_operation_b, 
-	ZLX_ISA_Minor_operation_baeqz,
-	ZLX_ISA_Minor_operation_baneqz,
-	ZLX_ISA_Minor_operation_lda, 
-	ZLX_ISA_Minor_operation_ald,
-	ZLX_ISA_Minor_operation_sta,
-	ZLX_ISA_Minor_operation_ast,	
-	ZLX_ISA_Minor_operation_stsa,
-	ZLX_ISA_Minor_operation_ldsa,
-	ZLX_ISA_Minor_operation_ld_plus, //ld+
-	ZLX_ISA_Minor_operation_st_plus,  //st+
-	ZLX_ISA_Minor_operation_bieqc,
-	ZLX_ISA_Minor_operation_bteqa,
-	ZLX_ISA_Minor_operation_btneqa,
-}ZLX_ISA_Minor_operation_t;
+	ZLX_ISA_minor_operation_move,
+	ZLX_ISA_minor_operation_add,
+	ZLX_ISA_minor_operation_adda,
+	ZLX_ISA_minor_operation_sub,
+	ZLX_ISA_minor_operation_geta, 
+	ZLX_ISA_minor_operation_get8,
+	ZLX_ISA_minor_operation_b, 
+	ZLX_ISA_minor_operation_baeqz,
+	ZLX_ISA_minor_operation_baneqz,
+	ZLX_ISA_minor_operation_lda, 
+	ZLX_ISA_minor_operation_ald,
+	ZLX_ISA_minor_operation_sta,
+	ZLX_ISA_minor_operation_ast,	
+	ZLX_ISA_minor_operation_stsa,
+	ZLX_ISA_minor_operation_ldsa,
+	ZLX_ISA_minor_operation_ld_plus, //ld+
+	ZLX_ISA_minor_operation_st_plus,  //st+
+	ZLX_ISA_minor_operation_bieqc,
+	ZLX_ISA_minor_operation_bteqa,
+	ZLX_ISA_minor_operation_btneqa,
+}ZLX_ISA_minor_operation_t;
 
 
 //minor extraction formats
 
-typedef enum ZLX_ISA_Minor_format_type
+typedef enum ZLX_ISA_minor_format_type
 {
-	ZLX_ISA_Minor_format_type_55,
-	ZLX_ISA_Minor_format_type_235,
-	ZLX_ISA_Minor_format_type_28,
-	ZLX_ISA_Minor_format_type_a,
-}ZLX_ISA_Minor_format_type_t;
+	ZLX_ISA_minor_format_type_55,
+	ZLX_ISA_minor_format_type_235,
+	ZLX_ISA_minor_format_type_28,
+	ZLX_ISA_minor_format_type_a,
+}ZLX_ISA_minor_format_type_t;
 
 
 
@@ -122,8 +122,8 @@ typedef struct ZLX_ISA_Minor_format_a
 
 typedef struct ZLX_ISA_Minor
 {
-	ZLX_ISA_Minor_format_type_t type;
-	ZLX_ISA_Minor_operation_t operation;
+	ZLX_ISA_minor_format_type_t type;
+	ZLX_ISA_minor_operation_t operation;
 	union 
 	{
 		ZLX_ISA_Minor_format_55_t u__format_55;
@@ -134,7 +134,7 @@ typedef struct ZLX_ISA_Minor
 }ZLX_ISA_Minor_t;
 
 
-extern ZLX_ISA_Minor_format_type_t ZLX_ISA_Minor_operation_formats[];
+extern ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[];
 
 
 
@@ -147,65 +147,65 @@ extern ZLX_ISA_Minor_format_type_t ZLX_ISA_Minor_operation_formats[];
 //
 //
 
-typedef enum ZLX_ISA_Major_3form
+typedef enum ZLX_ISA_major_3form
 {
-	ZLX_ISA_Major_operation_3form_add,
-	ZLX_ISA_Major_operation_3form_sub,
-	ZLX_ISA_Major_operation_3form_sll,
-	ZLX_ISA_Major_operation_3form_srl,
-	ZLX_ISA_Major_operation_3form_sra,
-	ZLX_ISA_Major_operation_3form_xor,
-	ZLX_ISA_Major_operation_3form_or,
-	ZLX_ISA_Major_operation_3form_and,
+	ZLX_ISA_major_3form_add,
+	ZLX_ISA_major_3form_sub,
+	ZLX_ISA_major_3form_sll,
+	ZLX_ISA_major_3form_srl,
+	ZLX_ISA_major_3form_sra,
+	ZLX_ISA_major_3form_xor,
+	ZLX_ISA_major_3form_or,
+	ZLX_ISA_major_3form_and,
 
-}ZLX_ISA_Major_3form_t;
+}ZLX_ISA_major_3form_t;
 
-typedef enum ZLX_ISA_Major_3form_immediate
+typedef enum ZLX_ISA_major_3form_immediate
 {
-	ZLX_ISA_Major_operation_3form_immediate_slli,
-	ZLX_ISA_Major_operation_3form_immediate_srli,
-	ZLX_ISA_Major_operation_3form_immediate_srai,
-	ZLX_ISA_Major_operation_3form_immediate_xori,
-	ZLX_ISA_Major_operation_3form_immediate_andi,
-	ZLX_ISA_Major_operation_3form_immediate_ori,
+	ZLX_ISA_major_3form_immediate_slli,
+	ZLX_ISA_major_3form_immediate_srli,
+	ZLX_ISA_major_3form_immediate_srai,
+	ZLX_ISA_major_3form_immediate_xori,
+	ZLX_ISA_major_3form_immediate_andi,
+	ZLX_ISA_major_3form_immediate_ori,
 	
-}ZLX_ISA_Major_3form_immediate_t;
+}ZLX_ISA_major_3form_immediate_t;
 
 
 
-typedef enum ZLX_ISA_Major_operation
+typedef enum ZLX_ISA_major_operation
 {
-	ZLX_ISA_Major_operation_ld,
-	ZLX_ISA_Major_operation_st,
-	ZLX_ISA_Major_operation_push8,
-	ZLX_ISA_Major_operation_push16,
-	ZLX_ISA_Major_operation_push32,
-	ZLX_ISA_Major_operation_pushp,
-	ZLX_ISA_Major_operation_pop8,
-	ZLX_ISA_Major_operation_pop16,
-	ZLX_ISA_Major_operation_pop32,
-	ZLX_ISA_Major_operation_popp,
-	ZLX_ISA_Major_operation_get16,
-	ZLX_ISA_Major_operation_get32,
-	ZLX_ISA_Major_operation_3form,
-	ZLX_ISA_Major_operation_3form_immediate,
-	ZLX_ISA_Major_operation_inc,
-	ZLX_ISA_Major_operation_dec,
-	ZLX_ISA_Major_operation_addi,
-	ZLX_ISA_Major_operation_bneq,
-	ZLX_ISA_Major_operation_beq,
-	ZLX_ISA_Major_operation_blt,
-	ZLX_ISA_Major_operation_bge,
-	ZLX_ISA_Major_operation_bltu,
-	ZLX_ISA_Major_operation_bgeu,
-	ZLX_ISA_Major_operation_call,
-	ZLX_ISA_Major_operation_ret,
+	ZLX_ISA_major_operation_ld,
+	ZLX_ISA_major_operation_st,
+	ZLX_ISA_major_operation_push8,
+	ZLX_ISA_major_operation_push16,
+	ZLX_ISA_major_operation_push32,
+	ZLX_ISA_major_operation_pushp,
+	ZLX_ISA_major_operation_pop8,
+	ZLX_ISA_major_operation_pop16,
+	ZLX_ISA_major_operation_pop32,
+	ZLX_ISA_major_operation_popp,
+	ZLX_ISA_major_operation_get16,
+	ZLX_ISA_major_operation_get32,
+	ZLX_ISA_major_operation_3form,
+	ZLX_ISA_major_operation_3form_immediate,
+	ZLX_ISA_major_operation_inc,
+	ZLX_ISA_major_operation_dec,
+	ZLX_ISA_major_operation_addi,
+	ZLX_ISA_major_operation_bneq,
+	ZLX_ISA_major_operation_beq,
+	ZLX_ISA_major_operation_blt,
+	ZLX_ISA_major_operation_bge,
+	ZLX_ISA_major_operation_bltu,
+	ZLX_ISA_major_operation_bgeu,
+	ZLX_ISA_major_operation_call,
+	ZLX_ISA_major_operation_ret,
 
-	ZLX_ISA_Major_operation_callp,
+	ZLX_ISA_major_operation_callp,
 
-	ZLX_ISA_Major_operation_retp,
+	ZLX_ISA_major_operation_retp,
 	
-}ZLX_ISA_Major_operation_t;
+}ZLX_ISA_major_operation_t;
 /*
  *add
  *sub
@@ -232,18 +232,18 @@ typedef enum ZLX_ISA_Major_operation
  *
  */
 
-typedef enum ZLX_ISA_Major_format_type
+typedef enum ZLX_ISA_major_format_type
 {
-	ZLX_ISA_Major_format_type_5,
-	ZLX_ISA_Major_format_type_5_5551,
-	ZLX_ISA_Major_format_type_5_952,
-	ZLX_ISA_Major_format_type_32,
-	ZLX_ISA_Major_format_type_5_b5,
-	ZLX_ISA_Major_format_type_5_f,
-	ZLX_ISA_Major_format_type_5_f_f,
-	ZLX_ISA_Major_format_type_5_655,
-	ZLX_ISA_Major_format_type_5_53251,
-}ZLX_ISA_Major_format_type_t;
+	ZLX_ISA_major_format_type_5,
+	ZLX_ISA_major_format_type_5_5551,
+	ZLX_ISA_major_format_type_5_952,
+	ZLX_ISA_major_format_type_32,
+	ZLX_ISA_major_format_type_5_b5,
+	ZLX_ISA_major_format_type_5_f,
+	ZLX_ISA_major_format_type_5_f_f,
+	ZLX_ISA_major_format_type_5_655,
+	ZLX_ISA_major_format_type_5_53251,
+}ZLX_ISA_major_format_type_t;
 
 
 
@@ -337,8 +337,8 @@ typedef struct ZLX_ISA_Major_format_5_f_f
 
 typedef struct ZLX_ISA_Major
 {
-	ZLX_ISA_Major_operation_t operation;
-	ZLX_ISA_Major_format_type_t type;
+	ZLX_ISA_major_operation_t operation;
+	ZLX_ISA_major_format_type_t type;
 	union 
 	{
 		ZLX_ISA_Major_format_5_b5_t u__format_5_b5; 
@@ -355,26 +355,26 @@ typedef struct ZLX_ISA_Major
 }ZLX_ISA_Major_t;
 
 
-extern ZLX_ISA_Major_format_type_t ZLX_ISA_Major_operation_formats[];
+extern ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[];
 extern uint8_t ZLX_ISA_Major_operation_size[];
 
 //
 
-typedef enum ZLX_ISA_Zerolox_version
+typedef enum ZLX_ISA_zerolox_version
 {
-	ZLX_ISA_ZEROLOX1,
-}ZLX_ISA_Zerolox_version_t;
+	ZLX_ISA_zerolox_version_1,
+}ZLX_ISA_zerolox_version_t;
 
-typedef enum ZLX_ISA_Instruction_type
+typedef enum ZLX_ISA_instruction_type
 {
-	ZLX_ISA_Major_type,
-	ZLX_ISA_Minor_type,
-}ZLX_ISA_Instruction_type_t;
+	ZLX_ISA_instruction_type_major,
+	ZLX_ISA_instruction_type_minor,
+}ZLX_ISA_instruction_type_t;
 
 
 typedef struct ZLX_ISA_Instruction
 {
-	ZLX_ISA_Instruction_type_t type;
+	ZLX_ISA_instruction_type_t type;
 	uint8_t size;
 	union
 	{

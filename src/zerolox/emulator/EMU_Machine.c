@@ -44,11 +44,11 @@ void ZLX_EMU_step_Machine(ZLX_EMU_Machine_t *machine)
 	ZLX_ISA_Instruction_t instruction =	ZLX_EMU_decode_instruction(machine);
 
 	ZLX_EMU__CPU_output_t output;
-	if(instruction.type == ZLX_ISA_Major_type)
+	if(instruction.type == ZLX_ISA_instruction_type_major)
 	{
 		output = ZLX_EMU_major_execution(machine, instruction.u__major);
 	}
-	else if(instruction.type == ZLX_ISA_Minor_type)
+	else if(instruction.type == ZLX_ISA_instruction_type_minor)
 	{
 
 		output = ZLX_EMU_minor_execution(machine, instruction.u__minor);
