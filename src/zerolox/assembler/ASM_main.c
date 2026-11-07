@@ -2,6 +2,9 @@
 #include "MY_commons.h"
 #include "ASM_Assembler.h"
 
+//we have been fucking this so badly, every single int32 or int64 is unportable to zerolox in 32 bit
+
+
 const char *my_bitchass_const_path = "asm.asm";
 
 int32_t main(int32_t argc, char *argv[])

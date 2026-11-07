@@ -593,6 +593,7 @@ OPERATION(minor_store_plus)
 	return output;	
 }
 
+//this one is bad, it really should have the option to increment or decrement... cringe
 //beqi
 OPERATION(minor_branch_compare_iterator)
 {	

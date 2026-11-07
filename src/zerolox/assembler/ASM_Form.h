@@ -1,6 +1,9 @@
 #ifndef ZLX_ASM_FORM_HEADER
 #define ZLX_ASM_FORM_HEADER
 
+#include "ASM_Handler.h"
+#include "ASM_Statement.h"
+#include "syntax/SYTX_syntax.h"
 
 //something like 
 //
@@ -49,11 +52,24 @@
 //it should be scalable, maybe not fast. but quite strict, not a macro assembler. you write what you get, the assembler yells first, you thank it for catching this 
 //
 
+
+//form goes to handler, hopefully. it picks the right handler from it.
+//
+
 typedef struct ZLX_ASM_Form
 {
-
+	
 	char a__form[64];
 			
+	//constant pointer i assume	
+	ZLX_SYTX_Mnemonic_t *cp__mnemonic;
+	ZLX_ASM_Handler_t *cp__handler;
+
 }ZLX_ASM_Form_t;
+
+extern ZLX_ASM_Form_t ZLX_ASM_forms[];
+
+ZLX_ASM_Handler_t *ZLX_ASM_get_handler(ZLX_ASM_Statement_t *statment);
+
 
 #endif

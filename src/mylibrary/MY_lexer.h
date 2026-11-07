@@ -70,9 +70,11 @@
 #define MY_TOKEN_TYPE_ENUM_NAME(X) MY_TOKEN_ ## X
 #define MY_TOKEN_TYPE_ENUM(X) MY_TOKEN_TYPE_ENUM_NAME(X),
 
+//this needs to be totally renamed, it doesn't follow the proper naming format
 
 typedef enum MY_token_type
 {
+	MY_TOKEN_ERROR,
 	MY_TOKEN_TYPE_LIST(MY_TOKEN_TYPE_ENUM)
 }MY_token_type_t;
 
@@ -109,6 +111,7 @@ typedef struct MY_lexer
 MY_lexer_t *MY_initialize_lexer(char *_string);
 int MY_get_token_string(MY_lexer_t *_lexer, int _position, char *_buffer, int _blength);
 int MY_get_substring(MY_lexer_t *_lexer, int _start, int _length, char *_buffer, int _blength);
+MY_token_type_t MY_get_token_type_Lexer(MY_lexer_t *_lexer, int _index); 
 void MY_lex(MY_lexer_t *_lexer);
 void MY_print_lexer(MY_lexer_t *lexer);
 void MY_free_lexer(MY_lexer_t *_lexer);
