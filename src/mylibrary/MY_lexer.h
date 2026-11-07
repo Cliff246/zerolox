@@ -74,7 +74,6 @@
 
 typedef enum MY_token_type
 {
-	MY_TOKEN_ERROR,
 	MY_TOKEN_TYPE_LIST(MY_TOKEN_TYPE_ENUM)
 }MY_token_type_t;
 

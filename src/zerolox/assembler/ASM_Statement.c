@@ -16,22 +16,48 @@ ZLX_ASM_Statement_t *ZLX_ASM_init_Statement(void)
 
 void ZLX_ASM_free_Statement(ZLX_ASM_Statement_t *statement)
 {
-	if(!statement)
-		return;
-
-	if(statement->arguments_count > 0)
-	{
-		for(uint64_t i = 0; i < statement->arguments_count; ++i)
-		{
-			if(statement->pap__arguments)
-				ZLX_ASM_free_Argument(statement->pap__arguments[i]);
-		}
-	}
-
-	free(statement->pap__arguments);
-	free(statement);
+	MY_TODO;
 }
 
+
+
+enum MnemonicState
+{
+    EXPECT_WORD,
+    EXPECT_DOT_VALUE,
+    EXPECT_SEPARATOR
+};
+
+
+
+static bool valid_form(const MY_token_type_t *tokens, int count) {
+    enum MnemonicState state = EXPECT_WORD;
+    for (int i = 0; i < count; i++) {
+        MY_token_type_t t = tokens[i];
+        switch (state) {
+        case EXPECT_WORD:
+            if (t != MY_TOKEN_WORD)
+                return false;
+            state = EXPECT_SEPARATOR;
+            break;
+        case EXPECT_DOT_VALUE:
+            if (t != MY_TOKEN_WORD &&
+                t != MY_TOKEN_INT)
+                return false;
+            state = EXPECT_SEPARATOR;
+            break;
+        case EXPECT_SEPARATOR:
+            if (t == MY_TOKEN_PERIOD)
+                state = EXPECT_DOT_VALUE;
+            else if (t == MY_TOKEN_ADD)
+                state = EXPECT_WORD;
+            else
+                return false;
+            break;
+        }
+    }
+    return state == EXPECT_SEPARATOR;
+}
 
 #define TYPE_BUFFER_SIZE 16
 
@@ -43,7 +69,7 @@ static int next_space(MY_token_type_t buf[TYPE_BUFFER_SIZE], int index)
 		return -2;
 	}
 	int space = -1;
-	for(int i = index; i < TYPE_BUFFER_SIZE - index; ++i)
+	for(int i = index; i < TYPE_BUFFER_SIZE; ++i)
 	{
 		if(buf[i] == MY_TOKEN_SPACE)
 		{
@@ -57,7 +83,6 @@ static int next_space(MY_token_type_t buf[TYPE_BUFFER_SIZE], int index)
 	}
 	return space;
 }
-
 
 
 //the form for the mnemonic can roughly be 
@@ -77,7 +102,7 @@ static int next_space(MY_token_type_t buf[TYPE_BUFFER_SIZE], int index)
 //
 	
 	
-	
+
 
 ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, int32_t start, int32_t count)
 {
@@ -106,7 +131,7 @@ ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assemb
 		MY_TODO;
 	}
 	
-
+	
 	//ugh parser, or just be a dipshit and do all cases. i forgot how to do a parser.
 	if(type_list[0] == MY_TOKEN_WORD)
 	{

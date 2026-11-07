@@ -84,7 +84,6 @@ ZLX_PSUDO_Operation_t ZLX_ASM_2_registers_minor(ZLX_ASM_Statement_t statement, i
 	ZLX_ISA_Register_identifier_t r1 = ZLX_ISA_get_register_number(source1);
 	ZLX_ISA_Register_identifier_t r2 = ZLX_ISA_get_register_number(source2);
 
-
 	instruction.size = 1;
 	instruction.type = ZLX_ISA_Minor_type; 
 	instruction.u__minor.type = ZLX_ISA_Minor_format_type_55;
@@ -95,8 +94,6 @@ ZLX_PSUDO_Operation_t ZLX_ASM_2_registers_minor(ZLX_ASM_Statement_t statement, i
 	ZLX_PSUDO_Operation_t operation = {0};
 	operation.instruction = instruction;
 	return operation;
-
-
 
 
 }
