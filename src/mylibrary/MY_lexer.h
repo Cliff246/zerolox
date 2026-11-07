@@ -145,6 +145,4 @@ typedef struct MY_Token_group
 }MY_Token_group_t;
 
 //in tokens, ie start token, to length of last
-MY_Token_group_t *MY_init_Token_group(MY_lexer_t *_lexer, int _start, int _length); 
-void MY_free_Token_group(MY_Token_group_t *group)
 #endif
