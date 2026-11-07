@@ -6,7 +6,7 @@
 
 #include <stdbool.h>
 
-typedef enum ZLX_ASM_Operation_type
+typedef enum ZLX_ASM_operation_type
 {
 	ZLX_ASM_Operation_type_invalid,
 	ZLX_ASM_Operation_type_mnemonic,

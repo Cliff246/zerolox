@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 
-typedef enum ZLX_ASM_Statement_type
+typedef enum ZLX_ASM_statement_type
 {
 	ZLX_ASM_Statement_type_invalid,	
 	ZLX_ASM_Statement_type_operation,	

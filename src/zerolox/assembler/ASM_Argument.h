@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef enum ZLX_ASM_Argument_type
+typedef enum ZLX_ASM_argument_type
 {
 	ZLX_ASM_Argument_type_number,
 	ZLX_ASM_Argument_type_register,

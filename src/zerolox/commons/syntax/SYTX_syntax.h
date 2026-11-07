@@ -9,7 +9,7 @@
 
 #define ZLX_SYTX_MNEMONIC_SIZE 16
 
-typedef enum ZLX_SYTX_Pattern_form
+typedef enum ZLX_SYTX_pattern_form
 {
 	ZLX_SYTX_Pattern_form_2_register,
 }ZLX_SYTX_Pattern_form_t;
