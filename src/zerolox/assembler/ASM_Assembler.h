@@ -8,9 +8,9 @@
 typedef struct ZLX_ASM_Assembler
 {
 
-	char *p__path;
+	char *pa__path;
 	
-	char *p__file_contents;
+	char *pa__file_contents;
 	uint64_t file_contents_size; 
 
 	MY_lexer_t *p__lexer;

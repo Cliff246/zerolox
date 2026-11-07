@@ -71,6 +71,11 @@
 #define MY_TOKEN_TYPE_ENUM(X) MY_TOKEN_TYPE_ENUM_NAME(X),
 
 //this needs to be totally renamed, it doesn't follow the proper naming format
+//
+//
+//
+//
+//
 
 typedef enum MY_token_type
 {
@@ -114,4 +119,32 @@ MY_token_type_t MY_get_token_type_Lexer(MY_lexer_t *_lexer, int _index);
 void MY_lex(MY_lexer_t *_lexer);
 void MY_print_lexer(MY_lexer_t *lexer);
 void MY_free_lexer(MY_lexer_t *_lexer);
+
+
+
+//---- before i kill myself, i am going to add a token group that is nice and simple, basically just a subset of lexer_t
+
+
+//p = ptr
+//pa = ptr, array
+//pap = ptr, array of ptr's
+//cpap = constant ptr, array of ptr's
+//cpapu = constant ptr, array of ptr unions (ie needs a dedicated free)
+//bleh bleh bleh... idk this is supposed to show you what needs to die and what not.
+//it should tell you what can be just raw free'd and what cannot be... 
+//i am cringe
+//a means [index]
+//p means ptr. 
+//i need another for has complex free. idk, honest to god
+// fuck ,e
+typedef struct MY_Token_group
+{
+	//i actually need to remember shit... it's ptr, array of ptr's not 	
+	MY_lexer_t *cp__lexer;	
+	int start, length;
+}MY_Token_group_t;
+
+//in tokens, ie start token, to length of last
+MY_Token_group_t *MY_init_Token_group(MY_lexer_t *_lexer, int _start, int _length); 
+void MY_free_Token_group(MY_Token_group_t *group)
 #endif

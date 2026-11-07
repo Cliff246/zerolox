@@ -5,11 +5,13 @@
 #include <assert.h>
 #include <stdlib.h>
 
-ZLX_ASM_Statement_t *ZLX_ASM_init_Statement(void)
+ZLX_ASM_Statement_t *ZLX_ASM_init_Statement(int start, int count)
 {
 	ZLX_ASM_Statement_t *statement = calloc(1, sizeof(*statement));
 	if(!statement)
 		MY_FAULT("malloc failed");
+
+	statement->start = start
 
 	return statement;
 }

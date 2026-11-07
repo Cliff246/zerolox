@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 
@@ -669,4 +670,32 @@ void MY_free_lexer(MY_lexer_t *_lexer)
 	free(_lexer->ap__string);
 	free(_lexer->ap__token_buffer);
 	free(_lexer);
+}
+
+
+
+
+//don't fucking free this without the lexer
+//don't use this without the lexer, 
+//fuck don't do this
+MY_Token_group_t *MY_init_Token_group(MY_lexer_t *_lexer, int _start, int _length)
+{
+	MY_Token_group_t *token_group = calloc(1, sizeof(MY_Token_group_t)); 
+	if(!token_group)
+		exit(1);
+
+	token_group->cp__lexer = _lexer;
+	token_group->start = _start;
+	token_group->length = _length;
+
+	return token_group;
+
+}
+
+
+
+void MY_free_Token_group(MY_Token_group_t *group)
+{
+	free(group);
+	
 }

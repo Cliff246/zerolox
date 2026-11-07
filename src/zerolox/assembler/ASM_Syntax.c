@@ -5,6 +5,8 @@
 
 //this is not really done yet but still
 
+
+/*
 ZLX_PSUDO_Operation_t ZLX_ASM_decode_syntax(ZLX_ASM_Statement_t statement)
 {
 	if(statement.a__mnemonic[ZLX_SYTX_MNEMONIC_SIZE - 1] != 0)
@@ -97,3 +99,4 @@ ZLX_PSUDO_Operation_t ZLX_ASM_2_registers_minor(ZLX_ASM_Statement_t statement, i
 
 
 }
+*/

@@ -39,8 +39,8 @@ bool ZLX_ASM_load_file_Assembler(ZLX_ASM_Assembler_t *assembler, const char *pat
 
 	
 	assembler->file_contents_size = size;
-	assembler->p__file_contents = result;
-	assembler->p__path = path_dup;
+	assembler->pa__file_contents = result;
+	assembler->pa__path = path_dup;
 
 	return assembler;
 }
@@ -49,12 +49,12 @@ bool ZLX_ASM_load_file_Assembler(ZLX_ASM_Assembler_t *assembler, const char *pat
 //lex this assembler
 void ZLX_ASM_lex_Assembler(ZLX_ASM_Assembler_t *assembler)
 {
-	if(assembler->p__file_contents == NULL)
+	if(assembler->pa__file_contents == NULL)
 		//trash spelling
 		MY_FAULT("no contents avilable");
 
 	//this isn't of the name, should be MY_init_Lexer, but i failed, oh well
-	MY_lexer_t *lexer = MY_initialize_lexer(assembler->p__file_contents);
+	MY_lexer_t *lexer = MY_initialize_lexer(assembler->pa__file_contents);
 
 	MY_lex(lexer);
 	assembler->p__lexer = lexer;
