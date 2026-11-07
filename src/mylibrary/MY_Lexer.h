@@ -117,7 +117,7 @@ int MY_get_token_string_Lexer(MY_Lexer_t *_lexer, int _position, char *_buffer, 
 int MY_get_substring_Lexer(MY_Lexer_t *_lexer, int _start, int _length, char *_buffer, int _blength);
 MY_token_type_t MY_get_token_type_Lexer(MY_Lexer_t *_lexer, int _index); 
 void MY_lex_Lexer(MY_Lexer_t *_lexer);
-void MY_print_Lexer(MY_Lexer_t *lexer);
+void MY_print_Lexer(MY_Lexer_t *_lexer);
 void MY_free_Lexer(MY_Lexer_t *_lexer);
 
 

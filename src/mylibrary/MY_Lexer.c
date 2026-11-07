@@ -198,12 +198,12 @@ int MY_get_token_string_Lexer(MY_Lexer_t *_lexer, int _position, char *_buffer, 
 	return -1;
 }
 
-void MY_print_Lexer(MY_Lexer_t *lexer)
+void MY_print_Lexer(MY_Lexer_t *_lexer)
 {
 
-	for(int i = 0; i < lexer->token_count; ++i)
+	for(int i = 0; i < _lexer->token_count; ++i)
 	{
-		print_token(lexer, i);
+		print_token(_lexer, i);
 	}
 }
 

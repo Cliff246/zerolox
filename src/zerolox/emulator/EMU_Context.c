@@ -20,13 +20,13 @@ ZLX_EMU_Context_t *ZLX_EMU_init_Context()
 
 
 
-void ZLX_EMU_load_file_Context(ZLX_EMU_Context_t *context, char *path)
+void ZLX_EMU_load_file_Context(ZLX_EMU_Context_t *_context, char *_path)
 {
 
 	uint64_t size = 0;
-	char *data = MY_read_file(path, &size);
+	char *data = MY_read_file(_path, &size);
 
-	ZLX_EMU_image_Machine(context->p__machine, data, size);
+	ZLX_EMU_load_image_Machine(_context->p__machine, data, size);
 
 	free(data);	
 
@@ -34,15 +34,15 @@ void ZLX_EMU_load_file_Context(ZLX_EMU_Context_t *context, char *path)
 
 
 
-void ZLX_EMU_step_Context(ZLX_EMU_Context_t *context)
+void ZLX_EMU_step_Context(ZLX_EMU_Context_t *_context)
 {
-	ZLX_EMU_step_Machine(context->p__machine);
+	ZLX_EMU_step_Machine(_context->p__machine);
 }
 
 
 
-void ZLX_EMU_free_Context(ZLX_EMU_Context_t *context)
+void ZLX_EMU_free_Context(ZLX_EMU_Context_t *_context)
 {
-	ZLX_EMU_free_Machine(context->p__machine);
-	free(context);	
+	ZLX_EMU_free_Machine(_context->p__machine);
+	free(_context);	
 }
