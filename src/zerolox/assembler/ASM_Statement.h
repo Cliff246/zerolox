@@ -4,6 +4,7 @@
 #include "ASM_Operation.h"
 #include "ASM_Argument.h"
 #include "ASM_Assembler.h"
+#include "MY_Lexer.h"
 #include "syntax/SYTX_syntax.h"
 #include <stdint.h>
 
@@ -40,11 +41,11 @@ typedef struct ZLX_ASM_Statement
 	};	
 }ZLX_ASM_Statement_t;
 
-ZLX_ASM_Statement_t *ZLX_ASM_init_Statement(int start, int count);
+ZLX_ASM_Statement_t *ZLX_ASM_init_Statement();
 void ZLX_ASM_free_Statement(ZLX_ASM_Statement_t *statement);
 
 
-ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(
+ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Lexer_t *_lexer, int start, int count);
 
 ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, int32_t start, int32_t count);
 

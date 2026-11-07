@@ -17,7 +17,7 @@ typedef enum ZLX_SYTX_pattern_form
 
 typedef struct ZLX_SYTX_Mnemonic
 {
-	ZLX_ISA_Instruction_type_t type;
+	ZLX_ISA_instruction_type_t type;
 	ZLX_SYTX_pattern_form_t form;
 	uint16_t opcode;
 	char a__mnemonic[ZLX_SYTX_MNEMONIC_SIZE];

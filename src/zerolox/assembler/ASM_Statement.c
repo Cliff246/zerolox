@@ -5,13 +5,12 @@
 #include <assert.h>
 #include <stdlib.h>
 
-ZLX_ASM_Statement_t *ZLX_ASM_init_Statement(int start, int count)
+ZLX_ASM_Statement_t *ZLX_ASM_init_Statement()
 {
 	ZLX_ASM_Statement_t *statement = calloc(1, sizeof(*statement));
 	if(!statement)
 		MY_FAULT("malloc failed");
 
-	statement->start = start
 
 	return statement;
 }
@@ -32,11 +31,14 @@ enum MnemonicState
 
 
 
-static bool valid_form(const MY_token_type_t *tokens, int count) {
+static bool valid_form(const MY_token_type_t *tokens, int count) 
+{
     enum MnemonicState state = EXPECT_WORD;
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) 
+	{
         MY_token_type_t t = tokens[i];
-        switch (state) {
+        switch (state) 
+		{
         case EXPECT_WORD:
             if (t != MY_token_type_word)
                 return false;
