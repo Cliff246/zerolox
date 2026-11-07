@@ -9,7 +9,7 @@
 
 ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[] = 
 {
-	{.type = ZLX_ISA_Minor_type, .form = ZLX_SYTX_Pattern_form_2_register, .a__mnemonic = "mv", .opcode = ZLX_ISA_Minor_operation_move},
+	{.type = ZLX_ISA_Minor_type, .form = ZLX_SYTX_pattern_form_2_register, .a__mnemonic = "mv", .opcode = ZLX_ISA_Minor_operation_move},
 	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "add", .opcode = ZLX_ISA_Minor_operation_add },
 	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "adda",.opcode = ZLX_ISA_Minor_operation_adda},
 	{.type = ZLX_ISA_Minor_type, .a__mnemonic = "sub", .opcode = ZLX_ISA_Minor_operation_sub},
