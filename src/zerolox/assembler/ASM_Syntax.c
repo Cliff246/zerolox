@@ -70,11 +70,11 @@ ZLX_PSUDO_Operation_t ZLX_ASM_2_registers_minor(ZLX_ASM_Statement_t statement, i
 	{
 		MY_FAULT("2 form minors must have 2 arguments");
 	}
-	if(statement.pap__arguments[0]->type != ZLX_ASM_Argument_type_register)
+	if(statement.pap__arguments[0]->type != ZLX_ASM_argument_type_register)
 	{
 		MY_FAULT("argument 1 is not a source register");
 	}
-	if(statement.pap__arguments[1]->type != ZLX_ASM_Argument_type_register)
+	if(statement.pap__arguments[1]->type != ZLX_ASM_argument_type_register)
 	{
 
 		MY_FAULT("argument 2 is not a source register");
@@ -83,12 +83,12 @@ ZLX_PSUDO_Operation_t ZLX_ASM_2_registers_minor(ZLX_ASM_Statement_t statement, i
 	char *source1 = statement.pap__arguments[0]->up__string;
 	char *source2 = statement.pap__arguments[1]->up__string;
 
-	ZLX_ISA_Register_identifier_t r1 = ZLX_ISA_get_register_number(source1);
-	ZLX_ISA_Register_identifier_t r2 = ZLX_ISA_get_register_number(source2);
+	ZLX_ISA_register_identifier_t r1 = ZLX_ISA_get_register_number(source1);
+	ZLX_ISA_register_identifier_t r2 = ZLX_ISA_get_register_number(source2);
 
 	instruction.size = 1;
-	instruction.type = ZLX_ISA_Minor_type; 
-	instruction.u__minor.type = ZLX_ISA_Minor_format_type_55;
+	instruction.type = ZLX_ISA_instruction_type_minor; 
+	instruction.u__minor.type = ZLX_ISA_minor_format_type_55;
 	instruction.u__minor.operation = ZLX_SYTX_mnemonics[index].opcode;
 	instruction.u__minor.u__format_55.a5 = r1;
 	instruction.u__minor.u__format_55.b5 = r2;

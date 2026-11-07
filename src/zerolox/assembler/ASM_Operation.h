@@ -8,10 +8,10 @@
 
 typedef enum ZLX_ASM_operation_type
 {
-	ZLX_ASM_Operation_type_invalid,
-	ZLX_ASM_Operation_type_mnemonic,
-	ZLX_ASM_Operation_type_semantic,
-}ZLX_ASM_Operation_type_t;
+	ZLX_ASM_operation_type_invalid,
+	ZLX_ASM_operation_type_mnemonic,
+	ZLX_ASM_operation_type_semantic,
+}ZLX_ASM_operation_type_t;
 
 typedef struct ZLX_ASM_Operation_mnemonic
 {
@@ -33,7 +33,7 @@ typedef struct ZLX_ASM_Operation_semantic
 typedef struct ZLX_ASM_Operation
 {
 
-	ZLX_ASM_Operation_type_t type;
+	ZLX_ASM_operation_type_t type;
 	union 
 	{
 		ZLX_ASM_Operation_mnemonic_t u__mnemonic;
