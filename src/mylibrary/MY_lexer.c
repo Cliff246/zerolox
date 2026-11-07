@@ -225,9 +225,9 @@ int MY_get_substring(MY_lexer_t *_lexer, int _start, int _length, char *_buffer,
 MY_token_type_t MY_get_token_type_Lexer(MY_lexer_t *_lexer, int _index)
 {
 	
-	if(_index < 0 || _index > _lexer->token_count)
+	if(_index < 0 || _index >= _lexer->token_count)
 	{
-		return MY_TOKEN_ERROR;	
+		return MY_TOKEN_INVALID;	
 	}
 	return _lexer->ap__token_buffer[_index].type;
 }
