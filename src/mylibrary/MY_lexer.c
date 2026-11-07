@@ -228,7 +228,7 @@ MY_token_type_t MY_get_token_type_Lexer(MY_lexer_t *_lexer, int _index)
 	
 	if(_index < 0 || _index >= _lexer->token_count)
 	{
-		return MY_TOKEN_INVALID;	
+		return MY_token_type_invalid;	
 	}
 	return _lexer->ap__token_buffer[_index].type;
 }
@@ -282,7 +282,7 @@ void MY_lex(MY_lexer_t *_lexer)
 		{
 			if(space == false)
 			{
-				add_token_start_word(_lexer, MY_TOKEN_SPACE, start);	
+				add_token_start_word(_lexer, MY_token_type_space, start);	
 				space = true;
 			}
 		}	
@@ -297,7 +297,7 @@ void MY_lex(MY_lexer_t *_lexer)
 			{
 				has_character_ctype_or_string(_lexer, isalnum, "_");
 
-				add_token_start_word(_lexer, MY_TOKEN_WORD, start);
+				add_token_start_word(_lexer, MY_token_type_word, start);
 			}
 			else if(current == '\"')
 			{
@@ -312,11 +312,11 @@ void MY_lex(MY_lexer_t *_lexer)
 				else
 				{
 					stop = position(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
+					add_token_start_word(_lexer, MY_token_type_invalid, start);
 					continue;
 				}
 				stop = position(_lexer);
-				MY_token_t range = init_token(MY_TOKEN_STRING, start + 1, stop - 1, _lexer->tcolumn, _lexer->trow);
+				MY_token_t range = init_token(MY_token_type_string, start + 1, stop - 1, _lexer->tcolumn, _lexer->trow);
 				add_token(_lexer, range);
 			}
 			else if(current == '!')
@@ -324,11 +324,11 @@ void MY_lex(MY_lexer_t *_lexer)
 				if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_EXCLAIM_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_exclaim_equals, start);
 
 				}
 				else
-					add_token_start_word(_lexer, MY_TOKEN_EXCLAIM, start);
+					add_token_start_word(_lexer, MY_token_type_exclaim, start);
 
 			}
 			else if(isdigit((unsigned char)current))
@@ -351,26 +351,26 @@ void MY_lex(MY_lexer_t *_lexer)
 				//printf("%c\n", scroll);
 					if(!strchr(hex_chars, scroll) || scroll == 0)
 					{
-						add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
+						add_token_start_word(_lexer, MY_token_type_invalid, start);
 	
 					}
 					else
 					{
 						has_character_string(_lexer, (char *)hex_chars);
 
-						add_token_start_word(_lexer, MY_TOKEN_HEXDECIMAL, start);
+						add_token_start_word(_lexer, MY_token_type_hexdecimal, start);
 					}
 				}
 				else if(has_hexcode && !has_zero_start)
 				{
-					add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
+					add_token_start_word(_lexer, MY_token_type_invalid, start);
 				}
 				else if(scroll == '.')
 				{
 					//floating point
 					advance(_lexer);
 					has_character_ctype(_lexer, isdigit);
-					add_token_start_word(_lexer, MY_TOKEN_FLOAT, start);
+					add_token_start_word(_lexer, MY_token_type_float, start);
 				}
 				else
 				{
@@ -386,59 +386,59 @@ void MY_lex(MY_lexer_t *_lexer)
 					{
 						advance(_lexer);
 						has_character_ctype(_lexer, isdigit);
-						add_token_start_word(_lexer, MY_TOKEN_FLOAT, start);
+						add_token_start_word(_lexer, MY_token_type_float, start);
 
 					}
 					else
 					{
-						add_token_start_word(_lexer, MY_TOKEN_INT, start);
+						add_token_start_word(_lexer, MY_token_type_int, start);
 					}
 				}
 			}
 			else if(current == '.')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_PERIOD, start);
+				add_token_start_word(_lexer, MY_token_type_period, start);
 			}
 			else if(current == '(')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_PARENTHESIS_OPEN, start);
+				add_token_start_word(_lexer, MY_token_type_parenthesis_open, start);
 			}
 			else if(current == ')')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_PARENTHESIS_CLOSED, start);
+				add_token_start_word(_lexer, MY_token_type_parenthesis_closed, start);
 			}
 			else if(current == '[')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_SQUAREBRACE_OPEN, start);
+				add_token_start_word(_lexer, MY_token_type_squarebrace_open, start);
 			}
 			else if(current == ']')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_SQUAREBRACE_CLOSED, start);
+				add_token_start_word(_lexer, MY_token_type_squarebrace_closed, start);
 
 			}
 			else if(current == '{')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_CURLYBRACE_OPEN, start);
+				add_token_start_word(_lexer, MY_token_type_curlybrace_open, start);
 			}
 			else if(current == '}')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_CURLYBRACE_CLOSED, start);
+				add_token_start_word(_lexer, MY_token_type_curlybrace_closed, start);
 			}
 			else if(current == '+')
 			{
 				if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_ADD_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_add_equals, start);
 				}
 				else if(scroll == '+')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_ADD_ADD, start);
+					add_token_start_word(_lexer, MY_token_type_add_add, start);
 				}
 				else
 				{
-					add_token_start_word(_lexer, MY_TOKEN_ADD, start);
+					add_token_start_word(_lexer, MY_token_type_add, start);
 				}
 			}
 			else if(current == '-')
@@ -446,16 +446,16 @@ void MY_lex(MY_lexer_t *_lexer)
 				if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_MINUS_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_minus_equals, start);
 				}
 				else if(scroll == '-')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_MINUS_MINUS, start);
+					add_token_start_word(_lexer, MY_token_type_minus_minus, start);
 				}
 				else
 				{
-					add_token_start_word(_lexer, MY_TOKEN_MINUS, start);
+					add_token_start_word(_lexer, MY_token_type_minus, start);
 				}
 			}
 			else if(current == '/')
@@ -463,12 +463,12 @@ void MY_lex(MY_lexer_t *_lexer)
 				if(scroll == '/')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_SLASH_SLASH, start);
+					add_token_start_word(_lexer, MY_token_type_slash_slash, start);
 				}
 				else if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_SLASH_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_slash_equals, start);
 				}
 				else if(scroll == ':')
 				{
@@ -484,7 +484,7 @@ void MY_lex(MY_lexer_t *_lexer)
 				}
 				else
 				{
-					add_token_start_word(_lexer, MY_TOKEN_SLASH, start);
+					add_token_start_word(_lexer, MY_token_type_slash, start);
 				}
 			}
 			else if(current == '*')
@@ -492,54 +492,54 @@ void MY_lex(MY_lexer_t *_lexer)
 				if(scroll == '*')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_STAR_STAR, start);
+					add_token_start_word(_lexer, MY_token_type_star_star, start);
 				}
 				else if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_STAR_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_star_equals, start);
 				}
 				else
 				{
-					add_token_start_word(_lexer, MY_TOKEN_STAR, start);
+					add_token_start_word(_lexer, MY_token_type_star, start);
 				}
 			}
 			else if(current == ',')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_COMMA, start);
+				add_token_start_word(_lexer, MY_token_type_comma, start);
 
 			}
 			else if(current == ':')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_COLON, start);
+				add_token_start_word(_lexer, MY_token_type_colon, start);
 			}
 			else if(current == ';')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_SEMICOLON, start);
+				add_token_start_word(_lexer, MY_token_type_semicolon, start);
 			}
 			else if(current == '@')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_AT, start);
+				add_token_start_word(_lexer, MY_token_type_at, start);
 			}
 			else if(current == '#')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_HASHTAG, start);
+				add_token_start_word(_lexer, MY_token_type_hashtag, start);
 			}
 			else if(current == '=')
 			{
 				if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_EQUALS_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_equals_equals, start);
 				}
 				else if(scroll == '>')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_EQUALS_LESS_THAN, start);
+					add_token_start_word(_lexer, MY_token_type_equals_less_than, start);
 				}
 				else
 				{
-					add_token_start_word(_lexer, MY_TOKEN_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_equals, start);
 				}
 			}
 			else if(current == '<')
@@ -547,7 +547,7 @@ void MY_lex(MY_lexer_t *_lexer)
 				if(scroll == '=')
 				{
 					scroll = advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_LESS_THAN_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_less_than_equals, start);
 				}
 				else if(scroll == '<')
 				{
@@ -555,20 +555,20 @@ void MY_lex(MY_lexer_t *_lexer)
 					if(scroll == '=')
 					{
 						advance(_lexer);
-						add_token_start_word(_lexer, MY_TOKEN_LESS_THAN_LESS_THAN_EQUALS, start);
+						add_token_start_word(_lexer, MY_token_type_less_than_less_than_equals, start);
 					}
 					else
-						add_token_start_word(_lexer, MY_TOKEN_LESS_THAN_LESS_THAN, start);
+						add_token_start_word(_lexer, MY_token_type_less_than_less_than, start);
 				}
 				else
-					add_token_start_word(_lexer, MY_TOKEN_LESS_THAN, start);
+					add_token_start_word(_lexer, MY_token_type_less_than, start);
 			}
 			else if(current == '>')
 			{
 				if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_greater_than_equals, start);
 				}
 				else if(scroll == '>')
 				{
@@ -576,29 +576,29 @@ void MY_lex(MY_lexer_t *_lexer)
 					if(scroll == '=')
 					{
 						advance(_lexer);
-						add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN_GREATER_THAN_EQUALS, start);
+						add_token_start_word(_lexer, MY_token_type_greater_than_greater_than_equals, start);
 					}
 					else
-						add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN_GREATER_THAN, start);
+						add_token_start_word(_lexer, MY_token_type_greater_than_greater_than, start);
 				}
 				else
-					add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN, start);
+					add_token_start_word(_lexer, MY_token_type_greater_than, start);
 			}
 			else if(current == '&')
 			{
 				if(scroll == '&')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_AMPERSAND_AMPERSAND, start);
+					add_token_start_word(_lexer, MY_token_type_ampersand_ampersand, start);
 				}
 				else if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_AMPERSAND_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_ampersand_equals, start);
 				}
 				else
 				{
-					add_token_start_word(_lexer, MY_TOKEN_AMPERSAND, start);
+					add_token_start_word(_lexer, MY_token_type_ampersand, start);
 				}
 			}
 			else if(current == '|')
@@ -606,16 +606,16 @@ void MY_lex(MY_lexer_t *_lexer)
 				if(scroll == '|')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_VERTICAL_LINE_VERTICAL_LINE, start);
+					add_token_start_word(_lexer, MY_token_type_vertical_line_vertical_line, start);
 				}
 				else if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_VERTICAL_LINE_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_vertical_line_equals, start);
 				}
 				else
 				{
-					add_token_start_word(_lexer, MY_TOKEN_VERTICAL_LINE, start);
+					add_token_start_word(_lexer, MY_token_type_vertical_line, start);
 				}
 			}
 			else if(current == '%')
@@ -623,11 +623,11 @@ void MY_lex(MY_lexer_t *_lexer)
 				if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_MODULO_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_modulo_equals, start);
 				}
 				else
 				{
-					add_token_start_word(_lexer, MY_TOKEN_MODULO, start);
+					add_token_start_word(_lexer, MY_token_type_modulo, start);
 				}
 			}
 			else if(current == '^')
@@ -635,21 +635,21 @@ void MY_lex(MY_lexer_t *_lexer)
 				if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_HAT_EQUALS, start);
+					add_token_start_word(_lexer, MY_token_type_hat_equals, start);
 				}
 				else
 				{
-					add_token_start_word(_lexer, MY_TOKEN_HAT, start);
+					add_token_start_word(_lexer, MY_token_type_hat, start);
 
 				}
 			}
 			else if(current == '?')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_QUESTION_MARK, start);
+				add_token_start_word(_lexer, MY_token_type_question_mark, start);
 			}
 			else
 			{
-				add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
+				add_token_start_word(_lexer, MY_token_type_invalid, start);
 
 			}
 			space = false;
