@@ -1,7 +1,7 @@
 
 set(ZLX_COMMONS_CFILES ${ZLX_COMMONS_CFILES}
 	${CMAKE_CURRENT_SOURCE_DIR}/isa/ISA_zerolox.c
-	${CMAKE_CURRENT_SOURCE_DIR}/pseudo/PSUDO_operation.c
+	${CMAKE_CURRENT_SOURCE_DIR}/pseudo/PSUDO_Operation.c
 	${CMAKE_CURRENT_SOURCE_DIR}/syntax/SYTX_syntax.c
 )
 

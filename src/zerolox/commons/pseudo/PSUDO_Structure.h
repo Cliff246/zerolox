@@ -1,7 +1,7 @@
 #ifndef ZLX_PSUDO_STRUCTURE_HEADER
 #define ZLX_PSUDO_STRUCTURE_HEADER
 
-#include "PSUDO_operation.h"
+#include "PSUDO_Operation.h"
 
 typedef struct ZLX_PSUDO_Structure
 {
