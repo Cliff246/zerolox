@@ -9,65 +9,65 @@
 
 
 #define MY_TOKEN_TYPE_LIST(X)			\
-	X(EMPTY)							\
-	X(INVALID)							\
-	X(SPACE)							\
-	X(WORD)								\
-	X(INT)								\
-	X(FLOAT)							\
-	X(HEXDECIMAL)						\
-	X(SYMBOL)							\
-	X(STRING)							\
-	X(EXCLAIM)							\
-	X(EXCLAIM_EQUALS)					\
-	X(PARENTHESIS_OPEN)					\
-	X(PARENTHESIS_CLOSED)				\
-	X(CURLYBRACE_OPEN)					\
-	X(CURLYBRACE_CLOSED)				\
-	X(SQUAREBRACE_OPEN)					\
-	X(SQUAREBRACE_CLOSED)				\
-	X(ADD)								\
-	X(ADD_ADD)							\
-	X(ADD_EQUALS)						\
-	X(MINUS)							\
-	X(MINUS_MINUS)						\
-	X(MINUS_EQUALS)						\
-	X(SLASH)							\
-	X(SLASH_SLASH)						\
-	X(SLASH_EQUALS)						\
-	X(STAR)								\
-	X(STAR_STAR)						\
-	X(STAR_EQUALS)						\
-	X(COMMA)							\
-	X(COLON)							\
-	X(SEMICOLON)						\
-	X(EQUALS)							\
-	X(EQUALS_EQUALS)					\
-	X(EQUALS_LESS_THAN)					\
-	X(LESS_THAN_EQUALS)					\
-	X(LESS_THAN)						\
-	X(LESS_THAN_LESS_THAN)				\
-	X(LESS_THAN_LESS_THAN_EQUALS)		\
-	X(GREATER_THAN)						\
-	X(GREATER_THAN_EQUALS)				\
-	X(GREATER_THAN_GREATER_THAN)		\
-	X(GREATER_THAN_GREATER_THAN_EQUALS)	\
-	X(VERTICAL_LINE)					\
-	X(VERTICAL_LINE_VERTICAL_LINE)		\
-	X(VERTICAL_LINE_EQUALS)				\
-	X(AMPERSAND)						\
-	X(AMPERSAND_AMPERSAND)				\
-	X(AMPERSAND_EQUALS)					\
-	X(MODULO)							\
-	X(MODULO_EQUALS)					\
-	X(HAT)								\
-	X(HAT_EQUALS)						\
-	X(QUESTION_MARK)					\
-	X(PERIOD)							\
-	X(AT)								\
-	X(HASHTAG)							\
+	X(empty)							\
+	X(invalid)							\
+	X(space)							\
+	X(word)								\
+	X(int)								\
+	X(float)							\
+	X(hexdecimal)						\
+	X(symbol)							\
+	X(string)							\
+	X(exclaim)							\
+	X(exclaim_equals)					\
+	X(parenthesis_open)					\
+	X(parenthesis_closed)				\
+	X(curlybrace_open)					\
+	X(curlybrace_closed)				\
+	X(squarebrace_open)					\
+	X(squarebrace_closed)				\
+	X(add)								\
+	X(add_add)							\
+	X(add_equals)						\
+	X(minus)							\
+	X(minus_minus)						\
+	X(minus_equals)						\
+	X(slash)							\
+	X(slash_slash)						\
+	X(slash_equals)						\
+	X(star)								\
+	X(star_star)						\
+	X(star_equals)						\
+	X(comma)							\
+	X(colon)							\
+	X(semicolon)						\
+	X(equals)							\
+	X(equals_equals)					\
+	X(equals_less_than)					\
+	X(less_than_equals)					\
+	X(less_than)						\
+	X(less_than_less_than)				\
+	X(less_than_less_than_equals)		\
+	X(greater_than)						\
+	X(greater_than_equals)				\
+	X(greater_than_greater_than)		\
+	X(greater_than_greater_than_equals)	\
+	X(vertical_line)					\
+	X(vertical_line_vertical_line)		\
+	X(vertical_line_equals)				\
+	X(ampersand)						\
+	X(ampersand_ampersand)				\
+	X(ampersand_equals)					\
+	X(modulo)							\
+	X(modulo_equals)					\
+	X(hat)								\
+	X(hat_equals)						\
+	X(question_mark)					\
+	X(period)							\
+	X(at)								\
+	X(hashtag)							\
 
-#define MY_TOKEN_TYPE_ENUM_NAME(X) MY_TOKEN_ ## X
+#define MY_TOKEN_TYPE_ENUM_NAME(X) MY_token_type_ ## X
 #define MY_TOKEN_TYPE_ENUM(X) MY_TOKEN_TYPE_ENUM_NAME(X),
 
 //this needs to be totally renamed, it doesn't follow the proper naming format
@@ -82,7 +82,7 @@ typedef enum MY_token_type
 	MY_TOKEN_TYPE_LIST(MY_TOKEN_TYPE_ENUM)
 }MY_token_type_t;
 
-#define MY_TOKEN_TYPE_STRING(X) ("MY_TOKEN_"#X),
+#define MY_TOKEN_TYPE_STRING(X) ("MY_token_type_"#X),
 
 extern char *MY_token_type_names[];
 

@@ -38,20 +38,20 @@ static bool valid_form(const MY_token_type_t *tokens, int count) {
         MY_token_type_t t = tokens[i];
         switch (state) {
         case EXPECT_WORD:
-            if (t != MY_TOKEN_WORD)
+            if (t != MY_token_type_word)
                 return false;
             state = EXPECT_SEPARATOR;
             break;
         case EXPECT_DOT_VALUE:
-            if (t != MY_TOKEN_WORD &&
-                t != MY_TOKEN_INT)
+            if (t != MY_token_type_word &&
+                t != MY_token_type_int)
                 return false;
             state = EXPECT_SEPARATOR;
             break;
         case EXPECT_SEPARATOR:
-            if (t == MY_TOKEN_PERIOD)
+            if (t == MY_token_type_period)
                 state = EXPECT_DOT_VALUE;
-            else if (t == MY_TOKEN_ADD)
+            else if (t == MY_token_type_add)
                 state = EXPECT_WORD;
             else
                 return false;
@@ -73,12 +73,12 @@ static int next_space(MY_token_type_t buf[TYPE_BUFFER_SIZE], int index)
 	int space = -1;
 	for(int i = index; i < TYPE_BUFFER_SIZE; ++i)
 	{
-		if(buf[i] == MY_TOKEN_SPACE)
+		if(buf[i] == MY_token_type_space)
 		{
 			space = i;
 			break;
 		}
-		else if(buf[i] == MY_TOKEN_EMPTY)
+		else if(buf[i] == MY_token_type_empty)
 		{
 			break;
 		}
@@ -117,7 +117,7 @@ ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assemb
 
 	if(count >= TYPE_BUFFER_SIZE)
 		MY_FAULT("count >= 16");	
-	MY_token_type_t type_list[TYPE_BUFFER_SIZE] = {MY_TOKEN_EMPTY};
+	MY_token_type_t type_list[TYPE_BUFFER_SIZE] = {MY_token_type_empty};
 
 
 	for(int i = 0; i < count && i < TYPE_BUFFER_SIZE; ++i)
@@ -135,7 +135,7 @@ ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assemb
 	
 	
 	//ugh parser, or just be a dipshit and do all cases. i forgot how to do a parser.
-	if(type_list[0] == MY_TOKEN_WORD)
+	if(type_list[0] == MY_token_type_word)
 	{
 		
 	}	

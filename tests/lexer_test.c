@@ -9,12 +9,12 @@ static void check_tokens(void)
     char source[] = "12 _label:\n\t{} ++ +- %= ^= 0xAf 42 1.5 \"hi\" /: comment\nnext";
     MY_token_type_t types[] =
     {
-        MY_TOKEN_INT, MY_TOKEN_WORD, MY_TOKEN_COLON,
-        MY_TOKEN_CURLYBRACE_OPEN, MY_TOKEN_CURLYBRACE_CLOSED,
-        MY_TOKEN_ADD_ADD, MY_TOKEN_ADD, MY_TOKEN_MINUS,
-        MY_TOKEN_MODULO_EQUALS, MY_TOKEN_HAT_EQUALS,
-        MY_TOKEN_HEXDECIMAL, MY_TOKEN_INT, MY_TOKEN_FLOAT,
-        MY_TOKEN_STRING, MY_TOKEN_WORD
+        MY_token_type_int, MY_token_type_word, MY_token_type_colon,
+        MY_token_type_curlybrace_open, MY_token_type_curlybrace_closed,
+        MY_token_type_add_add, MY_token_type_add, MY_token_type_minus,
+        MY_token_type_modulo_equals, MY_token_type_hat_equals,
+        MY_token_type_hexdecimal, MY_token_type_int, MY_token_type_float,
+        MY_token_type_string, MY_token_type_word
     };
     MY_Lexer_t *lexer = MY_init_Lexer(source);
     MY_lex_Lexer(lexer);
@@ -51,7 +51,7 @@ int main(void)
     assert(lexer->ap__token_buffer[0].row == 2);
     assert(lexer->ap__token_buffer[0].column == 0);
     assert(lexer->ap__token_buffer[1].row == 3);
-    assert(lexer->ap__token_buffer[lexer->token_count - 1].type == MY_TOKEN_INVALID);
+    assert(lexer->ap__token_buffer[lexer->token_count - 1].type == MY_token_type_invalid);
     MY_free_Lexer(lexer);
     MY_free_Lexer(NULL);
     puts("lexer tests passed");
