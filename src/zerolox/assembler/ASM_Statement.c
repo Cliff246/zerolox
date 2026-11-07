@@ -65,7 +65,7 @@ static bool valid_form(const MY_token_type_t *tokens, int count) {
 
 static int next_space(MY_token_type_t buf[TYPE_BUFFER_SIZE], int index)
 {
-	
+
 	if(index < 0 || index >= TYPE_BUFFER_SIZE)
 	{
 		return -2;
@@ -87,13 +87,13 @@ static int next_space(MY_token_type_t buf[TYPE_BUFFER_SIZE], int index)
 }
 
 
-//the form for the mnemonic can roughly be 
+//the form for the mnemonic can roughly be
 //word dot word plus word dot word
 //it cannot be word dot
 //dot word dot
-//etc 
+//etc
 //
-//basically [word], [word dot word], [word dot word dot word] [word plus word] [word dot word plus word] 
+//basically [word], [word dot word], [word dot word dot word] [word plus word] [word dot word plus word]
 //shit
 //
 //isolating what's in and what's out
@@ -102,46 +102,46 @@ static int next_space(MY_token_type_t buf[TYPE_BUFFER_SIZE], int index)
 //end: [dot word]
 //middle: [word], [word plus word]
 //
-	
-	
+
+
 
 
 ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, int32_t start, int32_t count)
 {
 	if(start < 0 || count <= 0 )
 		MY_FAULT("failed");
-	int opcode_size = 0;	
+	int opcode_size = 0;
 	char opcode[1024] = {0};
 #define BUFFER_SIZE 128
 	char buffer[BUFFER_SIZE] = {0};
 
 	if(count >= TYPE_BUFFER_SIZE)
-		MY_FAULT("count >= 16");	
+		MY_FAULT("count >= 16");
 	MY_token_type_t type_list[TYPE_BUFFER_SIZE] = {MY_token_type_empty};
 
 
 	for(int i = 0; i < count && i < TYPE_BUFFER_SIZE; ++i)
 	{
-		type_list[i] = MY_get_token_type_Lexer(assembler->p__lexer, i + start);	
-	
+		type_list[i] = MY_get_token_type_Lexer(assembler->p__lexer, i + start);
+
 	}
 
-	
-	int first_group = next_space(type_list, 0); 
+
+	int first_group = next_space(type_list, 0);
 	if(first_group == -1 || first_group == 0)
 	{
 		MY_TODO;
 	}
-	
-	
+
+
 	//ugh parser, or just be a dipshit and do all cases. i forgot how to do a parser.
 	if(type_list[0] == MY_token_type_word)
 	{
-		
-	}	
+
+	}
 
 #undef BUFFER_SIZE
-	
+
 	ZLX_ASM_Statement_t *statement = ZLX_ASM_init_Statement();
 
 	MY_TODO;

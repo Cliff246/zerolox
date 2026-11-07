@@ -115,7 +115,7 @@ typedef struct MY_Lexer
 MY_Lexer_t *MY_init_Lexer(char *_string);
 int MY_get_token_string_Lexer(MY_Lexer_t *_lexer, int _position, char *_buffer, int _blength);
 int MY_get_substring_Lexer(MY_Lexer_t *_lexer, int _start, int _length, char *_buffer, int _blength);
-MY_token_type_t MY_get_token_type_Lexer(MY_Lexer_t *_lexer, int _index); 
+MY_token_type_t MY_get_token_type_Lexer(MY_Lexer_t *_lexer, int _index);
 void MY_lex_Lexer(MY_Lexer_t *_lexer);
 void MY_print_Lexer(MY_Lexer_t *_lexer);
 void MY_free_Lexer(MY_Lexer_t *_lexer);
@@ -131,16 +131,16 @@ void MY_free_Lexer(MY_Lexer_t *_lexer);
 //cpap = constant ptr, array of ptr's
 //cpapu = constant ptr, array of ptr unions (ie needs a dedicated free)
 //bleh bleh bleh... idk this is supposed to show you what needs to die and what not.
-//it should tell you what can be just raw free'd and what cannot be... 
+//it should tell you what can be just raw free'd and what cannot be...
 //i am cringe
 //a means [index]
-//p means ptr. 
+//p means ptr.
 //i need another for has complex free. idk, honest to god
 // fuck ,e
 typedef struct MY_Token_group
 {
-	//i actually need to remember shit... it's ptr, array of ptr's not 	
-	MY_Lexer_t *cp__lexer;	
+	//i actually need to remember shit... it's ptr, array of ptr's not
+	MY_Lexer_t *cp__lexer;
 	int start, length;
 }MY_Token_group_t;
 

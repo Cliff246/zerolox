@@ -225,10 +225,10 @@ int MY_get_substring_Lexer(MY_Lexer_t *_lexer, int _start, int _length, char *_b
 
 MY_token_type_t MY_get_token_type_Lexer(MY_Lexer_t *_lexer, int _index)
 {
-	
+
 	if(_index < 0 || _index >= _lexer->token_count)
 	{
-		return MY_token_type_invalid;	
+		return MY_token_type_invalid;
 	}
 	return _lexer->ap__token_buffer[_index].type;
 }
@@ -282,10 +282,10 @@ void MY_lex_Lexer(MY_Lexer_t *_lexer)
 		{
 			if(space == false)
 			{
-				add_token_start_word(_lexer, MY_token_type_space, start);	
+				add_token_start_word(_lexer, MY_token_type_space, start);
 				space = true;
 			}
-		}	
+		}
 		else
 		{
 			if(current == '\n' || current == '\r')
@@ -337,7 +337,7 @@ void MY_lex_Lexer(MY_Lexer_t *_lexer)
 				if(scroll == 'x' || scroll == 'X')
 				{
 					has_hexcode = true;
-				}	
+				}
 
 				if(current == '0')
 				{
@@ -352,7 +352,7 @@ void MY_lex_Lexer(MY_Lexer_t *_lexer)
 					if(!strchr(hex_chars, scroll) || scroll == 0)
 					{
 						add_token_start_word(_lexer, MY_token_type_invalid, start);
-	
+
 					}
 					else
 					{
@@ -381,7 +381,7 @@ void MY_lex_Lexer(MY_Lexer_t *_lexer)
 				 		scroll = advance(_lexer);
 						if(scroll == '.')
 							has_found_dot = true;
-					}	
+					}
 					if(has_found_dot == true)
 					{
 						advance(_lexer);
@@ -654,7 +654,7 @@ void MY_lex_Lexer(MY_Lexer_t *_lexer)
 			}
 			space = false;
 		}
-		
+
 		//advance(lexer);
 
 	}
@@ -676,7 +676,7 @@ void MY_free_Lexer(MY_Lexer_t *_lexer)
 
 
 //don't fucking free this without the lexer
-//don't use this without the lexer, 
+//don't use this without the lexer,
 //fuck don't do this
 MY_Token_group_t MY_init_Token_group(MY_Lexer_t *_lexer, int _start, int _length)
 {
@@ -694,5 +694,5 @@ MY_Token_group_t MY_init_Token_group(MY_Lexer_t *_lexer, int _start, int _length
 void MY_free_Token_group(MY_Token_group_t *group)
 {
 	free(group);
-	
+
 }

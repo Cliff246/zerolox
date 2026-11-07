@@ -10,7 +10,7 @@ ZLX_EMU_Context_t *ZLX_EMU_init_Context()
 	ZLX_EMU_Context_t *context = malloc(sizeof(ZLX_EMU_Context_t));
 	if(!context)
 		MY_FAULT("malloc failed");
-	ZLX_EMU_Machine_t *machine = ZLX_EMU_init_Machine(); 
+	ZLX_EMU_Machine_t *machine = ZLX_EMU_init_Machine();
 	if(!machine)
 		MY_FAULT("machine ptr null");
 	context->p__machine = machine;
@@ -28,7 +28,7 @@ void ZLX_EMU_load_file_Context(ZLX_EMU_Context_t *_context, char *_path)
 
 	ZLX_EMU_load_image_Machine(_context->p__machine, data, size);
 
-	free(data);	
+	free(data);
 
 }
 
@@ -44,5 +44,5 @@ void ZLX_EMU_step_Context(ZLX_EMU_Context_t *_context)
 void ZLX_EMU_free_Context(ZLX_EMU_Context_t *_context)
 {
 	ZLX_EMU_free_Machine(_context->p__machine);
-	free(_context);	
+	free(_context);
 }

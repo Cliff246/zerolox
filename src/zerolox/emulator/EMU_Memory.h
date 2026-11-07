@@ -11,7 +11,7 @@ typedef struct ZLX_EMU_Memory
 	uint8_t *ap__memory;
 
 	uint64_t size;
-	
+
 }ZLX_EMU_Memory_t;
 
 ZLX_EMU_Memory_t *ZLX_EMU_init_Memory(uint64_t _size);

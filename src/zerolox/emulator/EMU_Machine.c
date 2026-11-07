@@ -53,7 +53,7 @@ void ZLX_EMU_step_Machine(ZLX_EMU_Machine_t *_machine)
 
 		output = ZLX_EMU_minor_execution(_machine, instruction.u__minor);
 	}
-	ZLX_EMU_solve__CPU(cpu, output, instruction._size); 
+	ZLX_EMU_solve__CPU(cpu, output, instruction._size);
 }
 
 
