@@ -1,6 +1,6 @@
-#ifndef ZLX_EMU_CPU_HEADER
+#ifndef ZLX_EMU__CPU_HEADER
 
-#define ZLX_EMU_CPU_HEADER
+#define ZLX_EMU__CPU_HEADER
 
 #include <stdint.h>
 #include <stdbool.h>

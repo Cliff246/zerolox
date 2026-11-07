@@ -88,7 +88,7 @@ extern char *MY_token_type_names[];
 
 
 
-typedef struct MY_token
+typedef struct MY_Token
 {
 	MY_token_type_t type;
 	int start;
@@ -97,7 +97,7 @@ typedef struct MY_token
 	int row;
 }MY_Token_t;
 
-typedef struct MY_lexer
+typedef struct MY_Lexer
 {
 	char *ap__string;
 	int string_length;
