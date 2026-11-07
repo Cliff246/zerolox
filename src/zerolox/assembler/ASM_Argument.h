@@ -5,15 +5,15 @@
 
 typedef enum ZLX_ASM_argument_type
 {
-	ZLX_ASM_Argument_type_number,
-	ZLX_ASM_Argument_type_register,
-	ZLX_ASM_Argument_type_symbol,
-}ZLX_ASM_Argument_type_t;
+	ZLX_ASM_argument_type_number,
+	ZLX_ASM_argument_type_register,
+	ZLX_ASM_argument_type_symbol,
+}ZLX_ASM_argument_type_t;
 
 //this could be actually so bad
 typedef struct ZLX_ASM_Argument
 {
-	ZLX_ASM_Argument_type_t type;
+	ZLX_ASM_argument_type_t type;
 
 	union
 	{

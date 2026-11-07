@@ -1,6 +1,6 @@
 # Zerolox C Naming and Formatting Guide
 
-Version: 0.2 (initial repository draft)  
+Version: 0.3 (enum values and all-uppercase class clarification)  
 Scope: Zerolox C source, shared libraries, and related code.  
 Status: Naming principles approved for a conservative cleanup; unresolved conventions below are **not** authorization for speculative renames.
 
@@ -48,15 +48,16 @@ Verb-first naming is the general rule. `init` and `free` are the conventional li
 
 ### All-uppercase class names
 
-When the class itself is all uppercase, use **two underscores** at that boundary; `__CPU` is intentional:
+When the class itself is **entirely uppercase**, use **two underscores** at the class boundary. This is a general rule for *any* all-uppercase class (for example, `CPU` or `FPGA`), not a special case for the CPU:
 
     ZLX_EMU_init__CPU(...)
     ZLX_EMU_free__CPU(...)
     ZLX_EMU_get_pc__CPU(...)
+    EXAMPLE_NS_init__FPGA(...)
 
 The related type and filename may also preserve it: `ZLX_EMU__CPU_t`, `EMU__CPU.c`.
 
-**Do not collapse these double underscores.**
+**Do not collapse these double underscores or replace them with single underscores.**
 
 ### Static functions
 
@@ -75,7 +76,16 @@ Enum type/category names should be **lowercase**, rather than using class-style 
 
     ZLX_ASM_statement_type_t
 
-The precise spelling/casing of *enumerator constants* is not yet fully specified; do not rename those speculatively.
+**Enumerator values begin with the exact enum type name without the `_t` suffix**, followed by a descriptive value suffix. Both enum type names and the corresponding value prefix are lowercase after the uppercase namespace pair:
+
+    ZLX_ASM_statement_type_t
+    ZLX_ASM_statement_type_invalid
+    ZLX_ASM_statement_type_operation
+
+    ZLX_ISA_minor_operation_t
+    ZLX_ISA_minor_operation_add
+
+For enums defined through X-macros, keep the generated value names consistent with the enum type as well. Apply renames consistently to all references; preserve the underlying numeric values and declaration order.
 
 Class-specific filenames use capitalized class identifiers:
 
@@ -145,7 +155,6 @@ Avoid sweeping formatting of unrelated files where that would obscure meaningful
 
 ## 9. Still to be specified
 
-- Complete enumerator-value casing and naming.
 - Union and auxiliary-type naming.
 - Full pointer/array/complex-cleanup prefix grammar.
 - Exact formatting defaults in areas where established files differ.

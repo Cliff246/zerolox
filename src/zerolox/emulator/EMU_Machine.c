@@ -30,38 +30,38 @@ ZLX_EMU_Machine_t *ZLX_EMU_init_Machine()
 }
 
 
-void ZLX_EMU_image_Machine(ZLX_EMU_Machine_t *machine, char *_image, uint64_t size)
+void ZLX_EMU_load_image_Machine(ZLX_EMU_Machine_t *_machine, char *_image, uint64_t _size)
 {
-	ZLX_EMU_set_Memory(machine->p__memory, _image, size);
+	ZLX_EMU_set_Memory(_machine->p__memory, _image, _size);
 }
 
-void ZLX_EMU_step_Machine(ZLX_EMU_Machine_t *machine)
+void ZLX_EMU_step_Machine(ZLX_EMU_Machine_t *_machine)
 {
-	ZLX_EMU__CPU_t *cpu = machine->p__cpu;
+	ZLX_EMU__CPU_t *cpu = _machine->p__cpu;
 
 
 
-	ZLX_ISA_Instruction_t instruction =	ZLX_EMU_decode_instruction(machine);
+	ZLX_ISA_Instruction_t instruction =	ZLX_EMU_decode_instruction(_machine);
 
 	ZLX_EMU__CPU_output_t output;
-	if(instruction.type == ZLX_ISA_Major_type)
+	if(instruction.type == ZLX_ISA_instruction_type_major)
 	{
-		output = ZLX_EMU_major_execution(machine, instruction.u__major);
+		output = ZLX_EMU_major_execution(_machine, instruction.u__major);
 	}
-	else if(instruction.type == ZLX_ISA_Minor_type)
+	else if(instruction.type == ZLX_ISA_instruction_type_minor)
 	{
 
-		output = ZLX_EMU_minor_execution(machine, instruction.u__minor);
+		output = ZLX_EMU_minor_execution(_machine, instruction.u__minor);
 	}
-	ZLX_EMU_solve__CPU(cpu, output, instruction.size); 
+	ZLX_EMU_solve__CPU(cpu, output, instruction._size);
 }
 
 
-void ZLX_EMU_free_Machine(ZLX_EMU_Machine_t *machine)
+void ZLX_EMU_free_Machine(ZLX_EMU_Machine_t *_machine)
 {
-	ZLX_EMU_free_Memory(machine->p__memory);
-	ZLX_EMU_free__CPU(machine->p__cpu);
-	free(machine);
+	ZLX_EMU_free_Memory(_machine->p__memory);
+	ZLX_EMU_free__CPU(_machine->p__cpu);
+	free(_machine);
 }
 
 

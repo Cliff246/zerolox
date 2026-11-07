@@ -10,11 +10,11 @@
 
 typedef enum ZLX_ASM_statement_type
 {
-	ZLX_ASM_Statement_type_invalid,	
-	ZLX_ASM_Statement_type_operation,	
-	ZLX_ASM_Statement_type_label,	
-	ZLX_ASM_Statement_type_directive,	
-}ZLX_ASM_Statement_type_t;
+	ZLX_ASM_statement_type_invalid,	
+	ZLX_ASM_statement_type_operation,	
+	ZLX_ASM_statement_type_label,	
+	ZLX_ASM_statement_type_directive,	
+}ZLX_ASM_statement_type_t;
 
 //will probably go to it's own file eventually
 typedef struct ZLX_ASM_Directive
@@ -31,7 +31,7 @@ typedef struct ZLX_ASM_Label
 //too get a statement it really should consume a token list. or at least something above -> statement or such, idk.
 typedef struct ZLX_ASM_Statement
 {
-	ZLX_ASM_Statement_type_t type;	
+	ZLX_ASM_statement_type_t type;	
 	union 
 	{
 		ZLX_ASM_Operation_t u__operation;
@@ -44,7 +44,7 @@ ZLX_ASM_Statement_t *ZLX_ASM_init_Statement(int start, int count);
 void ZLX_ASM_free_Statement(ZLX_ASM_Statement_t *statement);
 
 
-ZLX_ASM_Statement_type_t ZLX_ASM_classify_statement(
+ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(
 
 ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, int32_t start, int32_t count);
 

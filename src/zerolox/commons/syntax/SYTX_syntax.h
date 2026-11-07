@@ -11,14 +11,14 @@
 
 typedef enum ZLX_SYTX_pattern_form
 {
-	ZLX_SYTX_Pattern_form_2_register,
-}ZLX_SYTX_Pattern_form_t;
+	ZLX_SYTX_pattern_form_2_register,
+}ZLX_SYTX_pattern_form_t;
 
 
 typedef struct ZLX_SYTX_Mnemonic
 {
 	ZLX_ISA_Instruction_type_t type;
-	ZLX_SYTX_Pattern_form_t form;
+	ZLX_SYTX_pattern_form_t form;
 	uint16_t opcode;
 	char a__mnemonic[ZLX_SYTX_MNEMONIC_SIZE];
 }ZLX_SYTX_Mnemonic_t;

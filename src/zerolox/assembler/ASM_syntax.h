@@ -1,7 +1,7 @@
 #ifndef ZLX_ASM_SYNTAX_HEADER
 #define ZLX_ASM_SYNTAX_HEADER
 
-#include "pseudo/PSUDO_operation.h"
+#include "pseudo/PSUDO_Operation.h"
 #include "ASM_Statement.h"
 #include <stdint.h>
 
