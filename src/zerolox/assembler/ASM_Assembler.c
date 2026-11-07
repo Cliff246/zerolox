@@ -1,7 +1,7 @@
 
 #include "ASM_Assembler.h"
 #include "MY_commons.h"
-#include "MY_lexer.h"
+#include "MY_Lexer.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,9 +54,9 @@ void ZLX_ASM_lex_Assembler(ZLX_ASM_Assembler_t *assembler)
 		MY_FAULT("no contents avilable");
 
 	//this isn't of the name, should be MY_init_Lexer, but i failed, oh well
-	MY_lexer_t *lexer = MY_initialize_lexer(assembler->pa__file_contents);
+	MY_Lexer_t *lexer = MY_init_Lexer(assembler->pa__file_contents);
 
-	MY_lex(lexer);
+	MY_lex_Lexer(lexer);
 	assembler->p__lexer = lexer;
 	
 	return;

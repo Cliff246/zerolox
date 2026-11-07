@@ -1,7 +1,7 @@
 #ifndef ZLX_ASM_ASSEMBLER_HEADER
 #define ZLX_ASM_ASSEMBLER_HEADER
 
-#include "MY_lexer.h"
+#include "MY_Lexer.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -13,7 +13,7 @@ typedef struct ZLX_ASM_Assembler
 	char *pa__file_contents;
 	uint64_t file_contents_size; 
 
-	MY_lexer_t *p__lexer;
+	MY_Lexer_t *p__lexer;
 
 
 }ZLX_ASM_Assembler_t;
