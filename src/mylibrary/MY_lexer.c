@@ -256,7 +256,7 @@ MY_lexer_t *MY_initialize_lexer(char *_string)
 
 void MY_lex(MY_lexer_t *_lexer)
 {
-
+	bool space = false;
 
 	while(_lexer->position < _lexer->string_length)
 	{
@@ -269,396 +269,381 @@ void MY_lex(MY_lexer_t *_lexer)
 		int stop;
 		if(current == ' ' || current == '\t')
 		{
-		}
-		else if(current == '\n' || current == '\r')
+			if(space == false)
+			{
+				add_token_start_word(_lexer, MY_TOKEN_SPACE, start);	
+				space = true;
+			}
+		}	
+		else
 		{
-
-		}
-
-		else if(isalpha((unsigned char)current) || current == '_')
-		{
-			has_character_ctype_or_string(_lexer, isalnum, "_");
-
-			add_token_start_word(_lexer, MY_TOKEN_WORD, start);
-		}
-		else if(current == '\"')
-		{
-			while(scroll != '\0' && scroll != '\n' && scroll != '\"')
+			if(current == '\n' || current == '\r')
 			{
-				scroll = advance(_lexer);
-			}
-			if(scroll == '\"')
-			{
-				advance(_lexer);
-			}
-			else
-			{
-				stop = position(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
-				continue;
-			}
-			stop = position(_lexer);
-			MY_token_t range = init_token(MY_TOKEN_STRING, start + 1, stop - 1, _lexer->tcolumn, _lexer->trow);
-			add_token(_lexer, range);
-
-		}
-		else if(current == '!')
-		{
-			if(scroll == '=')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_EXCLAIM_EQUALS, start);
 
 			}
-			else
-				add_token_start_word(_lexer, MY_TOKEN_EXCLAIM, start);
 
-		}
-		else if(isdigit((unsigned char)current))
-		{
-			bool has_hexcode = false, has_zero_start = false;
-			if(scroll == 'x' || scroll == 'X')
+			else if(isalpha((unsigned char)current) || current == '_')
 			{
-				has_hexcode = true;
+				has_character_ctype_or_string(_lexer, isalnum, "_");
+
+				add_token_start_word(_lexer, MY_TOKEN_WORD, start);
 			}
-
-			if(current == '0')
+			else if(current == '\"')
 			{
-				has_zero_start = true;
-			}
-
-			if(has_hexcode && has_zero_start)
-			{
-				scroll = advance(_lexer);
-				const char *hex_chars = "0123456789aAbBcCdDeEfF";
-				//printf("%c\n", scroll);
-				if(!strchr(hex_chars, scroll) || scroll == 0)
-				{
-					add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
-
-				}
-				else
-				{
-					has_character_string(_lexer, (char *)hex_chars);
-
-					add_token_start_word(_lexer, MY_TOKEN_HEXDECIMAL, start);
-				}
-			}
-			else if(has_hexcode && !has_zero_start)
-			{
-				add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
-			}
-			else if(scroll == '.')
-			{
-				//floating point
-				advance(_lexer);
-				has_character_ctype(_lexer, isdigit);
-				add_token_start_word(_lexer, MY_TOKEN_FLOAT, start);
-			}
-			else
-			{
-				//integer
-				bool has_found_dot = false;
-				while(isdigit((unsigned char)scroll) && scroll != '\0' && scroll != '\n')
-				{
-				 	scroll = advance(_lexer);
-					if(scroll == '.')
-						has_found_dot = true;
-				}
-				if(has_found_dot == true)
-				{
-					advance(_lexer);
-					has_character_ctype(_lexer, isdigit);
-					add_token_start_word(_lexer, MY_TOKEN_FLOAT, start);
-
-				}
-				else
-				{
-					add_token_start_word(_lexer, MY_TOKEN_INT, start);
-				}
-			}
-
-
-		}
-		else if(current == '.')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_PERIOD, start);
-		}
-		else if(current == '(')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_PARENTHESIS_OPEN, start);
-		}
-		else if(current == ')')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_PARENTHESIS_CLOSED, start);
-		}
-		else if(current == '[')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_SQUAREBRACE_OPEN, start);
-		}
-		else if(current == ']')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_SQUAREBRACE_CLOSED, start);
-
-		}
-		else if(current == '{')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_CURLYBRACE_OPEN, start);
-
-		}
-		else if(current == '}')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_CURLYBRACE_CLOSED, start);
-
-		}
-		else if(current == '+')
-		{
-			if(scroll == '=')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_ADD_EQUALS, start);
-
-			}
-			else if(scroll == '+')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_ADD_ADD, start);
-
-			}
-			else
-			{
-				add_token_start_word(_lexer, MY_TOKEN_ADD, start);
-			}
-		}
-		else if(current == '-')
-		{
-			if(scroll == '=')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_MINUS_EQUALS, start);
-
-			}
-			else if(scroll == '-')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_MINUS_MINUS, start);
-
-			}
-			else
-			{
-				add_token_start_word(_lexer, MY_TOKEN_MINUS, start);
-			}
-		}
-		else if(current == '/')
-		{
-			if(scroll == '/')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_SLASH_SLASH, start);
-
-			}
-			else if(scroll == '=')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_SLASH_EQUALS, start);
-
-			}
-			else if(scroll == ':')
-			{
-				//printf("found this\n");
-				//_lexer->print_each = true;
-				advance(_lexer);
-				while(scroll != '\0' && scroll != '\n' )
+				while(scroll != '\0' && scroll != '\n' && scroll != '\"')
 				{
 					scroll = advance(_lexer);
 				}
+				if(scroll == '\"')
+				{
+					advance(_lexer);
+				}
+				else
+				{
+					stop = position(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
+					continue;
+				}
+				stop = position(_lexer);
+				MY_token_t range = init_token(MY_TOKEN_STRING, start + 1, stop - 1, _lexer->tcolumn, _lexer->trow);
+				add_token(_lexer, range);
+			}
+			else if(current == '!')
+			{
+				if(scroll == '=')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_EXCLAIM_EQUALS, start);
+
+				}
+				else
+					add_token_start_word(_lexer, MY_TOKEN_EXCLAIM, start);
+
+			}
+			else if(isdigit((unsigned char)current))
+			{
+				bool has_hexcode = false, has_zero_start = false;
+				if(scroll == 'x' || scroll == 'X')
+				{
+					has_hexcode = true;
+				}	
+
+				if(current == '0')
+				{
+					has_zero_start = true;
+				}
+
+				if(has_hexcode && has_zero_start)
+				{
+					scroll = advance(_lexer);
+					const char *hex_chars = "0123456789aAbBcCdDeEfF";
+				//printf("%c\n", scroll);
+					if(!strchr(hex_chars, scroll) || scroll == 0)
+					{
+						add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
+	
+					}
+					else
+					{
+						has_character_string(_lexer, (char *)hex_chars);
+
+						add_token_start_word(_lexer, MY_TOKEN_HEXDECIMAL, start);
+					}
+				}
+				else if(has_hexcode && !has_zero_start)
+				{
+					add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
+				}
+				else if(scroll == '.')
+				{
+					//floating point
+					advance(_lexer);
+					has_character_ctype(_lexer, isdigit);
+					add_token_start_word(_lexer, MY_TOKEN_FLOAT, start);
+				}
+				else
+				{
+					//integer
+					bool has_found_dot = false;
+					while(isdigit((unsigned char)scroll) && scroll != '\0' && scroll != '\n')
+					{
+				 		scroll = advance(_lexer);
+						if(scroll == '.')
+							has_found_dot = true;
+					}	
+					if(has_found_dot == true)
+					{
+						advance(_lexer);
+						has_character_ctype(_lexer, isdigit);
+						add_token_start_word(_lexer, MY_TOKEN_FLOAT, start);
+
+					}
+					else
+					{
+						add_token_start_word(_lexer, MY_TOKEN_INT, start);
+					}
+				}
+			}
+			else if(current == '.')
+			{
+				add_token_start_word(_lexer, MY_TOKEN_PERIOD, start);
+			}
+			else if(current == '(')
+			{
+				add_token_start_word(_lexer, MY_TOKEN_PARENTHESIS_OPEN, start);
+			}
+			else if(current == ')')
+			{
+				add_token_start_word(_lexer, MY_TOKEN_PARENTHESIS_CLOSED, start);
+			}
+			else if(current == '[')
+			{
+				add_token_start_word(_lexer, MY_TOKEN_SQUAREBRACE_OPEN, start);
+			}
+			else if(current == ']')
+			{
+				add_token_start_word(_lexer, MY_TOKEN_SQUAREBRACE_CLOSED, start);
+
+			}
+			else if(current == '{')
+			{
+				add_token_start_word(_lexer, MY_TOKEN_CURLYBRACE_OPEN, start);
+			}
+			else if(current == '}')
+			{
+				add_token_start_word(_lexer, MY_TOKEN_CURLYBRACE_CLOSED, start);
+			}
+			else if(current == '+')
+			{
+				if(scroll == '=')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_ADD_EQUALS, start);
+				}
+				else if(scroll == '+')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_ADD_ADD, start);
+				}
+				else
+				{
+					add_token_start_word(_lexer, MY_TOKEN_ADD, start);
+				}
+			}
+			else if(current == '-')
+			{
+				if(scroll == '=')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_MINUS_EQUALS, start);
+				}
+				else if(scroll == '-')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_MINUS_MINUS, start);
+				}
+				else
+				{
+					add_token_start_word(_lexer, MY_TOKEN_MINUS, start);
+				}
+			}
+			else if(current == '/')
+			{
+				if(scroll == '/')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_SLASH_SLASH, start);
+				}
+				else if(scroll == '=')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_SLASH_EQUALS, start);
+				}
+				else if(scroll == ':')
+				{
+					//printf("found this\n");
+					//_lexer->print_each = true;
+					advance(_lexer);
+					while(scroll != '\0' && scroll != '\n' )
+					{
+						scroll = advance(_lexer);
+					}
 				//_lexer->print_each = false;
 
+				}
+				else
+				{
+					add_token_start_word(_lexer, MY_TOKEN_SLASH, start);
+				}
 			}
-			else
+			else if(current == '*')
 			{
-				add_token_start_word(_lexer, MY_TOKEN_SLASH, start);
-
+				if(scroll == '*')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_STAR_STAR, start);
+				}
+				else if(scroll == '=')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_STAR_EQUALS, start);
+				}
+				else
+				{
+					add_token_start_word(_lexer, MY_TOKEN_STAR, start);
+				}
 			}
-		}
-		else if(current == '*')
-		{
-			if(scroll == '*')
+			else if(current == ',')
 			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_STAR_STAR, start);
-
-			}
-			else if(scroll == '=')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_STAR_EQUALS, start);
-
-			}
-			else
-			{
-				add_token_start_word(_lexer, MY_TOKEN_STAR, start);
-			}
-		}
-		else if(current == ',')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_COMMA, start);
-
-		}
-		else if(current == ':')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_COLON, start);
-
-		}
-
-		else if(current == ';')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_SEMICOLON, start);
-
-		}
-		else if(current == '@')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_AT, start);
-
-		}
-		else if(current == '#')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_HASHTAG, start);
-
-		}
-		else if(current == '=')
-		{
-			if(scroll == '=')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_EQUALS_EQUALS, start);
-			}
-			else if(scroll == '>')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_EQUALS_LESS_THAN, start);
-			}
-			else
-			{
-				add_token_start_word(_lexer, MY_TOKEN_EQUALS, start);
-			}
-		}
-		else if(current == '<')
-		{
-			if(scroll == '=')
-			{
-
-				scroll = advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_LESS_THAN_EQUALS, start);
+				add_token_start_word(_lexer, MY_TOKEN_COMMA, start);
 
 			}
-			else if(scroll == '<')
+			else if(current == ':')
 			{
-				scroll = advance(_lexer);
+				add_token_start_word(_lexer, MY_TOKEN_COLON, start);
+			}
+			else if(current == ';')
+			{
+				add_token_start_word(_lexer, MY_TOKEN_SEMICOLON, start);
+			}
+			else if(current == '@')
+			{
+				add_token_start_word(_lexer, MY_TOKEN_AT, start);
+			}
+			else if(current == '#')
+			{
+				add_token_start_word(_lexer, MY_TOKEN_HASHTAG, start);
+			}
+			else if(current == '=')
+			{
 				if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_LESS_THAN_LESS_THAN_EQUALS, start);
-
+					add_token_start_word(_lexer, MY_TOKEN_EQUALS_EQUALS, start);
+				}
+				else if(scroll == '>')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_EQUALS_LESS_THAN, start);
 				}
 				else
-					add_token_start_word(_lexer, MY_TOKEN_LESS_THAN_LESS_THAN, start);
+				{
+					add_token_start_word(_lexer, MY_TOKEN_EQUALS, start);
+				}
 			}
-			else
-				add_token_start_word(_lexer, MY_TOKEN_LESS_THAN, start);
-		}
-		else if(current == '>')
-		{
-			if(scroll == '=')
+			else if(current == '<')
 			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN_EQUALS, start);
+				if(scroll == '=')
+				{
+					scroll = advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_LESS_THAN_EQUALS, start);
+				}
+				else if(scroll == '<')
+				{
+					scroll = advance(_lexer);
+					if(scroll == '=')
+					{
+						advance(_lexer);
+						add_token_start_word(_lexer, MY_TOKEN_LESS_THAN_LESS_THAN_EQUALS, start);
+					}
+					else
+						add_token_start_word(_lexer, MY_TOKEN_LESS_THAN_LESS_THAN, start);
+				}
+				else
+					add_token_start_word(_lexer, MY_TOKEN_LESS_THAN, start);
 			}
-			else if(scroll == '>')
+			else if(current == '>')
 			{
-				scroll = advance(_lexer);
 				if(scroll == '=')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN_GREATER_THAN_EQUALS, start);
-
+					add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN_EQUALS, start);
+				}
+				else if(scroll == '>')
+				{
+					scroll = advance(_lexer);
+					if(scroll == '=')
+					{
+						advance(_lexer);
+						add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN_GREATER_THAN_EQUALS, start);
+					}
+					else
+						add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN_GREATER_THAN, start);
 				}
 				else
-					add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN_GREATER_THAN, start);
+					add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN, start);
+			}
+			else if(current == '&')
+			{
+				if(scroll == '&')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_AMPERSAND_AMPERSAND, start);
+				}
+				else if(scroll == '=')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_AMPERSAND_EQUALS, start);
+				}
+				else
+				{
+					add_token_start_word(_lexer, MY_TOKEN_AMPERSAND, start);
+				}
+			}
+			else if(current == '|')
+			{
+				if(scroll == '|')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_VERTICAL_LINE_VERTICAL_LINE, start);
+				}
+				else if(scroll == '=')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_VERTICAL_LINE_EQUALS, start);
+				}
+				else
+				{
+					add_token_start_word(_lexer, MY_TOKEN_VERTICAL_LINE, start);
+				}
+			}
+			else if(current == '%')
+			{
+				if(scroll == '=')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_MODULO_EQUALS, start);
+				}
+				else
+				{
+					add_token_start_word(_lexer, MY_TOKEN_MODULO, start);
+				}
+			}
+			else if(current == '^')
+			{
+				if(scroll == '=')
+				{
+					advance(_lexer);
+					add_token_start_word(_lexer, MY_TOKEN_HAT_EQUALS, start);
+				}
+				else
+				{
+					add_token_start_word(_lexer, MY_TOKEN_HAT, start);
+
+				}
+			}
+			else if(current == '?')
+			{
+				add_token_start_word(_lexer, MY_TOKEN_QUESTION_MARK, start);
 			}
 			else
-				add_token_start_word(_lexer, MY_TOKEN_GREATER_THAN, start);
-		}
-		else if(current == '&')
-		{
-			if(scroll == '&')
 			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_AMPERSAND_AMPERSAND, start);
-			}
-			else if(scroll == '=')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_AMPERSAND_EQUALS, start);
-			}
-			else
-			{
-				add_token_start_word(_lexer, MY_TOKEN_AMPERSAND, start);
-			}
-		}
-		else if(current == '|')
-		{
-			if(scroll == '|')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_VERTICAL_LINE_VERTICAL_LINE, start);
-			}
-			else if(scroll == '=')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_VERTICAL_LINE_EQUALS, start);
-			}
-			else
-			{
-				add_token_start_word(_lexer, MY_TOKEN_VERTICAL_LINE, start);
-			}
-		}
-		else if(current == '%')
-		{
-			if(scroll == '=')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_MODULO_EQUALS, start);
+				add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
 
 			}
-			else
-			{
-				add_token_start_word(_lexer, MY_TOKEN_MODULO, start);
-
-			}
+			space = false;
 		}
-		else if(current == '^')
-		{
-			if(scroll == '=')
-			{
-				advance(_lexer);
-				add_token_start_word(_lexer, MY_TOKEN_HAT_EQUALS, start);
-			}
-			else
-			{
-				add_token_start_word(_lexer, MY_TOKEN_HAT, start);
-
-			}
-		}
-		else if(current == '?')
-		{
-			add_token_start_word(_lexer, MY_TOKEN_QUESTION_MARK, start);
-		}
-		else
-		{
-			add_token_start_word(_lexer, MY_TOKEN_INVALID, start);
-
-		}
+		
 		//advance(lexer);
 
 	}

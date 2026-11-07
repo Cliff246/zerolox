@@ -11,6 +11,7 @@
 #define MY_TOKEN_TYPE_LIST(X)			\
 	X(EMPTY)							\
 	X(INVALID)							\
+	X(SPACE)							\
 	X(WORD)								\
 	X(INT)								\
 	X(FLOAT)							\

@@ -57,7 +57,7 @@ void ZLX_ASM_lex_Assembler(ZLX_ASM_Assembler_t *assembler)
 	MY_lexer_t *lexer = MY_initialize_lexer(assembler->p__file_contents);
 
 	MY_lex(lexer);
-
+	assembler->p__lexer = lexer;
 	
 	return;
 }
