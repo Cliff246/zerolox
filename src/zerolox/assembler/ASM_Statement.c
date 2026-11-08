@@ -106,6 +106,33 @@ static int next_space(MY_token_type_t buf[TYPE_BUFFER_SIZE], int index)
 //
 
 
+struct StatementInformation
+{
+	MY_Token_group_t group;
+	MY_token_type_t token_types[TYPE_BUFFER_SIZE];
+};
+
+
+
+static struct StatementInformation get_statement_tokentypes(MY_Token_group_t _group)
+{
+	if(count >= TYPE_BUFFER_SIZE)
+		MY_FAULT("count >= 16");
+	MY_token_type_t type_list[TYPE_BUFFER_SIZE] = {MY_token_type_empty};
+
+
+	for(int i = 0; i < count && i < TYPE_BUFFER_SIZE; ++i)
+	{
+		type_list[i] = MY_get_token_type_Lexer(assembler->p__lexer, i + start);
+	}
+
+}	
+
+
+ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group)
+{
+
+}
 
 
 ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, int32_t start, int32_t count)
@@ -116,15 +143,6 @@ ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assemb
 	char opcode[1024] = {0};
 #define BUFFER_SIZE 128
 	char buffer[BUFFER_SIZE] = {0};
-
-	if(count >= TYPE_BUFFER_SIZE)
-		MY_FAULT("count >= 16");
-	MY_token_type_t type_list[TYPE_BUFFER_SIZE] = {MY_token_type_empty};
-
-
-	for(int i = 0; i < count && i < TYPE_BUFFER_SIZE; ++i)
-	{
-		type_list[i] = MY_get_token_type_Lexer(assembler->p__lexer, i + start);
 
 	}
 

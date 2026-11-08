@@ -137,12 +137,18 @@ void MY_free_Lexer(MY_Lexer_t *_lexer);
 //p means ptr.
 //i need another for has complex free. idk, honest to god
 // fuck ,e
+//
 typedef struct MY_Token_group
 {
 	//i actually need to remember shit... it's ptr, array of ptr's not
 	MY_Lexer_t *cp__lexer;
 	int start, length;
 }MY_Token_group_t;
+
+MY_Token_group_t MY_init_Token_group(MY_Lexer_t *_lexer, int _start, int _length);
+
+MY_token_type_t MY_get_token_type_Token_group(MY_Token_group_t _group, int _index)
+int MY_get_token_string_Token_group(MY_Token_group_t _group, int _index, char *_buffer, int _size);
 
 //in tokens, ie start token, to length of last
 #endif

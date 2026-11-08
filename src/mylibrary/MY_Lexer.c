@@ -1,4 +1,6 @@
 #include "MY_Lexer.h"
+#include "MY_commons.h"
+#include <_ctype.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -690,9 +692,38 @@ MY_Token_group_t MY_init_Token_group(MY_Lexer_t *_lexer, int _start, int _length
 }
 
 
-
-void MY_free_Token_group(MY_Token_group_t *group)
+//probably fucked so idk
+MY_token_type_t MY_get_token_type_Token_group(MY_Token_group_t _group, int _index)
 {
-	free(group);
+	if(_group.length >= _index || _group.cp__lexer->token_count >= _index + _group.start || index < 0)
+	{
+		return MY_token_type_invalid;
+	}
 
+	return MY_get_token_type_Lexer(_group.cp__lexer, _index);
+
+}
+
+int MY_get_token_string_Token_group(MY_Token_group_t _group, int _index, char *_buffer, int _size)
+{
+	int together = _group.start + _index;
+	if(together > _group.start || together + _group.length >= _group.cp__lexer->token_count)
+	{
+		MY_FAULT("fucked");
+		return -1;	
+	}
+	if(_index < 0)
+	{
+		MY_FAULT("fucked");
+		return -1;
+	}
+
+	if(!_buffer || _size < 0)
+	{
+		MY_FAULT("buffer cannot fit string");
+	}	
+
+
+
+	return MY_get_token_string_Lexer(_group.cp__lexer, together, _buffer, _size);
 }

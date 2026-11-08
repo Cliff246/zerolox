@@ -29,6 +29,10 @@ typedef struct ZLX_ASM_Label
 
 }ZLX_ASM_Label_t;
 
+
+
+
+
 //too get a statement it really should consume a token list. or at least something above -> statement or such, idk.
 typedef struct ZLX_ASM_Statement
 {
@@ -41,11 +45,14 @@ typedef struct ZLX_ASM_Statement
 	};	
 }ZLX_ASM_Statement_t;
 
+
+
+
 ZLX_ASM_Statement_t *ZLX_ASM_init_Statement();
 void ZLX_ASM_free_Statement(ZLX_ASM_Statement_t *statement);
 
 
-ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Lexer_t *_lexer, int start, int count);
+ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t *_group);
 
 ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, int32_t start, int32_t count);
 
