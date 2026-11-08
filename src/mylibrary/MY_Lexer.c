@@ -727,12 +727,12 @@ int MY_get_token_string_Token_group(MY_Token_group_t _group, int _index, char *_
 		return MY_token_type_invalid;
 	}
 
-	if(!_buffer || _size < 0)
+	if(!_buffer || _size <= 0)
 	{
 		MY_FAULT("buffer cannot fit string");
 	}	
 
 
 
-	return MY_get_token_string_Lexer(_group.cp__lexer, together, _buffer, _size);
+	return MY_get_token_string_Lexer(_group.cp__lexer, _index + _group.start, _buffer, _size);
 }

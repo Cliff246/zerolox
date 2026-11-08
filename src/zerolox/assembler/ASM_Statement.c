@@ -116,23 +116,55 @@ struct StatementInformation
 
 static struct StatementInformation get_statement_tokentypes(MY_Token_group_t _group)
 {
+	int count = _group.length;
 	if(count >= TYPE_BUFFER_SIZE)
 		MY_FAULT("count >= 16");
-	MY_token_type_t type_list[TYPE_BUFFER_SIZE] = {MY_token_type_empty};
-
+	struct StatementInformation statement_information =
+	{
+		.group = _group,
+	};
 
 	for(int i = 0; i < count && i < TYPE_BUFFER_SIZE; ++i)
 	{
-		type_list[i] = MY_get_token_type_Lexer(assembler->p__lexer, i + start);
+		statement_information.token_types[i] = MY_get_token_type_Token_group(_group, i);
 	}
 
-}	
 
+	return statement_information;	
+}	
 
 ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group)
 {
+	struct StatementInformation statement_information = get_statement_tokentypes(_group);	
 
+
+	MY_token_type_t first = statement_information.token_types[0];
+
+
+	if(first == MY_token_type_modulo)
+		return ZLX_ASM_statement_type_directive;
+	else if(first == MY_token_type_ampersand)
+		return ZLX_ASM_statement_type_operation_semantic;
+	
+	int last = 0;
+	for(int i = 1; i < TYPE_BUFFER_SIZE; ++i)
+	{
+		if(statement_information.token_types[i] == MY_token_type_space)
+		{
+			break;
+		}
+		last++;
+	}	
+	
+	if(statement_information.token_types[last] == MY_token_type_colon)
+		return ZLX_ASM_statement_type_label;
+
+
+	if(valid_form(statement_information.token_types, last))
+		return ZLX_ASM_statement_type_operation_mnemonic;
+	return ZLX_ASM_statement_type_invalid;
 }
+
 
 
 ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, int32_t start, int32_t count)
@@ -144,30 +176,7 @@ ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assemb
 #define BUFFER_SIZE 128
 	char buffer[BUFFER_SIZE] = {0};
 
-	}
 
-
-	int first_group = next_space(type_list, 0);
-	if(first_group == -1 || first_group == 0)
-	{
-		MY_TODO;
-	}
-
-
-	//ugh parser, or just be a dipshit and do all cases. i forgot how to do a parser.
-	if(type_list[0] == MY_token_type_word)
-	{
-
-	}
-
-#undef BUFFER_SIZE
-
-	ZLX_ASM_Statement_t *statement = ZLX_ASM_init_Statement();
-
-	MY_TODO;
-
-
-	return statement;
 
 }
 

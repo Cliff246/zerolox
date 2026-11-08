@@ -12,7 +12,9 @@
 typedef enum ZLX_ASM_statement_type
 {
 	ZLX_ASM_statement_type_invalid,	
-	ZLX_ASM_statement_type_operation,	
+	ZLX_ASM_statement_type_operation_mnemonic,	
+	ZLX_ASM_statement_type_operation_semantic,	
+	
 	ZLX_ASM_statement_type_label,	
 	ZLX_ASM_statement_type_directive,	
 }ZLX_ASM_statement_type_t;
@@ -52,7 +54,7 @@ ZLX_ASM_Statement_t *ZLX_ASM_init_Statement();
 void ZLX_ASM_free_Statement(ZLX_ASM_Statement_t *statement);
 
 
-ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t *_group);
+ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group);
 
 ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, int32_t start, int32_t count);
 
