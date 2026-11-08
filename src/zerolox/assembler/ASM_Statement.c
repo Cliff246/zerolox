@@ -1,7 +1,7 @@
 #include "ASM_Statement.h"
 #include "MY_commons.h"
 #include "MY_Lexer.h"
-
+#include "MY_commons.h"
 #include <assert.h>
 #include <stdlib.h>
 
@@ -116,6 +116,7 @@ struct StatementInformation
 
 static struct StatementInformation get_statement_tokentypes(MY_Token_group_t _group)
 {
+	MY_ENTRY("get statement type");
 	int count = _group.length;
 	if(count >= TYPE_BUFFER_SIZE)
 		MY_FAULT("count >= 16");
@@ -135,32 +136,32 @@ static struct StatementInformation get_statement_tokentypes(MY_Token_group_t _gr
 
 ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group)
 {
+	MY_ENTRY("classify statement");
 	struct StatementInformation statement_information = get_statement_tokentypes(_group);	
 
 
 	MY_token_type_t first = statement_information.token_types[0];
-
-
 	if(first == MY_token_type_modulo)
 		return ZLX_ASM_statement_type_directive;
-	else if(first == MY_token_type_ampersand)
+	else if(first == MY_token_type_at)
 		return ZLX_ASM_statement_type_operation_semantic;
 	
 	int last = 0;
-	for(int i = 1; i < TYPE_BUFFER_SIZE; ++i)
+	for(int i = 0; i < TYPE_BUFFER_SIZE; ++i)
 	{
-		if(statement_information.token_types[i] == MY_token_type_space)
+		MY_token_type_t type = statement_information.token_types[i];
+		if(type == MY_token_type_space || type == MY_token_type_empty)
 		{
 			break;
 		}
 		last++;
 	}	
 	
-	if(statement_information.token_types[last] == MY_token_type_colon)
+	if(statement_information.token_types[last - 1] == MY_token_type_colon)
 		return ZLX_ASM_statement_type_label;
 
 
-	if(valid_form(statement_information.token_types, last))
+	if(valid_form(statement_information.token_types, last - 1))
 		return ZLX_ASM_statement_type_operation_mnemonic;
 	return ZLX_ASM_statement_type_invalid;
 }
@@ -169,15 +170,7 @@ ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group)
 
 ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, int32_t start, int32_t count)
 {
-	if(start < 0 || count <= 0 )
-		MY_FAULT("failed");
-	int opcode_size = 0;
-	char opcode[1024] = {0};
-#define BUFFER_SIZE 128
-	char buffer[BUFFER_SIZE] = {0};
-
-
-
+	return NULL;
 }
 
 #undef TYPE_BUFFER_SIZE

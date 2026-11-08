@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+
+bool MY_debug_flag = true;
 
 int32_t MY_get_filename_start(char *path)
 {
@@ -23,20 +26,31 @@ int32_t MY_get_filename_start(char *path)
 	return last_slash;
 }
 
-void MY_todo(char *file, int32_t line)
+void MY_todo(char *file, int line)
 {
 
 	fprintf(stdout, "TODO[%s:%d]\n", file + MY_get_filename_start(file), line);
 	exit(EXIT_FAILURE);
 }
 
-void MY_fault(char *message, char *file, int32_t line)
+void MY_fault(char *message, char *file, int line)
 {
 	
 	fprintf(stdout, "FAULT[%s:%d] %s \n", file + MY_get_filename_start(file), line, message);
 
 	exit(EXIT_FAILURE);
 }
+void MY_entryf(char *file, int line, char *fmt, ...)
+{
+	MY_TODO;
+}
+void MY_entry(char *file, int line, char *msg)
+{
+	if(MY_debug_flag)
+		fprintf(stdout, "ENTRY[%s:%d] %s \n", file + MY_get_filename_start(file), line, msg);
+}
+
+
 
 
 

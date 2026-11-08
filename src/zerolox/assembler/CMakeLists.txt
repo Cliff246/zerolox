@@ -10,18 +10,18 @@ set(ASM_CFILE ${ASM_CFILE}
 	${CMAKE_CURRENT_SOURCE_DIR}/ASM_Operation.c
 )
 
-add_executable(ZLX_asm ${ASM_CFILE})
+add_executable(zlx-asm ${ASM_CFILE})
 
-include_directories(ZLX_asm)
+include_directories(zlx-asm)
 
-target_link_libraries(ZLX_asm 
+target_link_libraries(zlx-asm 
 	PUBLIC
 
 	ZLX_commons
 	MY_library
 )
 
-target_include_directories(ZLX_asm
+target_include_directories(zlx-asm
 	PUBLIC
 
 	ZLX_commons

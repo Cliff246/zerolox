@@ -3,7 +3,9 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 
+extern bool MY_debug_flag;
 
 typedef struct MY_List
 {
@@ -14,12 +16,17 @@ typedef struct MY_List
 
 int32_t MY_get_filename_start(char *path);
 
-void MY_todo(char *file, int32_t line);
-void MY_fault(char *message, char *file, int32_t line);
+
+
+void MY_todo(char *file, int line);
+void MY_fault(char *message, char *file, int line);
+void MY_entryf(char *file, int line, char *fmt, ...);
+void MY_entry(char *file, int line, char *msg);
 
 #define MY_TODO { MY_todo(__FILE__, __LINE__); }
 #define MY_FAULT(X) { MY_fault(X, __FILE__, __LINE__); } 
-
+#define MY_ENTRYF(X, ...) {MY_entryf(__FILE__, __LINE__,X, __VA_ARGS__);}
+#define MY_ENTRY(X) {MY_entry(__FILE__, __LINE__, X);}
 
 #define MY_SET_BIT(n, k) (n | (1 << (k - 1)))
 #define MY_CLR_BIT(n, k) (n & (~(1 << (k - 1))))
