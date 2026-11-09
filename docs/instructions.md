@@ -127,4 +127,36 @@ majors:
 	1 | oria	|			| ac = ac | imm5
 	1 | xoria	|			| ac = ac | imm5
 
-		
+	1 | swpa    |			| swap ac r1
+	1 | rev		|			| reverse r1	
+	1 | inca	|			| acc += imm5
+	2 | deca    |			| acc -= imm5
+//haahahahahahh sext
+	2 | sext	|			| 
+//maybe not
+	2 | cigetc  |			| clear itterator and get 16 bit counter 
+
+//for now, cause i don't
+	1 | rota	|			| rotate 
+	1 | rotoa	|			| rotate other way 
+
+	2 | ld2		|			| r1 = mem_size[r2, r3]
+	2 | st2		|			| mem[r2, r3] = r1
+
+	2 | push3	|			| push 3 registers of 3 sizes. 
+	2 | pop3	|			| push 3 registers of 3 sizes. 
+
+
+minors:
+	1 | ald+	|			|	 
+	2 | ast+    |			|
+
+	1 | bieqc+	|[x|y][+/-] |
+	1 | bineqc+	|[x|y][+/-]	|
+
+
+
+
+
+
+
