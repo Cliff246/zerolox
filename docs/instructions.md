@@ -130,7 +130,7 @@ majors:
 	1 | swpa    |			| swap ac r1
 	1 | rev		|			| reverse r1	
 	1 | inca	|			| acc += imm5
-	2 | deca    |			| acc -= imm5
+	1 | deca    |			| acc -= imm5
 //haahahahahahh sext
 	2 | sext	|			| 
 //maybe not
@@ -149,7 +149,7 @@ majors:
 
 minors:
 	1 | ald+	|			|	 
-	2 | ast+    |			|
+	1 | ast+    |			|
 
 	1 | bieqc+	|[x|y][+/-] |
 	1 | bineqc+	|[x|y][+/-]	|
