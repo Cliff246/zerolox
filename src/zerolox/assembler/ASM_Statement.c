@@ -1,5 +1,6 @@
 #include "ASM_Statement.h"
 #include "MY_commons.h"
+#include "ASM_commons.h"
 #include "MY_Lexer.h"
 #include "MY_commons.h"
 #include <assert.h>
@@ -63,17 +64,16 @@ static bool valid_form(const MY_token_type_t *tokens, int count)
     return state == EXPECT_SEPARATOR;
 }
 
-#define TYPE_BUFFER_SIZE 16
 
-static int next_space(MY_token_type_t buf[TYPE_BUFFER_SIZE], int index)
+static int next_space(MY_token_type_t buf[ZLX_ASM_TYPE_BUFFER_SIZE], int index)
 {
 
-	if(index < 0 || index >= TYPE_BUFFER_SIZE)
+	if(index < 0 || index >= ZLX_ASM_TYPE_BUFFER_SIZE)
 	{
 		return -2;
 	}
 	int space = -1;
-	for(int i = index; i < TYPE_BUFFER_SIZE; ++i)
+	for(int i = index; i < ZLX_ASM_TYPE_BUFFER_SIZE; ++i)
 	{
 		if(buf[i] == MY_token_type_space)
 		{
@@ -106,28 +106,22 @@ static int next_space(MY_token_type_t buf[TYPE_BUFFER_SIZE], int index)
 //
 
 
-struct StatementInformation
-{
-	MY_Token_group_t group;
-	MY_token_type_t token_types[TYPE_BUFFER_SIZE];
-};
 
 
-
-static struct StatementInformation get_statement_tokentypes(MY_Token_group_t _group)
+static ZLX_ASM_Statement_information_t get_statement_tokentypes(MY_Token_group_t _group)
 {
 	MY_ENTRY("get statement type");
 	int count = _group.length;
-	if(count >= TYPE_BUFFER_SIZE)
+	if(count >= ZLX_ASM_TYPE_BUFFER_SIZE)
 		MY_FAULT("count >= 16");
-	struct StatementInformation statement_information =
+	ZLX_ASM_Statement_information_t statement_information =
 	{
 		.group = _group,
 	};
 
-	for(int i = 0; i < count && i < TYPE_BUFFER_SIZE; ++i)
+	for(int i = 0; i < count && i < ZLX_ASM_TYPE_BUFFER_SIZE; ++i)
 	{
-		statement_information.token_types[i] = MY_get_token_type_Token_group(_group, i);
+		statement_information.a__token_types[i] = MY_get_token_type_Token_group(_group, i);
 	}
 
 
@@ -137,19 +131,19 @@ static struct StatementInformation get_statement_tokentypes(MY_Token_group_t _gr
 ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group)
 {
 	MY_ENTRY("classify statement");
-	struct StatementInformation statement_information = get_statement_tokentypes(_group);	
+	ZLX_ASM_Statement_information_t statement_information = get_statement_tokentypes(_group);	
 
 
-	MY_token_type_t first = statement_information.token_types[0];
+	MY_token_type_t first = statement_information.a__token_types[0];
 	if(first == MY_token_type_modulo)
 		return ZLX_ASM_statement_type_directive;
 	else if(first == MY_token_type_at)
 		return ZLX_ASM_statement_type_operation_semantic;
 	
 	int last = 0;
-	for(int i = 0; i < TYPE_BUFFER_SIZE; ++i)
+	for(int i = 0; i < ZLX_ASM_TYPE_BUFFER_SIZE; ++i)
 	{
-		MY_token_type_t type = statement_information.token_types[i];
+		MY_token_type_t type = statement_information.a__token_types[i];
 		if(type == MY_token_type_space || type == MY_token_type_empty)
 		{
 			break;
@@ -157,11 +151,11 @@ ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group)
 		last++;
 	}	
 	
-	if(statement_information.token_types[last - 1] == MY_token_type_colon)
+	if(statement_information.a__token_types[last - 1] == MY_token_type_colon)
 		return ZLX_ASM_statement_type_label;
 
 
-	if(valid_form(statement_information.token_types, last - 1))
+	if(valid_form(statement_information.a__token_types, last ))
 		return ZLX_ASM_statement_type_operation_mnemonic;
 	return ZLX_ASM_statement_type_invalid;
 }
