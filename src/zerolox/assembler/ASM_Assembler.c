@@ -128,7 +128,7 @@ void ZLX_ASM_temp_frontend(ZLX_ASM_Assembler_t *_assembler)
 		
 
 		MY_get_token_string_Lexer(_assembler->p__lexer, i, buffer, 255);		
-		printf("{[%s][%d]} \n", buffer, type);
+		printf("{[%s][%d][%d]} \n", buffer, type, line_count);
 		if(type == MY_token_type_space && has_first_space == false)
 		{
 			if(new_line_started == true)
@@ -142,20 +142,23 @@ void ZLX_ASM_temp_frontend(ZLX_ASM_Assembler_t *_assembler)
 			int length;
 			if(has_first_space)
 			{
+				//printf("has first space\n");
 				length = first_space - start_line;	
+
 			}
 			else
 			{
+				//printf("no first space\n");
 				length = i - start_line;
 			}
 
+			printf("%d %d\n", start_line, length);
 			MY_Token_group_t group = MY_init_Token_group(_assembler->p__lexer, start_line, length); 
-
 			ZLX_ASM_statement_type_t type = ZLX_ASM_classify_statement(group);
 		
 			printf("[%d] = %d type\n", line_count++,type);
 
-			start_line = i;
+			start_line = i+1;
 			new_line_started = true;
 			has_first_space = false;
 		}
