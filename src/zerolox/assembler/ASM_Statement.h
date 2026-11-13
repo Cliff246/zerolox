@@ -57,7 +57,7 @@ void ZLX_ASM_free_Statement(ZLX_ASM_Statement_t *statement);
 
 ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group);
 
-ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, int32_t start, int32_t count);
+ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, MY_Token_group_t _group);
 
 
 #endif

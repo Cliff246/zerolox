@@ -8,6 +8,7 @@
 typedef struct ZLX_ASM_Assembler
 {
 
+	bool has_content, has_lexed;
 	char *pa__path;
 	//ptr array 
 	char *pa__contents;
@@ -27,7 +28,11 @@ bool ZLX_ASM_load_file_Assembler(ZLX_ASM_Assembler_t *assembler, const char *pat
 
 
 
+
 void ZLX_ASM_lex_Assembler(ZLX_ASM_Assembler_t *assembler);
+void ZLX_ASM_clear_assembler(ZLX_ASM_Assembler_t *_assembler);
+
+void ZLX_ASM_temp_frontend(ZLX_ASM_Assembler_t *_assembler);
 
 
 void ZLX_ASM_test_Assembler(ZLX_ASM_Assembler_t *_assembler);

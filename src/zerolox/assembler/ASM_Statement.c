@@ -110,7 +110,7 @@ static int next_space(MY_token_type_t buf[ZLX_ASM_TYPE_BUFFER_SIZE], int index)
 
 static ZLX_ASM_Statement_information_t get_statement_tokentypes(MY_Token_group_t _group)
 {
-	MY_ENTRY("get statement type");
+	//MY_ENTRY("get statement type");
 	int count = _group.length;
 	if(count >= ZLX_ASM_TYPE_BUFFER_SIZE)
 		MY_FAULT("count >= 16");
@@ -130,7 +130,7 @@ static ZLX_ASM_Statement_information_t get_statement_tokentypes(MY_Token_group_t
 
 ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group)
 {
-	MY_ENTRY("classify statement");
+	//MY_ENTRY("classify statement");
 	ZLX_ASM_Statement_information_t statement_information = get_statement_tokentypes(_group);	
 
 
@@ -162,7 +162,7 @@ ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group)
 
 
 
-ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, int32_t start, int32_t count)
+ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, MY_Token_group_t _group)
 {
 	return NULL;
 }

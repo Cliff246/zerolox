@@ -189,13 +189,23 @@ int MY_get_token_string_Lexer(MY_Lexer_t *_lexer, int _position, char *_buffer, 
 		{
 			return -1;
 		}
-		int c = 0;
-		for(int i = token.start; i < token.length + token.start && c < _blength; ++i, ++c)
+		if(token.type == MY_token_type_newline && _blength > 2)
 		{
-			_buffer[c] = _lexer->ap__string[i];
+			_buffer[0] = '\\';
+			_buffer[1] = 'n';	
+			_buffer[2] = '\0';
+			return 1;
 		}
-		_buffer[c] = '\0';
-		return c;
+		else
+		{
+			int c = 0;
+			for(int i = token.start; i < token.length + token.start && c < _blength; ++i, ++c)
+			{
+				_buffer[c] = _lexer->ap__string[i];
+			}
+			_buffer[c] = '\0';
+			return c;
+		}
 	}
 	return -1;
 }
@@ -292,7 +302,7 @@ void MY_lex_Lexer(MY_Lexer_t *_lexer)
 		{
 			if(current == '\n' || current == '\r')
 			{
-
+				add_token_start_word(_lexer, MY_token_type_newline, start);
 			}
 
 			else if(isalpha((unsigned char)current) || current == '_')

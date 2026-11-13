@@ -12,6 +12,7 @@
 	X(empty)							\
 	X(invalid)							\
 	X(space)							\
+	X(newline)							\
 	X(word)								\
 	X(int)								\
 	X(float)							\

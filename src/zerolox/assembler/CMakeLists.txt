@@ -8,6 +8,8 @@ set(ASM_CFILE ${ASM_CFILE}
 	${CMAKE_CURRENT_SOURCE_DIR}/ASM_Form.c
 	${CMAKE_CURRENT_SOURCE_DIR}/ASM_Handler.c
 	${CMAKE_CURRENT_SOURCE_DIR}/ASM_Operation.c
+	${CMAKE_CURRENT_SOURCE_DIR}/ASM_commons.c
+	
 )
 
 add_executable(zlx-asm ${ASM_CFILE})
