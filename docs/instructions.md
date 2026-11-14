@@ -151,14 +151,14 @@ majors:
 	1 | dec2	|			|
 	1 |	dec3	|			|
 	1 |	dec4	|			|
+	1 | auipc	|			|
+	
+	
 //might be worth adding a m.addi where r1 = r1 + sext(imm5)
 minors:
-	1 | ald+	|			|	 
-	1 | ast+    |			|
-
 	1 | bieqc+	|[x|y][+/-] |
 	1 | bineqc+	|[x|y][+/-]	|
-
+	1 | calli	| imm10		|
 
 
 
