@@ -746,3 +746,23 @@ int MY_get_token_string_Token_group(MY_Token_group_t _group, int _index, char *_
 
 	return MY_get_token_string_Lexer(_group.cp__lexer, _index + _group.start, _buffer, _size);
 }
+
+
+
+void MY_print_token_group(MY_Token_group_t _group)
+{
+	if(
+		!_group.cp__lexer || 
+		_group.start < 0 ||
+		_group.length < 0 ||
+		_group.start > _group.cp__lexer->token_count ||
+		_group.length > _group.cp__lexer->token_count - _group.start 
+	)
+	{
+		return;
+	}
+	for(int i = 0; i < _group.length; ++i)
+	{
+		print_token(_group.cp__lexer, _group.start + i);	
+	}
+}

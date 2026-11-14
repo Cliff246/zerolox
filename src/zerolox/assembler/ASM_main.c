@@ -7,7 +7,7 @@
 
 #define USE_INTERNAL false
 
-const char *my_bitchass_const_path = "asm.asm";
+const char *my_bitchass_const_path = "asm/asm.asm";
 
 const char *internal_string = "%mv";
 

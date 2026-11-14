@@ -1,4 +1,5 @@
 #include "ASM_Statement.h"
+#include "ASM_Operation.h"
 #include "MY_commons.h"
 #include "ASM_commons.h"
 #include "MY_Lexer.h"
@@ -128,12 +129,9 @@ static ZLX_ASM_Statement_information_t get_statement_tokentypes(MY_Token_group_t
 	return statement_information;	
 }	
 
-ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group)
+
+static ZLX_ASM_statement_type_t classify_statement(ZLX_ASM_Statement_information_t statement_information)
 {
-	//MY_ENTRY("classify statement");
-	ZLX_ASM_Statement_information_t statement_information = get_statement_tokentypes(_group);	
-
-
 	MY_token_type_t first = statement_information.a__token_types[0];
 	if(first == MY_token_type_modulo)
 		return ZLX_ASM_statement_type_directive;
@@ -158,13 +156,68 @@ ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group)
 	if(valid_form(statement_information.a__token_types, last ))
 		return ZLX_ASM_statement_type_operation_mnemonic;
 	return ZLX_ASM_statement_type_invalid;
+
+}
+
+ZLX_ASM_statement_type_t ZLX_ASM_classify_statement(MY_Token_group_t _group)
+{
+	//MY_ENTRY("classify statement");
+	ZLX_ASM_Statement_information_t statement_information = get_statement_tokentypes(_group);	
+	return classify_statement(statement_information);
 }
 
 
 
 ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assembler_t *assembler, MY_Token_group_t _group)
 {
-	return NULL;
+	if(!assembler)
+		return NULL;
+
+
+	ZLX_ASM_Statement_information_t information = get_statement_tokentypes(_group); 
+
+	
+	
+	MY_print_token_group(_group);
+	ZLX_ASM_statement_type_t type = classify_statement(information);
+
+	if(type == ZLX_ASM_statement_type_invalid)
+	{
+		return NULL;
+	}
+	//this should be removed 
+	ZLX_ASM_Statement_t *statement = calloc(1, sizeof(ZLX_ASM_Statement_t));
+	if(!statement)
+		MY_FAULT("statement malloc failed");
+
+	//should be temporary
+	statement->type = type;
+	switch(type)
+	{
+		case ZLX_ASM_statement_type_label:
+			MY_FAULT("labels not solved yet");
+			break;
+		case ZLX_ASM_statement_type_operation_mnemonic:
+			statement->u__operation = ZLX_ASM_init_mnemonic_Operation(information);	
+			
+			break;
+		case ZLX_ASM_statement_type_operation_semantic:
+			MY_FAULT("semantics not solved yet");
+			break;
+		case ZLX_ASM_statement_type_directive:
+			MY_FAULT("directives not solved yet");
+			break;
+		case ZLX_ASM_statement_type_invalid:
+			MY_FAULT("invalid for some reason got here");
+			break;
+		default:
+			MY_FAULT("invalid");
+	}
+
+
+	
+
+	return statement;
 }
 
 #undef TYPE_BUFFER_SIZE

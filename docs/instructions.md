@@ -145,8 +145,13 @@ majors:
 
 	2 | push3	|			| push 3 registers of 3 sizes. 
 	2 | pop3	|			| push 3 registers of 3 sizes. 
-
-
+	1 | inc2    |			| 
+	1 | inc3	|			| 
+	1 | inc4	|			|
+	1 | dec2	|			|
+	1 |	dec3	|			|
+	1 |	dec4	|			|
+//might be worth adding a m.addi where r1 = r1 + sext(imm5)
 minors:
 	1 | ald+	|			|	 
 	1 | ast+    |			|
