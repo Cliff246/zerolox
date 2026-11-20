@@ -19,10 +19,9 @@ typedef struct ZLX_ASM_Operation_mnemonic
 {
 	//waste of space for the has post and prefix
 	bool has_prefix, has_postfix;
-	char a__prefix[4];
-	char a__mnemonic[8];
-	char a__postfix[4];
-
+	int prefix;
+	int opcode;
+	int postfix;
 
 }ZLX_ASM_Operation_mnemonic_t;
 

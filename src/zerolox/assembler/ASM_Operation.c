@@ -60,7 +60,7 @@ static struct segments find_segments(ZLX_ASM_Statement_information_t information
 
 	}
 
-	print_type_buffer(information.a__token_types);
+	//print_type_buffer(information.a__token_types);
 	for(int i = 1; i < ZLX_ASM_TYPE_BUFFER_SIZE; ++i)
 	{
 		MY_token_type_t type = information.a__token_types[i];
@@ -89,16 +89,13 @@ static struct segments find_segments(ZLX_ASM_Statement_information_t information
 		}
 		
 	}
-	print_segments(seg);
+	//print_segments(seg);
 	return seg; 
 }
 
 
 ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM_Statement_information_t information, int start, int length)
 {
-	
-	
-	
 	int dots[2] =
 	{
 		-1, -1
@@ -112,11 +109,14 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 		MY_token_type_t type = information.a__token_types[i];
 		if(type == MY_token_type_period)
 		{
+			if(dots_count == 1)
+				MY_FAULT("too many dots in an opcode");
 			dots[++dots_count] = i;
+
 		}
 		
 	}
-	printf("0:%d 1:%d\n", dots[0], dots[1]);	
+	//printf("0:%d 1:%d\n", dots[0], dots[1]);	
 	
 	char buffer1[16] = {0};
 	int opcode = -1;
@@ -146,41 +146,46 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 		if(test == -1)
 		{
 			//the other one is the opcode
-			test_size1 = MY_get_substring_Token_group(information.group, dots[0], length - dots[0], buffer1, 16);
+			test_size1 = MY_get_substring_Token_group(information.group, dots[0] + 1, length - dots[0] - 1, buffer1, 16);
 			if(test_size1 < 0)
 				MY_FAULT("could not fit substring in buffer");
 			test = ZLX_SYTX_get_mnemonic_code(buffer1);
 			if(test == -1)
 			{
+				MY_FAULT("opcode not found");
 				opcode = -1;
 			}
+			else 
+				opcode = test;
 		}
 		else 
 		{
 			opcode = test;
 		}
 
-		printf("dots count 0\n");
+		//printf("dots count 0\n");
 	}
 	else if(dots_count == 1)
 	{
 
-		int test_size1 = MY_get_substring_Token_group(information.group, dots[0], dots[1] - dots[0], buffer1, 16);  
+		int test_size1 = MY_get_substring_Token_group(information.group, dots[0] + 1, dots[1] - dots[0] - 1, buffer1, 16);  
 		if(test_size1 < 0)
 			MY_FAULT("could not fit substring in buffer");
 
 		opcode = ZLX_SYTX_get_mnemonic_code(buffer1);
 
-		printf("dots count 1\n");
+		//printf("dots count 1\n");
 	}
 
+	//printf("%s\n", buffer1);	
 	if(opcode == -1)
 	{
 		MY_FAULT("opcode does not match any");
+		
 	}
 
-	printf("%s\n", buffer1);	
 	ZLX_ASM_Operation_mnemonic_t mnemonic = {0};
+	mnemonic.opcode = opcode;
 	return mnemonic;
 }
 
