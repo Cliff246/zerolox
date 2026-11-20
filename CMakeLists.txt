@@ -12,6 +12,9 @@ if(BUILD_TESTING)
     add_executable(MY_lexer_test tests/lexer_test.c)
     target_link_libraries(MY_lexer_test PRIVATE MY_library)
     add_test(NAME lexer COMMAND MY_lexer_test)
+    add_executable(MY_token_group_test tests/token_group_test.c)
+    target_link_libraries(MY_token_group_test PRIVATE MY_library)
+    add_test(NAME token_group COMMAND MY_token_group_test)
     add_executable(ZLX_ASM_statement_test
         tests/statement_test.c
         src/zerolox/assembler/ASM_Statement.c

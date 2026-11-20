@@ -97,7 +97,7 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 	
 	char buffer[256] = {0};
 	
-	int size = MY_get_substring_Token_group(information.group, start, end, buffer, 256); 
+	int size = MY_get_substring_Token_group(information.group, start, end - start, buffer, 256); 
 	if(size < 0)
 		MY_FAULT("could not fit substring in buffer");
 

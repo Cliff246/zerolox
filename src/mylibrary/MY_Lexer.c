@@ -729,34 +729,26 @@ MY_token_type_t MY_get_token_type_Token_group(MY_Token_group_t _group, int _inde
 int MY_get_token_string_Token_group(MY_Token_group_t _group, int _index, char *_buffer, int _size)
 {
 	if(
-		!_group.cp__lexer || 
+		!_group.cp__lexer ||
 		_group.start < 0 ||
 		_group.length < 0 ||
 		_index < 0 ||
 		_group.start > _group.cp__lexer->token_count ||
 		_group.length > _group.cp__lexer->token_count - _group.start ||
-		_index >= _group.length	
+		_index >= _group.length ||
+		!_buffer || _size <= 0
 	)
 	{
-		return MY_token_type_invalid;
+		return -1;
 	}
-	if(!_buffer || _size <= 0)
-	{
-		MY_FAULT("buffer cannot fit string");
-	}	
-
-
-
-	return MY_get_token_type_Lexer(_group.cp__lexer, _index + _group.start);
-
+	return MY_get_token_string_Lexer(_group.cp__lexer, _group.start + _index, _buffer, _size);
 }
 
 
 int MY_get_substring_Token_group(MY_Token_group_t _group, int _index, int _length, char *_buffer, int _size)
 {
-	//this is probably wrong
 	if(
-		!_group.cp__lexer || 
+		!_group.cp__lexer ||
 		_group.start < 0 ||
 		_group.length < 0 ||
 		_index < 0 ||
@@ -764,17 +756,30 @@ int MY_get_substring_Token_group(MY_Token_group_t _group, int _index, int _lengt
 		_group.start > _group.cp__lexer->token_count ||
 		_group.length > _group.cp__lexer->token_count - _group.start ||
 		_index >= _group.length ||
-		_index + _length + _group.start > _group.cp__lexer->token_count ||
-		_length > _group.length 	
+		_length > _group.length - _index ||
+		!_buffer || _size <= 0
 	)
 	{
-		return MY_token_type_invalid;
+		return -1;
 	}
-	if(!_buffer || _size <= 0)
+
+	MY_Lexer_t *lexer = _group.cp__lexer;
+	MY_Token_t first = lexer->ap__token_buffer[_group.start + _index];
+	MY_Token_t last = lexer->ap__token_buffer[_group.start + _index + _length - 1];
+	if(
+		first.start < 0 ||
+		last.start < first.start ||
+		last.start > lexer->string_length ||
+		last.length < 0 ||
+		last.length > lexer->string_length - last.start
+	)
 	{
-		MY_FAULT("buffer cannot fit string");
-	}	
-	return MY_get_substring_Lexer(_group.cp__lexer, _group.start + _index, _length, _buffer, _size); 
+		return -1;
+	}
+
+	// Token indices select the range; source offsets preserve the text between them.
+	int length = last.start - first.start + last.length;
+	return MY_get_substring_Lexer(lexer, first.start, length, _buffer, _size);
 }
 
 void MY_print_token_group(MY_Token_group_t _group)
