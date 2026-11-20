@@ -74,7 +74,7 @@ ZLX_SYTX_instruction_postfix_t ZLX_SYTX_get_instruction_postfix(char *string)
 	if(string == NULL)
 		return ZLX_SYTX_instruction_postfix_invalid;
 	int id = -1;
-	for(int i = 0; i < ZLX_SYTX_instruction_postfix_count; ++i)
+	for(int i = 2; i < ZLX_SYTX_instruction_postfix_count; ++i)
 	{
 		
 		if(strcmp(ZLX_SYTX_instruction_postfix_keywords[i], string) == 0)
@@ -88,11 +88,9 @@ ZLX_SYTX_instruction_postfix_t ZLX_SYTX_get_instruction_postfix(char *string)
 }
 ZLX_SYTX_instruction_prefix_t ZLX_SYTX_get_instruction_prefix(char *string)
 {
-	if(string[0] == 'm')
-	{
+	if(strcmp("m", string) == 0)
 		return ZLX_SYTX_instruction_prefix_minor;
-	}
-	else if(string[0] == 'n')
+	else if(strcmp("n", string) == 0)
 		return ZLX_SYTX_instruction_prefix_natural;
 	else if(string[0] == '\0')
 		return ZLX_SYTX_instruction_prefix_invalid;
