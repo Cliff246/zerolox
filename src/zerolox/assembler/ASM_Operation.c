@@ -213,7 +213,6 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 
 		
 		opcode = ZLX_SYTX_get_mnemonic_code(buffer1);
-		MY_TODO;
 		//printf("dots count 1\n");
 	}
 

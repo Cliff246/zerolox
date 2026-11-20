@@ -73,7 +73,7 @@ ZLX_SYTX_instruction_postfix_t ZLX_SYTX_get_instruction_postfix(char *string)
 {
 	if(string == NULL)
 		return ZLX_SYTX_instruction_postfix_invalid;
-	int id = -1;
+	int id = ZLX_SYTX_instruction_postfix_invalid;
 	for(int i = 2; i < ZLX_SYTX_instruction_postfix_count; ++i)
 	{
 		
