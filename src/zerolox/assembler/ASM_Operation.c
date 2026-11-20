@@ -1,7 +1,8 @@
 #include "ASM_Operation.h"
+#include "ASM_Argument.h"
 #include "ASM_commons.h"
 #include "MY_Lexer.h"
-
+#include "MY_commons.h"
 
 static void print_type_buffer(MY_token_type_t type[ZLX_ASM_TYPE_BUFFER_SIZE])
 {
@@ -91,10 +92,33 @@ static struct segments find_segments(ZLX_ASM_Statement_information_t information
 }
 
 
+ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM_Statement_information_t information, int start, int end)
+{
+	
+	char buffer[256] = {0};
+	
+	int size = MY_get_substring_Token_group(information.group, start, end, buffer, 256); 
+	if(size < 0)
+		MY_FAULT("could not fit substring in buffer");
+
+	printf("%s\n", buffer);
+	
+	ZLX_ASM_Operation_mnemonic_t mnemonic = {0};
+	return mnemonic;
+}
+
+
+
+
 ZLX_ASM_Operation_t ZLX_ASM_init_mnemonic_Operation(ZLX_ASM_Statement_information_t _statement_information)
 {
 
 	struct segments seg = find_segments(_statement_information); 
+
+	ZLX_ASM_collect_mnemonic_Operation_mnemonic(_statement_information, seg.segments[0], seg.length[0] + seg.segments[0]); 	
+	ZLX_ASM_Argument_t argument; 
+
+
 	ZLX_ASM_Operation_t operation = {0};
 	return operation;
 }

@@ -150,6 +150,7 @@ MY_Token_group_t MY_init_Token_group(MY_Lexer_t *_lexer, int _start, int _length
 
 MY_token_type_t MY_get_token_type_Token_group(MY_Token_group_t _group, int _index);
 int MY_get_token_string_Token_group(MY_Token_group_t _group, int _index, char *_buffer, int _size);
+int MY_get_substring_Token_group(MY_Token_group_t _group, int _index, int _length, char *_buffer, int _size); 
 void MY_print_token_group(MY_Token_group_t _group);
 
 //in tokens, ie start token, to length of last

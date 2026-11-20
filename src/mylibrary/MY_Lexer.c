@@ -740,7 +740,6 @@ int MY_get_token_string_Token_group(MY_Token_group_t _group, int _index, char *_
 	{
 		return MY_token_type_invalid;
 	}
-
 	if(!_buffer || _size <= 0)
 	{
 		MY_FAULT("buffer cannot fit string");
@@ -748,10 +747,35 @@ int MY_get_token_string_Token_group(MY_Token_group_t _group, int _index, char *_
 
 
 
-	return MY_get_token_string_Lexer(_group.cp__lexer, _index + _group.start, _buffer, _size);
+	return MY_get_token_type_Lexer(_group.cp__lexer, _index + _group.start);
+
 }
 
 
+int MY_get_substring_Token_group(MY_Token_group_t _group, int _index, int _length, char *_buffer, int _size)
+{
+	//this is probably wrong
+	if(
+		!_group.cp__lexer || 
+		_group.start < 0 ||
+		_group.length < 0 ||
+		_index < 0 ||
+		_length <= 0 ||
+		_group.start > _group.cp__lexer->token_count ||
+		_group.length > _group.cp__lexer->token_count - _group.start ||
+		_index >= _group.length ||
+		_index + _length + _group.start > _group.cp__lexer->token_count ||
+		_length > _group.length 	
+	)
+	{
+		return MY_token_type_invalid;
+	}
+	if(!_buffer || _size <= 0)
+	{
+		MY_FAULT("buffer cannot fit string");
+	}	
+	return MY_get_substring_Lexer(_group.cp__lexer, _group.start + _index, _length, _buffer, _size); 
+}
 
 void MY_print_token_group(MY_Token_group_t _group)
 {
