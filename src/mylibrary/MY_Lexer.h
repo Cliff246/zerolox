@@ -34,7 +34,6 @@
 	X(minus_minus)						\
 	X(minus_equals)						\
 	X(slash)							\
-	X(slash_slash)						\
 	X(slash_equals)						\
 	X(star)								\
 	X(star_star)						\

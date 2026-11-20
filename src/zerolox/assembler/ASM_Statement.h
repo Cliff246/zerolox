@@ -13,8 +13,7 @@ typedef enum ZLX_ASM_statement_type
 {
 	ZLX_ASM_statement_type_invalid,	
 	ZLX_ASM_statement_type_operation_mnemonic,	
-	ZLX_ASM_statement_type_operation_semantic,	
-	
+	ZLX_ASM_statement_type_operation_semantic,		
 	ZLX_ASM_statement_type_label,	
 	ZLX_ASM_statement_type_directive,	
 }ZLX_ASM_statement_type_t;

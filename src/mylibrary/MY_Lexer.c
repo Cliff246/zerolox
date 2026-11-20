@@ -475,7 +475,11 @@ void MY_lex_Lexer(MY_Lexer_t *_lexer)
 				if(scroll == '/')
 				{
 					advance(_lexer);
-					add_token_start_word(_lexer, MY_token_type_slash_slash, start);
+					while(scroll != '\0' && scroll != '\n' )
+					{
+						scroll = advance(_lexer);
+					}
+
 				}
 				else if(scroll == '=')
 				{

@@ -36,7 +36,14 @@ enum MnemonicState
 static bool valid_form(const MY_token_type_t *tokens, int count) 
 {
     enum MnemonicState state = EXPECT_WORD;
-    for (int i = 0; i < count; i++) 
+	int i = 0;
+	if(tokens[i] == MY_token_type_space)
+	{
+		printf("is space first\n");
+		while(i < count && tokens[i++] == MY_token_type_space);
+		   
+	}
+    for (; i < count; i++) 
 	{
         MY_token_type_t t = tokens[i];
         switch (state) 
@@ -68,6 +75,7 @@ static bool valid_form(const MY_token_type_t *tokens, int count)
 
 static int next_space(MY_token_type_t buf[ZLX_ASM_TYPE_BUFFER_SIZE], int index)
 {
+	printf("invalid\n");
 
 	if(index < 0 || index >= ZLX_ASM_TYPE_BUFFER_SIZE)
 	{
@@ -152,7 +160,7 @@ static ZLX_ASM_statement_type_t classify_statement(ZLX_ASM_Statement_information
 	if(statement_information.a__token_types[last - 1] == MY_token_type_colon)
 		return ZLX_ASM_statement_type_label;
 
-
+	
 	if(valid_form(statement_information.a__token_types, last ))
 		return ZLX_ASM_statement_type_operation_mnemonic;
 	return ZLX_ASM_statement_type_invalid;
@@ -199,10 +207,11 @@ ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assemb
 			break;
 		case ZLX_ASM_statement_type_operation_mnemonic:
 			statement->u__operation = ZLX_ASM_init_mnemonic_Operation(information);	
-			
+			//MY_ENTRY("operation mnemonic");	
 			break;
 		case ZLX_ASM_statement_type_operation_semantic:
-			MY_FAULT("semantics not solved yet");
+			//MY_FAULT("semantics not solved yet");
+			statement->u__operation = ZLX_ASM_init_semantic_Operation(information);
 			break;
 		case ZLX_ASM_statement_type_directive:
 			MY_FAULT("directives not solved yet");
