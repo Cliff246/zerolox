@@ -12,6 +12,14 @@ if(BUILD_TESTING)
     add_executable(MY_lexer_test tests/lexer_test.c)
     target_link_libraries(MY_lexer_test PRIVATE MY_library)
     add_test(NAME lexer COMMAND MY_lexer_test)
+    add_executable(ZLX_ASM_statement_test
+        tests/statement_test.c
+        src/zerolox/assembler/ASM_Statement.c
+        src/zerolox/assembler/ASM_Operation.c
+    )
+    target_include_directories(ZLX_ASM_statement_test PRIVATE src/zerolox/assembler)
+    target_link_libraries(ZLX_ASM_statement_test PRIVATE ZLX_commons MY_library)
+    add_test(NAME assembler_statement COMMAND ZLX_ASM_statement_test)
 endif()
 
 

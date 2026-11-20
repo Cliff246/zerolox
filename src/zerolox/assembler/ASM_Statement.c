@@ -36,14 +36,7 @@ enum MnemonicState
 static bool valid_form(const MY_token_type_t *tokens, int count) 
 {
     enum MnemonicState state = EXPECT_WORD;
-	int i = 0;
-	if(tokens[i] == MY_token_type_space)
-	{
-		printf("is space first\n");
-		while(i < count && tokens[i++] == MY_token_type_space);
-		   
-	}
-    for (; i < count; i++) 
+    for (int i = 0; i < count; i++) 
 	{
         MY_token_type_t t = tokens[i];
         switch (state) 
@@ -120,6 +113,12 @@ static int next_space(MY_token_type_t buf[ZLX_ASM_TYPE_BUFFER_SIZE], int index)
 static ZLX_ASM_Statement_information_t get_statement_tokentypes(MY_Token_group_t _group)
 {
 	//MY_ENTRY("get statement type");
+	// Keep the statement and its operation segments relative to the first non-space token.
+	while(_group.length > 0 && MY_get_token_type_Token_group(_group, 0) == MY_token_type_space)
+	{
+		_group.start++;
+		_group.length--;
+	}
 	int count = _group.length;
 	if(count >= ZLX_ASM_TYPE_BUFFER_SIZE)
 		MY_FAULT("count >= 16");
@@ -140,6 +139,8 @@ static ZLX_ASM_Statement_information_t get_statement_tokentypes(MY_Token_group_t
 
 static ZLX_ASM_statement_type_t classify_statement(ZLX_ASM_Statement_information_t statement_information)
 {
+	if(statement_information.group.length <= 0)
+		return ZLX_ASM_statement_type_invalid;
 	MY_token_type_t first = statement_information.a__token_types[0];
 	if(first == MY_token_type_modulo)
 		return ZLX_ASM_statement_type_directive;
@@ -230,4 +231,5 @@ ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assemb
 }
 
 #undef TYPE_BUFFER_SIZE
+
 
