@@ -29,4 +29,7 @@ extern ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[];
 
 extern const size_t ZLX_SYTX_mnemonics_count;
 
+int ZLX_SYTX_get_mnemonic_code(char *string);
+
+
 #endif

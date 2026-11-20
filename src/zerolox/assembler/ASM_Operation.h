@@ -51,6 +51,10 @@ typedef struct ZLX_ASM_Operation
 
 }ZLX_ASM_Operation_t;
 
+
+ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM_Statement_information_t information, int start, int length);
+
+
 ZLX_ASM_Operation_t ZLX_ASM_init_mnemonic_Operation(ZLX_ASM_Statement_information_t _statement_information);
 ZLX_ASM_Operation_t ZLX_ASM_init_semantic_Operation(ZLX_ASM_Statement_information_t _statement_information);
 

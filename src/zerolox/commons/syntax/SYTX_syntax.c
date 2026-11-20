@@ -32,4 +32,24 @@ ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[] =
 
 };
 
+
+
+
 const size_t ZLX_SYTX_mnemonics_count = MY_ARRAY_SIZE(ZLX_SYTX_mnemonics);
+
+
+int ZLX_SYTX_get_mnemonic_code(char *string)
+{
+	int id = -1;
+	for(int i = 0; i < MY_ARRAY_SIZE(ZLX_SYTX_mnemonics); ++i)
+	{
+		
+		if(strcmp(ZLX_SYTX_mnemonics[i].a__mnemonic, string) == 0)
+		{
+			id = i;
+			break;
+		}
+	}
+	return id;
+}
+

@@ -3,6 +3,8 @@
 #include "ASM_commons.h"
 #include "MY_Lexer.h"
 #include "MY_commons.h"
+#include "syntax/SYTX_syntax.h"
+#include <math.h>
 
 static void print_type_buffer(MY_token_type_t type[ZLX_ASM_TYPE_BUFFER_SIZE])
 {
@@ -92,17 +94,92 @@ static struct segments find_segments(ZLX_ASM_Statement_information_t information
 }
 
 
-ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM_Statement_information_t information, int start, int end)
+ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM_Statement_information_t information, int start, int length)
 {
 	
-	char buffer[256] = {0};
 	
-	int size = MY_get_substring_Token_group(information.group, start, end - start, buffer, 256); 
-	if(size < 0)
-		MY_FAULT("could not fit substring in buffer");
+	
+	int dots[2] =
+	{
+		-1, -1
+	};
+	char dots_count = -1;
 
-	printf("%s\n", buffer);
+	int i = start;	
+	for(; i < ZLX_ASM_TYPE_BUFFER_SIZE && i < length; ++i)
+	{
+
+		MY_token_type_t type = information.a__token_types[i];
+		if(type == MY_token_type_period)
+		{
+			dots[++dots_count] = i;
+		}
+		
+	}
+	printf("0:%d 1:%d\n", dots[0], dots[1]);	
 	
+	char buffer1[16] = {0};
+	int opcode = -1;
+	if(dots_count == -1)
+	{
+		//this one is always the opcode		
+		int test_size1 = MY_get_substring_Token_group(information.group, start, length, buffer1, 16);  
+
+		if(test_size1 < 0)
+			MY_FAULT("could not fit substring in buffer");
+		
+		
+		opcode = ZLX_SYTX_get_mnemonic_code(buffer1);
+		
+		//printf("0:%s\n", buffer1);
+		//printf("dots count -1\n");
+	}
+	else if(dots_count == 0)
+	{
+		int test_size1 = MY_get_substring_Token_group(information.group, start, dots[0], buffer1, 16);  
+
+		if(test_size1 < 0)
+			MY_FAULT("could not fit substring in buffer");
+
+		
+		int test = ZLX_SYTX_get_mnemonic_code(buffer1);
+		if(test == -1)
+		{
+			//the other one is the opcode
+			test_size1 = MY_get_substring_Token_group(information.group, dots[0], length - dots[0], buffer1, 16);
+			if(test_size1 < 0)
+				MY_FAULT("could not fit substring in buffer");
+			test = ZLX_SYTX_get_mnemonic_code(buffer1);
+			if(test == -1)
+			{
+				opcode = -1;
+			}
+		}
+		else 
+		{
+			opcode = test;
+		}
+
+		printf("dots count 0\n");
+	}
+	else if(dots_count == 1)
+	{
+
+		int test_size1 = MY_get_substring_Token_group(information.group, dots[0], dots[1] - dots[0], buffer1, 16);  
+		if(test_size1 < 0)
+			MY_FAULT("could not fit substring in buffer");
+
+		opcode = ZLX_SYTX_get_mnemonic_code(buffer1);
+
+		printf("dots count 1\n");
+	}
+
+	if(opcode == -1)
+	{
+		MY_FAULT("opcode does not match any");
+	}
+
+	printf("%s\n", buffer1);	
 	ZLX_ASM_Operation_mnemonic_t mnemonic = {0};
 	return mnemonic;
 }
@@ -115,7 +192,7 @@ ZLX_ASM_Operation_t ZLX_ASM_init_mnemonic_Operation(ZLX_ASM_Statement_informatio
 
 	struct segments seg = find_segments(_statement_information); 
 
-	ZLX_ASM_collect_mnemonic_Operation_mnemonic(_statement_information, seg.segments[0], seg.length[0] + seg.segments[0]); 	
+	ZLX_ASM_collect_mnemonic_Operation_mnemonic(_statement_information, seg.segments[0], seg.length[0]); 	
 	ZLX_ASM_Argument_t argument; 
 
 
