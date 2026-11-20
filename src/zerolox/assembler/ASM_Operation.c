@@ -5,6 +5,7 @@
 #include "MY_commons.h"
 #include "syntax/SYTX_syntax.h"
 #include <math.h>
+#include <string.h>
 
 static void print_type_buffer(MY_token_type_t type[ZLX_ASM_TYPE_BUFFER_SIZE])
 {
@@ -120,6 +121,8 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 	
 	char buffer1[16] = {0};
 	int opcode = -1;
+	ZLX_SYTX_instruction_prefix_t prefix = ZLX_SYTX_instruction_prefix_invalid;
+	ZLX_SYTX_instruction_postfix_t postfix = ZLX_SYTX_instruction_postfix_invalid;
 	if(dots_count == -1)
 	{
 		//this one is always the opcode		
@@ -128,9 +131,9 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 		if(test_size1 < 0)
 			MY_FAULT("could not fit substring in buffer");
 		
-		
+		prefix = ZLX_SYTX_instruction_prefix_none;		
 		opcode = ZLX_SYTX_get_mnemonic_code(buffer1);
-		
+		postfix = ZLX_SYTX_instruction_postfix_none;
 		//printf("0:%s\n", buffer1);
 		//printf("dots count -1\n");
 	}
@@ -143,8 +146,10 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 
 		
 		int test = ZLX_SYTX_get_mnemonic_code(buffer1);
+		
 		if(test == -1)
 		{
+			prefix = ZLX_SYTX_get_instruction_prefix(buffer1);	
 			//the other one is the opcode
 			test_size1 = MY_get_substring_Token_group(information.group, dots[0] + 1, length - dots[0] - 1, buffer1, 16);
 			if(test_size1 < 0)
@@ -157,23 +162,58 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 			}
 			else 
 				opcode = test;
+			postfix = ZLX_SYTX_instruction_postfix_none;
 		}
 		else 
 		{
+			prefix = ZLX_SYTX_instruction_prefix_none;
 			opcode = test;
+			char temp[16];
+			//copy out 
+			memcpy(temp, buffer1, 16);
+			test_size1 = MY_get_substring_Token_group(information.group, dots[0] + 1, length - dots[0] - 1, buffer1, 16);
+			if(test_size1 < 0)
+				MY_FAULT("could not fit substring in buffer");
+			postfix = ZLX_SYTX_get_instruction_postfix(buffer1);			
+			if(postfix == ZLX_SYTX_instruction_postfix_invalid)
+				MY_FAULT("failed to do a postfix correctly");
+			//copy in
+			memcpy(buffer1, temp, 16);
 		}
 
 		//printf("dots count 0\n");
 	}
 	else if(dots_count == 1)
 	{
+		//prefix
+		char buffer_prefix[16] = {0};
+		int test_prefix = MY_get_substring_Token_group(information.group, start, dots[0], buffer_prefix, 16); 
+		if(test_prefix < 0)
+			MY_FAULT("failed to get proper prefix");
 
+		prefix = ZLX_SYTX_get_instruction_prefix(buffer_prefix);
+		if(prefix == ZLX_SYTX_instruction_prefix_invalid)
+			MY_FAULT("invalid prefix");
+		//----------------------
+		//opcode
 		int test_size1 = MY_get_substring_Token_group(information.group, dots[0] + 1, dots[1] - dots[0] - 1, buffer1, 16);  
 		if(test_size1 < 0)
 			MY_FAULT("could not fit substring in buffer");
+		//--------------------
+		//prefix
+		char buffer_postfix[16] = {0};
+		int test_postfix = MY_get_substring_Token_group(information.group, dots[1] + 1, length - dots[1] - 1, buffer_postfix, 16);
+		if(test_postfix < 0)
+			MY_FAULT("could not fit substring in buffer");
+		postfix = ZLX_SYTX_get_instruction_postfix(buffer_postfix);
+		if(postfix == ZLX_SYTX_instruction_postfix_invalid)
+			MY_FAULT("invalid prefix");
 
+	
+
+		
 		opcode = ZLX_SYTX_get_mnemonic_code(buffer1);
-
+		MY_TODO;
 		//printf("dots count 1\n");
 	}
 
@@ -186,6 +226,8 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 
 	ZLX_ASM_Operation_mnemonic_t mnemonic = {0};
 	mnemonic.opcode = opcode;
+	mnemonic.prefix = prefix;
+	mnemonic.postfix = postfix;
 	return mnemonic;
 }
 

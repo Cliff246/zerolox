@@ -35,13 +35,28 @@ ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[] =
 
 
 
+char *ZLX_SYTX_instruction_postfix_keywords[] = 
+{
+	[ZLX_SYTX_instruction_postfix_invalid] = NULL, 
+	[ZLX_SYTX_instruction_postfix_none] = NULL,
+	[ZLX_SYTX_instruction_postfix_8] = "8",
+	[ZLX_SYTX_instruction_postfix_16] = "16",
+	[ZLX_SYTX_instruction_postfix_32] = "32",
+	[ZLX_SYTX_instruction_postfix_24] = "24",
+	[ZLX_SYTX_instruction_postfix_p] = "p"
+
+};
+
+const size_t ZLX_SYTX_instruction_postfix_count = MY_ARRAY_SIZE(ZLX_SYTX_instruction_postfix_keywords);
 const size_t ZLX_SYTX_mnemonics_count = MY_ARRAY_SIZE(ZLX_SYTX_mnemonics);
+
+
 
 
 int ZLX_SYTX_get_mnemonic_code(char *string)
 {
 	int id = -1;
-	for(int i = 0; i < MY_ARRAY_SIZE(ZLX_SYTX_mnemonics); ++i)
+	for(int i = 0; i < ZLX_SYTX_mnemonics_count; ++i)
 	{
 		
 		if(strcmp(ZLX_SYTX_mnemonics[i].a__mnemonic, string) == 0)
@@ -51,5 +66,37 @@ int ZLX_SYTX_get_mnemonic_code(char *string)
 		}
 	}
 	return id;
+}
+
+
+ZLX_SYTX_instruction_postfix_t ZLX_SYTX_get_instruction_postfix(char *string)
+{
+	if(string == NULL)
+		return ZLX_SYTX_instruction_postfix_invalid;
+	int id = -1;
+	for(int i = 0; i < ZLX_SYTX_instruction_postfix_count; ++i)
+	{
+		
+		if(strcmp(ZLX_SYTX_instruction_postfix_keywords[i], string) == 0)
+		{
+			id = i;
+			break;
+		}
+	}
+	return id;
+
+}
+ZLX_SYTX_instruction_prefix_t ZLX_SYTX_get_instruction_prefix(char *string)
+{
+	if(string[0] == 'm')
+	{
+		return ZLX_SYTX_instruction_prefix_minor;
+	}
+	else if(string[0] == 'n')
+		return ZLX_SYTX_instruction_prefix_natural;
+	else if(string[0] == '\0')
+		return ZLX_SYTX_instruction_prefix_invalid;
+	else
+		return ZLX_SYTX_instruction_prefix_none;
 }
 

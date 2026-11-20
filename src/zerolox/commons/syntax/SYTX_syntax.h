@@ -7,6 +7,30 @@
 
 
 
+typedef enum ZLX_SYTX_instruction_prefix
+{
+	ZLX_SYTX_instruction_prefix_invalid,
+	ZLX_SYTX_instruction_prefix_none,
+	ZLX_SYTX_instruction_prefix_minor,
+
+	ZLX_SYTX_instruction_prefix_natural,
+}ZLX_SYTX_instruction_prefix_t;
+
+
+typedef enum ZLX_SYTX_instruction_postfix
+{
+	ZLX_SYTX_instruction_postfix_invalid, 
+	ZLX_SYTX_instruction_postfix_none,
+	ZLX_SYTX_instruction_postfix_8,
+	ZLX_SYTX_instruction_postfix_16,
+	ZLX_SYTX_instruction_postfix_32,
+	ZLX_SYTX_instruction_postfix_24,
+	ZLX_SYTX_instruction_postfix_p
+}ZLX_SYTX_instruction_postfix_t;
+
+extern char *ZLX_SYTX_instruction_postfix_keywords[];
+
+extern const size_t ZLX_SYTX_instruction_postfix_count;
 #define ZLX_SYTX_MNEMONIC_SIZE 16
 
 typedef enum ZLX_SYTX_pattern_form
@@ -30,6 +54,7 @@ extern ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[];
 extern const size_t ZLX_SYTX_mnemonics_count;
 
 int ZLX_SYTX_get_mnemonic_code(char *string);
-
+ZLX_SYTX_instruction_postfix_t ZLX_SYTX_get_instruction_postfix(char *string);
+ZLX_SYTX_instruction_prefix_t ZLX_SYTX_get_instruction_prefix(char *string);
 
 #endif

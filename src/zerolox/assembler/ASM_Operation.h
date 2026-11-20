@@ -18,10 +18,10 @@ typedef enum ZLX_ASM_operation_type
 typedef struct ZLX_ASM_Operation_mnemonic
 {
 	//waste of space for the has post and prefix
-	bool has_prefix, has_postfix;
-	int prefix;
+	bool strong;
+	ZLX_SYTX_instruction_prefix_t prefix;
 	int opcode;
-	int postfix;
+	ZLX_SYTX_instruction_postfix_t postfix;
 
 }ZLX_ASM_Operation_mnemonic_t;
 
