@@ -6,7 +6,7 @@ import unittest
 
 from assembler import Error, assemble, link
 from image import build_image
-from opcodes import MINOR
+from opcodes import MAJOR, MINOR
 
 
 def binary(source):
@@ -14,9 +14,35 @@ def binary(source):
 
 
 class EncodingTests(unittest.TestCase):
-    def test_unit_step_aliases(self):
-        for op in ('inc', 'dec'):
-            self.assertEqual(binary(f'{op} t0'), binary(f'{op}1 t0'))
+    def test_in_place_encodings(self):
+        for op in ('addi', 'slli', 'srli', 'srai'):
+            for field in range(32):
+                immediate = field
+                if op == 'addi':
+                    immediate = 16 if field == 0 else (field ^ 16) - 16
+                source = f'{op} r31, {immediate}'
+                word = (MINOR[op] << 11) | (field << 6) | (31 << 1) | 1
+                self.assertEqual(binary('m.' + source), word.to_bytes(2, 'little'))
+                self.assertEqual(binary(source), binary('m.' + source))
+            for imm in ((-17, 0, 17) if op == 'addi' else (-1, 32)):
+                with self.assertRaises(Error):
+                    binary(f'm.{op} t0, {imm}')
+            for invalid in (f'm.{op} t0, t1, 1', f'n.{op} t0, 1'):
+                with self.assertRaises(Error):
+                    binary(invalid)
+            with self.assertRaises(Error):
+                build_image(assemble(f'm.{op} t0, 1', target='zerolox1-legacy-emu-v1'))
+
+    def test_retired_forms(self):
+        names = ['inc', 'dec', 'inca', 'deca', 'srra', 'srla', 'slla']
+        names += [stem + str(i) for stem in ('inc', 'dec', 'sl', 'sr', 'sra') for i in range(1, 9)]
+        for name in names:
+            with self.subTest(name=name), self.assertRaises(Error):
+                binary(f'{name} t0')
+        for name in ('inc', 'inc1', 'dec', 'dec1'):
+            opcode = 14 if name.startswith('inc') else 15
+            self.assertEqual(build_image(assemble(f'{name} t0', target='zerolox1-legacy-emu-v1')),
+                             ((opcode << 6) | 16).to_bytes(2, 'little'))
 
     def test_minor_count_is_excluded(self):
         self.assertNotIn('count', MINOR)
@@ -77,7 +103,7 @@ class EncodingTests(unittest.TestCase):
     def test_invalid_combinations(self):
         for source in ('n.add t0, t1, t2 ; amv t0', 'add ac, t1, t2 ; mva t0',
                        'm.add t0, t1 ; amv t2', 'andi t0, ac, 4 ; amv t1',
-                       'inc t0 ; amv t2', 'bieqc+ x+, 2 ; amv t1', 'sext ac, t1, 0',
+                       'addi t0, 1 ; amv t2', 'bieqc+ x+, 2 ; amv t1', 'sext ac, t1, 0',
                        'sext ac, t1, 33', 'bineqc+ x, 2', 'bieqc+ y-, 3'):
             with self.subTest(source=source), self.assertRaises(Error):
                 binary(source)
@@ -110,8 +136,8 @@ class ExecutionTests(unittest.TestCase):
 
     def test_register_jump_tail_call(self):
         source = ('get16 t0, &caller\nget16 t1, &callee\nget16 sp, 0x8000\n'
-                  'get ac, 41\ncall t0\nresume:\ninc t2\nb #done\n'
-                  'caller:\nj t1\nget ac, -1\ncallee:\ninca 1\nret t3\ndone:')
+                  'get ac, 41\ncall t0\nresume:\naddi t2, 1\nb #done\n'
+                  'caller:\nj t1\nget ac, -1\ncallee:\naddi ac, 1\nret t3\ndone:')
         _, labels = link(assemble(source))
         self.check_program(source, {1: 42, 2: 0x8000, 3: labels['resume']['value'],
                                     8: labels['caller']['value'], 9: labels['callee']['value'],
@@ -169,7 +195,7 @@ class ExecutionTests(unittest.TestCase):
         base = int.from_bytes(binary('n.add t0, t1, t2')[2:], 'little')
         faults = [(binary('n.add t0, t1, t2')[:2] + (base | 16).to_bytes(2,'little'), 'w1 == w2'),
                   (binary('n.add ac, t1, t2')[:2] + ((base & 2047) | (1<<11) | 17).to_bytes(2,'little'), 'w1 == w2')]
-        for major in (12, 13, 1023):
+        for major in (max(MAJOR.values()) + 1, 1023):
             faults.append(((major << 6).to_bytes(2,'little'), 'could not decode'))
         for minor in range(max(MINOR.values()) + 1, 32):
             faults.append((((minor << 11) | 1).to_bytes(2,'little'), 'could not decode'))
@@ -182,19 +208,22 @@ class ExecutionTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(reason, result.stdout + result.stderr)
 
-    def test_fixed_counts(self):
-        for n in range(1, 9):
-            for op, result in [('sl', 0x80000001 << n), ('sr', 0x80000001 >> n),
-                               ('sra', -2147483647 >> n), ('inc', 0x80000001 + n),
-                               ('dec', 0x80000001 - n)]:
-                with self.subTest(op=op, n=n):
-                    self.check_program(f'get32 t0, 0x80000001\n{op}{n} t0', {8: result & 0xffffffff})
+    def test_in_place_results(self):
+        for field in range(32):
+            delta = 16 if field == 0 else (field ^ 16) - 16
+            source = (f'get32 t0, 0x80000001\nget32 t1, 0x80000001\nget32 t2, 0x80000001\n'
+                      f'slli t0, {field}\nsrli t1, {field}\nsrai t2, {field}\n'
+                      f'addi ac, {delta}\naddi z0, {delta}')
+            self.check_program(source, {0: 0, 1: delta & 0xffffffff,
+                                        8: (0x80000001 << field) & 0xffffffff,
+                                        9: 0x80000001 >> field,
+                                        10: (-2147483647 >> field) & 0xffffffff})
 
     def test_accumulator_and_immediates(self):
         for op, value in [('and', 2), ('or', 15), ('xor', 13)]:
             self.check_program(f'm.geta 10\nm.get8 t0, 7\n{op}a t0', {1:value, 8:7})
             self.check_program(f'm.geta 10\nm.get8 t0, 7\na{op} t0', {1:10, 8:value})
-        self.check_program('m.geta 0\ndeca 1\nsrra 31\nsrla 31\nslla 3\ninca 31', {1:39})
+        self.check_program('m.geta 0\naddi ac, -1\nsrai ac, 31\nsrli ac, 31\nslli ac, 3\naddi ac, 16\naddi ac, 15', {1:39})
         self.check_program('get32 t0, 0xffffff70\nsext t1, t0, 8\nsext t2, t0, 7\nsext t3, t0, 32\n'
                            'ori t4, z0, -1024\nxori t5, z0, 1023\nslli ac, t5, 2047',
                            {1:1<<31, 9:112, 10:0xfffffff0, 11:0xffffff70, 12:0xfffffc00, 13:1023})
@@ -206,6 +235,6 @@ class ExecutionTests(unittest.TestCase):
                     for counter in (0, delta):
                         taken = (counter == 0) == (op == 'bieqc+')
                         source = (f'get32 r{cr}, {counter & 0xffffffff}\n'
-                                  f'{op} {pair}{sign}, #done\nm.geta 9\ndone:\ninc t0')
+                                  f'{op} {pair}{sign}, #done\nm.geta 9\ndone:\naddi t0, 1')
                         self.check_program(source, {1:0 if taken else 9, ir:delta & 0xffffffff,
                                                     cr:counter & 0xffffffff, 8:1}, 3 if taken else 4)

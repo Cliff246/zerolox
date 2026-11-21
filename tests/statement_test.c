@@ -54,7 +54,23 @@ int main(void)
 	check_opcode("n.cgeu t0, t1, t2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_cgeu);
 	check_opcode("n.add t0, t1, t2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_add);
 	check_opcode("m.add t0, t1", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_add);
-	check_opcode("inc8 t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_inc8);
+
+	check_opcode("m.addi ac, 1", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_addi);
+	check_opcode("addi t0, 1", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_addi);
+	check_opcode("n.addi t0, t1, 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_addi);
+	check_opcode("addi t0, t1, 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_addi);
+	check_opcode("m.slli ac, 1", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_slli);
+	check_opcode("slli t0, 1", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_slli);
+	check_opcode("n.slli t0, t1, 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_slli);
+	check_opcode("slli t0, t1, 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_slli);
+	check_opcode("m.srli ac, 1", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_srli);
+	check_opcode("srli t0, 1", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_srli);
+	check_opcode("n.srli t0, t1, 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_srli);
+	check_opcode("srli t0, t1, 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_srli);
+	check_opcode("m.srai ac, 1", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_srai);
+	check_opcode("srai t0, 1", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_srai);
+	check_opcode("n.srai t0, t1, 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_srai);
+	check_opcode("srai t0, t1, 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_srai);
 	check_opcode("m.bieqc+ x+, 2", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_bieqc_update);
 	check_opcode("bineqc+ y-, 2", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_bineqc_update);
 	check_statement("add+ t0", ZLX_ASM_statement_type_invalid);

@@ -61,7 +61,7 @@ def assemble(source, filename='<input>', *, target=CURRENT_ISA):
                 elif op in ('@jumpto','%align'):
                     if len(args)!=1: raise Error(f'{op} requires one value')
                     rec.update(kind=op[1:],value=args[0])
-                elif accepts(op) or op in extra.names() or op.removeprefix('n.') in extra.REG_ALU or op in ('m.add','m.adda','m.sub','mv','m.mv','m.geta','m.get8','b','m.b','beqz','bnez','m.baeqz','m.baneqz') or re.fullmatch(r'(?:m\.(?:lda|ald|sta|ast)|n\.(?:ld|st)|ld|st)\.(?:8|16|32|p)',op):
+                elif accepts(op) or op in extra.names(target) or op.removeprefix('n.') in extra.REG_ALU or op in ('m.add','m.adda','m.sub','mv','m.mv','m.geta','m.get8','b','m.b','beqz','bnez','m.baeqz','m.baneqz') or re.fullmatch(r'(?:m\.(?:lda|ald|sta|ast)|n\.(?:ld|st)|ld|st)\.(?:8|16|32|p)',op):
                     parts=op.split('.')
                     form=parts.pop(0) if parts[0] in ('m','n') else None
                     rec.update(kind='instruction',operation=parts[0],form=form,width=parts[1] if len(parts)>1 else None,args=args)

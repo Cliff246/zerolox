@@ -19,7 +19,7 @@ def encode(rec, chosen, symbols, pc, target=CURRENT_ISA):
     base=chosen.rsplit('.',1)[0]
     minor_name = 'move' if chosen == 'm.mv' else chosen.removeprefix('m.')
     major, minor = (MAJOR, MINOR) if target == CURRENT_ISA else (LEGACY_MAJOR, LEGACY_MINOR)
-    if op in extra.names():
+    if op in extra.names(target):
         form,fields=extra.parse(op,args,symbols,pc,target)
         return extra.encode(form,fields)
     if chosen in ('m.mv','m.add','m.adda','m.sub'):

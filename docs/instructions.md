@@ -23,12 +23,8 @@ majors:
     2 | slli, srli, srai    | 5_b5 | low 5 bits of the 11-bit shift count
     2 | extb                | 5_b5 | rd = (rs >> index) & 1, bit 0 is least significant, ZLX-1 accepts 0..31
     2 | sext                | 5_b5 | sign-extend the low 1..32 bits of the source
-    1 | inc1..8, dec1..8    | 5    | inc and dec are aliases for inc1 and dec1
-    1 | sl1..8, sr1..8, sra1..8 | 5 | shift the named register in place
     1 | anda, xora, ora     | 5    | accumulator receives the result
     1 | aand, axor, aor     | 5    | named register receives the result
-    1 | inca, deca          | 5    | add or subtract imm5 from ac
-    1 | srra, srla, slla    | 5    | arithmetic right, logical right or left shift of ac by imm5
 	2 | addi	|			|
 	2 | bneq	|			|
 	2 | beq		|			|
@@ -60,6 +56,9 @@ moved value if it reads the move destination. Both writes commit together. Two
 writes to the same nonzero register fault before either write commits.
 
 minors 
+    1 | addi reg, delta     | 55 | add in place, -16..-1 or +1..+16. Imm5 is signed, with 0 encoding +16.
+    1 | slli, srli, srai    | 55 | shift reg in place by unsigned imm5 (0..31), including ac
+    // Each encoding is [minor5][imm5][reg5][1].
 	1 |	mv		|			| 
 	1 | add		|			|
 	1 | adda	|			|
@@ -116,7 +115,6 @@ majors:
 	1 | auipc	|			|
 	
 	
-//might be worth adding a m.addi where r1 = r1 + sext(imm5)
 minors:
 	1 | calli	| imm10		|
 

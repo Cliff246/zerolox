@@ -1,6 +1,6 @@
 # ZLX-1 emulator encoding forms
 
-This table describes the forms available to the `zerolox1-emu-v2` backend. See [README.md](README.md) for current source examples and [docs/instructions.md](../../../docs/instructions.md) for the evolving ISA inventory. Each listed form emits one instruction. `m.` and `n.` constrain the form; unprefixed spellings below are experimental selectable aliases. A register is `r`, a value expression is `v`, and branch displacement `d` is in bytes from the instruction start and must be even. Memory syntax is `[base, byte_offset]`.
+This table describes the forms available to the `zerolox1-emu-v3` backend. See [README.md](README.md) for current source examples and [docs/instructions.md](../../../docs/instructions.md) for the evolving ISA inventory. Each listed form emits one instruction. `m.` and `n.` constrain the form; unprefixed spellings below are experimental selectable aliases. A register is `r`, a value expression is `v`, and branch displacement `d` is in bytes from the instruction start and must be even. Memory syntax is `[base, byte_offset]`.
 
 | Forms | Arguments |
 | --- | --- |
@@ -27,11 +27,11 @@ This table describes the forms available to the `zerolox1-emu-v2` backend. See [
 | `push.W`, `pop.W`, `n.push.W`, `n.pop.W` | register |
 | `extb`, `n.extb` | `destination, source, index` returns bit `index` as 0 or 1. The unsigned 11-bit field holds the index. ZLX-1 faults on values above 31. |
 | `sext` | `destination, source, width` with width in bits from 1 through 32 |
-| `inc1..8`, `dec1..8`, `sl1..8`, `sr1..8`, `sra1..8` | register |
+| `m.addi` | `register, delta` adds −16…−1 or +1…+16 in place. |
+| `m.slli`, `m.srli`, `m.srai` | `register, count` shifts in place by 0…31. All four in-place operations also accept the two-operand spelling without `m.`. |
 | `anda`, `xora`, `ora`, `aand`, `axor`, `aor` | register. A trailing `a` writes ac. A leading `a` writes the register. |
-| `inca`, `deca`, `srra`, `srla`, `slla` | unsigned five-bit immediate |
 | `j`, `n.j` | One register holding an absolute byte address. An odd target faults. All registers, including `rp`, retain their values. |
-| `inc`, `dec`, `call`, `ret`, `callp`, `retp` and `n.` versions | register |
+| `call`, `ret`, `callp`, `retp` and `n.` versions | register |
 
 `W` is `8`, `16`, `32` or `p`; `p` is three bytes on zerolox one. `m.ldplus` and `m.stplus` accept only -4, -2, -1, 1, 2, 3, 4, 8 as their increment, matching the current emulator's encoded selector; the operation accesses the old address, then updates the base. `m.ldplus` rejects `ac` as base because it conflicts with its implicit accumulator destination. `ret` and `retp` have a register operand because the current emulator copies `ac` to it. These spellings do not imply an ABI.
 

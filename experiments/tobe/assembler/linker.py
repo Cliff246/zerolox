@@ -30,7 +30,7 @@ def select(rec,symbols,pc,target=CURRENT_ISA):
         return 'n.' + name, 4
     source_op = op
     op,args = lower(op,args,symbols,pc)
-    if op in extra.names():
+    if op in extra.names(target):
         form, fields=extra.parse(op,args,symbols,pc,target)
         if source_op.startswith(('ld+a', 'st+a', 'm.ld+a', 'm.st+a')):
             op = op.replace('ldplus', 'ld+a').replace('stplus', 'st+a')

@@ -7,25 +7,22 @@ from opcodes import MAJOR, MINOR, LEGACY_MAJOR, LEGACY_MINOR, LEGACY_IMM_SELECTO
 COMPARE = {'clt', 'cge', 'cltu', 'cgeu', 'ceq', 'cneq'}
 REG_ALU = COMPARE | {'add', 'sub', 'sll', 'srl', 'sra', 'xor', 'or', 'and', 'andn'}
 IMM = {'slli', 'srli', 'srai', 'xori', 'andi', 'ori', 'sext', 'extb'}
-ACC_IMM = {'inca', 'deca', 'srra', 'srla', 'slla'}
-ONE = {name: name for name in ('inc', 'dec', 'j', 'call', 'ret', 'callp', 'retp',
+IN_PLACE = {'addi', 'slli', 'srli', 'srai'}
+LEGACY_STEP = {'inc': 'inc', 'inc1': 'inc', 'dec': 'dec', 'dec1': 'dec'}
+ONE = {name: name for name in ('j', 'call', 'ret', 'callp', 'retp',
                                 'anda', 'xora', 'ora', 'aand', 'axor', 'aor')}
-ONE.update(inc1='inc', dec1='dec')
 for name in ('push', 'pop'):
     for width in ('8', '16', '32', 'p'):
         ONE[f'{name}.{width}'] = name + width
-for stem, first in [('inc', 2), ('dec', 2), ('sl', 1), ('sr', 1), ('sra', 1)]:
-    for count in range(first, 9):
-        name = f'{stem}{count}'
-        ONE[name] = name
 ITER = {'bieqc+': 'bieqc_update', 'bineqc+': 'bineqc_update'}
 BRANCH = {'bneq', 'beq', 'blt', 'bge', 'bltu', 'bgeu'}
 MINOR28 = {'ldsa', 'stsa', 'bieqc', 'bteqa', 'btneqa'}
 PLUS = {'ldplus': 'ld_plus', 'stplus': 'st_plus'}
 WIDTH = {'8':0,'16':1,'32':2,'p':3}
 
-def names():
-    return (set(ITER) | {'m.'+k for k in ITER} | set(ACC_IMM) | {'n.'+k for k in ACC_IMM} |
+def names(target=CURRENT_ISA):
+    steps = set(LEGACY_STEP) if target != CURRENT_ISA else set()
+    return (set(ITER) | {'m.'+k for k in ITER} | {'m.'+k for k in IN_PLACE} | steps | {'n.'+k for k in steps} |
             {'n.'+k for k in ONE} | set(ONE) | {'n.get16','n.get32','get16','get32','n.addi','addi'} |
             {'n.'+k for k in IMM} | set(IMM) | {'n.'+k for k in BRANCH} | set(BRANCH) |
             {'m.'+k+'.'+w for k in ('ldsa','stsa','ldplus','stplus') for w in WIDTH} |
@@ -36,7 +33,7 @@ def parse(op,args,symbols,pc,target=CURRENT_ISA):
     legacy = target != CURRENT_ISA
     major, minor = (LEGACY_MAJOR, LEGACY_MINOR) if legacy else (MAJOR, MINOR)
     name=op.removeprefix('n.')
-    if legacy and (name in ACC_IMM or (name in IMM and name not in LEGACY_IMM_SELECTOR) or op.removeprefix('m.') in ITER
+    if legacy and ((name in IMM and name not in LEGACY_IMM_SELECTOR) or op.removeprefix('m.') in ITER
                    or (name in ONE and ONE[name] not in major)):
         raise Error(f'{op} is unavailable for the legacy target')
     def count(n):
@@ -45,9 +42,21 @@ def parse(op,args,symbols,pc,target=CURRENT_ISA):
         v=expr(s,symbols,pc)
         if not lo<=v<=hi: raise Error(f'{op} value {v} outside {lo}..{hi}')
         return v
-    if name in ACC_IMM:
+    if legacy and name in LEGACY_STEP:
         count(1)
-        return 'one', (major[name], immediate(args[0], 0, 31))
+        return 'one', (major[LEGACY_STEP[name]], reg(args[0]))
+    if op.startswith('m.') and op[2:] in IN_PLACE:
+        if legacy:
+            raise Error(f'{op} is unavailable for the legacy target')
+        count(2)
+        if op == 'm.addi':
+            value = immediate(args[1], -16, 16)
+            if value == 0:
+                raise Error('m.addi requires a nonzero immediate')
+            field = 0 if value == 16 else value & 31
+        else:
+            field = immediate(args[1], 0, 31)
+        return 'minor55', (minor[op[2:]], field, reg(args[0]))
     branch = op.removeprefix('m.')
     if branch in ITER:
         count(2)
@@ -117,6 +126,7 @@ def encode(form, f):
     if form=='imm11':
         op,a,c,v=f
         return p((op<<6)|(a<<1))+p(((v&31)<<11)|(((v>>5)&31)<<6)|(c<<1)|((v>>10)&1))
+    if form=='minor55': return p((f[0]<<11)|(f[1]<<6)|(f[2]<<1)|1)
     if form=='minor28': return p((f[0]<<11)|(f[1]<<9)|(f[2]<<1)|1)
     if form=='minor235': return p((f[0]<<11)|(f[1]<<9)|(f[2]<<6)|(f[3]<<1)|1)
     raise Error('unknown instruction format')

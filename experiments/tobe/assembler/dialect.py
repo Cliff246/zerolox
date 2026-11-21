@@ -1,6 +1,8 @@
 """Map current source spellings onto the legacy emulator's instruction forms."""
 import re
 
+from extra import IN_PLACE
+
 from model import Error, REGISTERS
 from syntax import split_args
 from values import expr, reg
@@ -19,6 +21,8 @@ def accepts(op):
 
 def lower(op, args, symbols, pc):
     """Return an encoding mnemonic and operands without changing the object."""
+    if op in IN_PLACE and len(args) == 2:
+        return 'm.' + op, args
     if op == 'get':
         if len(args) != 2:
             raise Error('get requires a register and an immediate')

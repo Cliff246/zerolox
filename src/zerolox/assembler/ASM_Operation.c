@@ -133,6 +133,22 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 		
 		prefix = ZLX_SYTX_instruction_prefix_none;		
 		opcode = ZLX_SYTX_find_mnemonic(buffer1, prefix);
+		// In-place and three-operand immediates share an unprefixed mnemonic.
+		if (opcode >= 0 && ZLX_SYTX_mnemonics[opcode].form == ZLX_SYTX_pattern_form_register_immediate)
+		{
+			unsigned commas = 0;
+			for (int j = start + length; j < information.group.length; ++j)
+			{
+				MY_token_type_t type = information.a__token_types[j];
+				if (type == MY_token_type_semicolon || type == MY_token_type_newline)
+					break;
+				if (type == MY_token_type_comma && ++commas == 2)
+				{
+					opcode = ZLX_SYTX_find_mnemonic(buffer1, ZLX_SYTX_instruction_prefix_natural);
+					break;
+				}
+			}
+		}
 		postfix = ZLX_SYTX_instruction_postfix_none;
 		//printf("0:%s\n", buffer1);
 		//printf("dots count -1\n");

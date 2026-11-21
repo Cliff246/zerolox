@@ -25,7 +25,7 @@ field_begin:
     mv ac, t5
     st+a.p [s0{1}]
 
-    inc ix
+    addi ix, 1
     ld+a.8 [t4{1}]
     bteqa t1, #quoted_loop
 
@@ -71,7 +71,7 @@ end_cr:
     lda.8 [t4, 0]
 	/:could be bneq ac, t3, #end_line
     btneqa t3, #end_line
-    inc t4
+    addi t4, 1
 
 end_line:
     mv ac, z0

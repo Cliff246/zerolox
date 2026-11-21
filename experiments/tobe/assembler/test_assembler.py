@@ -38,7 +38,7 @@ class DesignCases(unittest.TestCase):
     def test_current_get_and_versioned_objects(self):
         obj = assemble('get t0, 44\nget ac, -1\nget t0, 256\nget t0, 65536')
         self.assertEqual(obj['syntax'], 'zerolox-source-v1')
-        self.assertEqual(obj['target'], 'zerolox1-emu-v2')
+        self.assertEqual(obj['target'], 'zerolox1-emu-v3')
         self.assertEqual([entry[1] for entry in link(obj)[0]], [2, 2, 4, 6])
         self.assertEqual(build_image(obj), build_image(dict(obj, target='zerolox1')))
         with self.assertRaisesRegex(Error, 'unsupported ISA target'):
@@ -135,7 +135,7 @@ class DesignCases(unittest.TestCase):
         emulator = os.environ.get('ZEROLOX_EMULATOR')
         if not emulator: self.skipTest('set ZEROLOX_EMULATOR to a built C emulator')
         cases = [
-            ('get t4, 80\nget ac, 41\nst+a [t4{1}]\ndec t4\nld+a [t4{1}]\nbeq ix, cx, #done\nget ac, 99\ndone:\n', 6, {1:41,12:81}),
+            ('get t4, 80\nget ac, 41\nst+a [t4{1}]\naddi t4, -1\nld+a [t4{1}]\nbeq ix, cx, #done\nget ac, 99\ndone:\n', 6, {1:41,12:81}),
             ('m.get8 t0, 7\nm.get8 t1, 3\nadd ac, t0, t1\nadd t2, ac, t1\nadd t3, t0, t1\n', 5, {1:10, 10:13, 11:10}),
             ('m.get8 t0, 64\nm.get8 t1, 123\nst.8 t1, [t0]\nld.8 ac, [t0]\n', 4, {1:123}),
             ('m.geta 0\nbeqz #target\nm.geta 99\ntarget:\nm.geta 7\n', 3, {1:7}),
@@ -143,7 +143,7 @@ class DesignCases(unittest.TestCase):
             ('m.geta 80\nm.get8 t1, 42\nst.8 t1, [ac, 2]\nld.8 t2, [ac, 2]\n', 4, {10:42}),
             ('m.get8 t0, 12\nm.get8 t1, 5\nsub ac, t0, t1\nsub t2, t0, t1\nxor t3, t0, t1\nand t4, t0, t1\nor t5, t0, t1\n', 7, {1:7,10:7,11:9,12:4,13:13}),
             ('m.get8 t0, 12\nm.get8 t1, 2\nsll t2, t0, t1\nsrl t3, t0, t1\nsra t4, t0, t1\n', 5, {10:48,11:3,12:3}),
-            ('n.get32 t0, 0x12345678\nn.get16 t1, 65535\naddi t2, t1, -2\ninc t2\ndec t2\n', 5, {8:0x12345678,9:65535,10:65533}),
+            ('n.get32 t0, 0x12345678\nn.get16 t1, 65535\naddi t2, t1, -2\naddi t2, 1\naddi t2, -1\n', 5, {8:0x12345678,9:65535,10:65533}),
             ('m.get8 t0, 12\nslli t1, t0, 2\nsrli t2, t0, 1\nxori t3, t0, 3\nori t4, t0, 3\nandi t5, t0, 3\n', 6, {9:48,10:6,11:15,12:15,13:0}),
             ('m.get8 t0, 5\nm.get8 t1, 5\nbeq t0, t1, #target\nm.geta 99\ntarget:\nm.geta 7\n', 4, {1:7}),
             ('m.get8 t0, 90\nmv sp, t0\nm.get8 t1, 77\npush.8 t1\npop.8 t2\n', 5, {2:90,10:77}),
@@ -165,7 +165,7 @@ class DesignCases(unittest.TestCase):
             **{x:'t0, t1, 1' for x in extra.IMM},
             **{x:'t0, t1, 2' for x in extra.BRANCH},
             **{x:'t0' for x in extra.ONE},
-            **{x:'7' for x in extra.ACC_IMM},
+            **{'m.'+x:'t0, 7' for x in extra.IN_PLACE},
             **{x:'x+, 2' for x in extra.ITER},
             **{'m.'+x:'y-, 2' for x in extra.ITER},
             **{'m.'+x+'.'+w:'0' for x in ('ldsa','stsa') for w in extra.WIDTH},

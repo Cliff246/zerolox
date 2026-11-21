@@ -1,7 +1,7 @@
 """Shared types and register definitions."""
 
 SOURCE_SYNTAX = 'zerolox-source-v1'
-CURRENT_ISA = 'zerolox1-emu-v2'
+CURRENT_ISA = 'zerolox1-emu-v3'
 LEGACY_ISA = 'zerolox1-legacy-emu-v1'
 
 REGISTERS = {'z0': 0, 'ac': 1, 'sp': 2, 'rp': 3, 'ix': 4, 'iy': 5, 'cx': 6, 'cy': 7}
