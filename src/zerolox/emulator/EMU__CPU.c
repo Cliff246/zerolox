@@ -682,8 +682,48 @@ OPERATION(minor_branch_temporary_not_equal_accumulator)
 
 	return output;
 }
-static ZLX_EMU__CPU_operation_t minor_operations[] = 
+// Stage writes here. The common writeback checks destination conflicts.
+static void stage_register(ZLX_EMU__CPU_output_t *output, uint8_t reg, uint32_t value)
 {
+	output->use_destination = true;
+	output->use_destination_1 = true;
+	output->destination_1 = reg;
+	output->destination_1_data = value;
+}
+
+static void stage_iterator_branch(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_parameters_t p,
+	ZLX_EMU__CPU_output_t *output, bool branch_if_equal)
+{
+	bool y = p.imm2 & 2;
+	uint8_t iter = y ? ZLX_ISA_register_identifier_iterator_y : ZLX_ISA_register_identifier_iterator_x;
+	uint8_t counter = y ? ZLX_ISA_register_identifier_counter_y : ZLX_ISA_register_identifier_counter_x;
+	uint32_t old = ZLX_EMU_get_register__CPU(cpu, iter);
+	bool equal = old == ZLX_EMU_get_register__CPU(cpu, counter);
+
+	stage_register(output, iter, (p.imm2 & 1) ? old - 1 : old + 1);
+	output->pc_changed = equal == branch_if_equal;
+	output->pc_set_or_add = true;
+	output->pc_value = 2 * MY_sign_extend32(p.imm8, 8);
+}
+
+OPERATION(minor_bieqc_update)
+{
+	OPERATION_SETUP;
+	stage_iterator_branch(cpu, paramaters, &output, true);
+	return output;
+}
+
+OPERATION(minor_bineqc_update)
+{
+	OPERATION_SETUP;
+	stage_iterator_branch(cpu, paramaters, &output, false);
+	return output;
+}
+
+static const ZLX_EMU__CPU_operation_t minor_operations[ZLX_ISA_minor_operation_count] =
+{
+	[ZLX_ISA_minor_operation_bieqc_update] = minor_bieqc_update,
+	[ZLX_ISA_minor_operation_bineqc_update] = minor_bineqc_update,
 	[ZLX_ISA_minor_operation_move] = minor_move,
 	[ZLX_ISA_minor_operation_add] = minor_add,
 	[ZLX_ISA_minor_operation_adda] = minor_adda,
@@ -1069,104 +1109,299 @@ OPERATION(major_get32)
 }
 
 
-static ZLX_EMU__CPU_output_t register_result(unsigned dest, uint32_t value)
+typedef struct {
+	uint32_t left;
+	uint32_t right;
+} ultra_operands_t;
+
+static ultra_operands_t stage_ultra_move(ZLX_EMU__CPU_t *cpu,
+	ZLX_EMU__CPU_parameters_t p, ZLX_EMU__CPU_output_t *output)
 {
-	return (ZLX_EMU__CPU_output_t){
-		.use_destination = true, .use_destination_1 = true,
-		.destination_1 = dest, .destination_1_data = value
+	const uint8_t ac = ZLX_ISA_register_identifier_accumulator;
+	uint8_t src = p.imm1_x ? p.source_4 : ac;
+	uint8_t dst = p.imm1_x ? ac : p.source_4;
+	uint32_t moved = ZLX_EMU_get_register__CPU(cpu, src);
+	stage_register(output, dst, moved);
+	output->use_destination_2 = true;
+	output->destination_2 = p.source_2;
+
+	// The ALU sees the move first. Writes to z0 are discarded.
+	return (ultra_operands_t){
+		.left = dst && dst == p.source_1 ? moved : ZLX_EMU_get_register__CPU(cpu, p.source_1),
+		.right = dst && dst == p.source_3 ? moved : ZLX_EMU_get_register__CPU(cpu, p.source_3),
 	};
 }
 
-static uint32_t alu_register_result(ZLX_ISA_major_operation_t op, uint32_t left, uint32_t right)
+OPERATION(major_add)
 {
-	switch (op)
-	{
-		case ZLX_ISA_major_operation_add: return left + right;
-		case ZLX_ISA_major_operation_sub: return left - right;
-		case ZLX_ISA_major_operation_sll: return left << (right & 31);
-		case ZLX_ISA_major_operation_srl: return left >> (right & 31);
-		case ZLX_ISA_major_operation_sra: return (int32_t)left >> (right & 31);
-		case ZLX_ISA_major_operation_xor: return left ^ right;
-		case ZLX_ISA_major_operation_or:  return left | right;
-		case ZLX_ISA_major_operation_and: return left & right;
-		default: MY_FAULT("opcode does not permit an ultra move");
-	}
-	return 0;
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left + v.right;
+	return output;
 }
 
-static ZLX_EMU__CPU_output_t execute_alu(ZLX_EMU__CPU_t *cpu, ZLX_ISA_Major_t major)
+OPERATION(major_sub)
 {
-	const unsigned ac = ZLX_ISA_register_identifier_accumulator;
-	ZLX_ISA_major_operation_t op = major.operation;
-	if (major.type == ZLX_ISA_major_format_type_5_5551)
-	{
-		ZLX_ISA_Major_format_5_5551_t f = major.u__format_5_5551;
-		unsigned move_src = f.e1 ? f.d5 : ac;
-		unsigned move_dst = f.e1 ? ac : f.d5;
-		uint32_t moved = ZLX_EMU_get_register__CPU(cpu, move_src);
-		// Move first. Forward its latched value to either ALU source.
-		// Writes to z0 disappear, even when z0 is an ALU source.
-		uint32_t left = (move_dst && f.a5 == move_dst) ? moved : ZLX_EMU_get_register__CPU(cpu, f.a5);
-		uint32_t right = (move_dst && f.c5 == move_dst) ? moved : ZLX_EMU_get_register__CPU(cpu, f.c5);
-		ZLX_EMU__CPU_output_t out = register_result(move_dst, moved);
-		out.use_destination_2 = true;
-		out.destination_2 = f.b5;
-		out.destination_2_data = alu_register_result(op, left, right);
-		return out; // solve checks both destinations before either write
-	}
-	if (major.type == ZLX_ISA_major_format_type_5_b5)
-	{
-		ZLX_ISA_Major_format_5_b5_t f = major.u__format_5_b5;
-		uint32_t value = ZLX_EMU_get_register__CPU(cpu, f.a5);
-		uint32_t imm = MY_sign_extend32(f.b11, 11);
-		unsigned width = f.b11;
-		switch (op)
-		{
-			case ZLX_ISA_major_operation_slli: value <<= imm & 31; break;
-			case ZLX_ISA_major_operation_srli: value >>= imm & 31; break;
-			case ZLX_ISA_major_operation_srai: value = (int32_t)value >> (imm & 31); break;
-			case ZLX_ISA_major_operation_xori: value ^= imm; break;
-			case ZLX_ISA_major_operation_andi: value &= imm; break;
-			case ZLX_ISA_major_operation_ori: value |= imm; break;
-			case ZLX_ISA_major_operation_sext:
-				if (width == 0 || width > 32) MY_FAULT("sext width outside 1..32");
-				if (width < 32)
-					value = MY_sign_extend32(value & ((UINT32_C(1) << width) - 1), width);
-				break;
-			default: MY_FAULT("unsupported immediate opcode");
-		}
-		return register_result(f.c5, value);
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left - v.right;
+	return output;
+}
+
+OPERATION(major_sll)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left << (v.right & 31);
+	return output;
+}
+
+OPERATION(major_srl)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left >> (v.right & 31);
+	return output;
+}
+
+OPERATION(major_sra)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = (int32_t)v.left >> (v.right & 31);
+	return output;
+}
+
+OPERATION(major_xor)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left ^ v.right;
+	return output;
+}
+
+OPERATION(major_or)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left | v.right;
+	return output;
+}
+
+OPERATION(major_and)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left & v.right;
+	return output;
+}
+
+OPERATION(major_slli)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	stage_register(&output, paramaters.source_2, value << (paramaters.imm11 & 31));
+	return output;
+}
+
+OPERATION(major_srli)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	stage_register(&output, paramaters.source_2, value >> (paramaters.imm11 & 31));
+	return output;
+}
+
+OPERATION(major_srai)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	stage_register(&output, paramaters.source_2, (int32_t)value >> (paramaters.imm11 & 31));
+	return output;
+}
+
+OPERATION(major_andi)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	stage_register(&output, paramaters.source_2, value & MY_sign_extend32(paramaters.imm11, 11));
+	return output;
+}
+
+OPERATION(major_ori)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	stage_register(&output, paramaters.source_2, value | MY_sign_extend32(paramaters.imm11, 11));
+	return output;
+}
+
+OPERATION(major_xori)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	stage_register(&output, paramaters.source_2, value ^ MY_sign_extend32(paramaters.imm11, 11));
+	return output;
+}
+
+OPERATION(major_sext)
+{
+	OPERATION_SETUP;
+	unsigned width = paramaters.imm11;
+	if (width == 0 || width > 32) MY_FAULT("sext width outside 1..32");
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	if (width < 32)
+		value = MY_sign_extend32(value & ((UINT32_C(1) << width) - 1), width);
+	stage_register(&output, paramaters.source_2, value);
+	return output;
+}
+
+#define FIXED_REGISTER_OPERATION(name, expression) \
+	OPERATION(major_##name) \
+	{ \
+		OPERATION_SETUP; \
+		uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1); \
+		stage_register(&output, paramaters.source_1, expression); \
+		return output; \
 	}
 
-	unsigned field = major.u__foramt_5.a5;
-	uint32_t value = ZLX_EMU_get_register__CPU(cpu, field);
-	uint32_t accumulator = ZLX_EMU_get_register__CPU(cpu, ac);
-	if (op >= ZLX_ISA_major_operation_inc2 && op <= ZLX_ISA_major_operation_inc8)
-		return register_result(field, value + (op - ZLX_ISA_major_operation_inc2 + 2));
-	if (op >= ZLX_ISA_major_operation_dec2 && op <= ZLX_ISA_major_operation_dec8)
-		return register_result(field, value - (op - ZLX_ISA_major_operation_dec2 + 2));
-	if (op >= ZLX_ISA_major_operation_sl1 && op <= ZLX_ISA_major_operation_sl8)
-		return register_result(field, value << (op - ZLX_ISA_major_operation_sl1 + 1));
-	if (op >= ZLX_ISA_major_operation_sr1 && op <= ZLX_ISA_major_operation_sr8)
-		return register_result(field, value >> (op - ZLX_ISA_major_operation_sr1 + 1));
-	if (op >= ZLX_ISA_major_operation_sra1 && op <= ZLX_ISA_major_operation_sra8)
-		return register_result(field, (int32_t)value >> (op - ZLX_ISA_major_operation_sra1 + 1));
-	switch (op)
-	{
-		case ZLX_ISA_major_operation_anda: return register_result(ac, value & accumulator);
-		case ZLX_ISA_major_operation_xora: return register_result(ac, value ^ accumulator);
-		case ZLX_ISA_major_operation_ora:  return register_result(ac, value | accumulator);
-		case ZLX_ISA_major_operation_aand: return register_result(field, value & accumulator);
-		case ZLX_ISA_major_operation_axor: return register_result(field, value ^ accumulator);
-		case ZLX_ISA_major_operation_aor:  return register_result(field, value | accumulator);
-		case ZLX_ISA_major_operation_inca: return register_result(ac, accumulator + field);
-		case ZLX_ISA_major_operation_deca: return register_result(ac, accumulator - field);
-		case ZLX_ISA_major_operation_srra: return register_result(ac, (int32_t)accumulator >> field);
-		case ZLX_ISA_major_operation_srla: return register_result(ac, accumulator >> field);
-		case ZLX_ISA_major_operation_slla: return register_result(ac, accumulator << field);
-		default: MY_FAULT("unsupported short opcode");
-	}
-	return (ZLX_EMU__CPU_output_t){0};
+FIXED_REGISTER_OPERATION(inc2, value + 2)
+FIXED_REGISTER_OPERATION(inc3, value + 3)
+FIXED_REGISTER_OPERATION(inc4, value + 4)
+FIXED_REGISTER_OPERATION(inc5, value + 5)
+FIXED_REGISTER_OPERATION(inc6, value + 6)
+FIXED_REGISTER_OPERATION(inc7, value + 7)
+FIXED_REGISTER_OPERATION(inc8, value + 8)
+
+FIXED_REGISTER_OPERATION(dec2, value - 2)
+FIXED_REGISTER_OPERATION(dec3, value - 3)
+FIXED_REGISTER_OPERATION(dec4, value - 4)
+FIXED_REGISTER_OPERATION(dec5, value - 5)
+FIXED_REGISTER_OPERATION(dec6, value - 6)
+FIXED_REGISTER_OPERATION(dec7, value - 7)
+FIXED_REGISTER_OPERATION(dec8, value - 8)
+
+FIXED_REGISTER_OPERATION(sl1, value << 1)
+FIXED_REGISTER_OPERATION(sl2, value << 2)
+FIXED_REGISTER_OPERATION(sl3, value << 3)
+FIXED_REGISTER_OPERATION(sl4, value << 4)
+FIXED_REGISTER_OPERATION(sl5, value << 5)
+FIXED_REGISTER_OPERATION(sl6, value << 6)
+FIXED_REGISTER_OPERATION(sl7, value << 7)
+FIXED_REGISTER_OPERATION(sl8, value << 8)
+
+FIXED_REGISTER_OPERATION(sr1, value >> 1)
+FIXED_REGISTER_OPERATION(sr2, value >> 2)
+FIXED_REGISTER_OPERATION(sr3, value >> 3)
+FIXED_REGISTER_OPERATION(sr4, value >> 4)
+FIXED_REGISTER_OPERATION(sr5, value >> 5)
+FIXED_REGISTER_OPERATION(sr6, value >> 6)
+FIXED_REGISTER_OPERATION(sr7, value >> 7)
+FIXED_REGISTER_OPERATION(sr8, value >> 8)
+
+FIXED_REGISTER_OPERATION(sra1, (int32_t)value >> 1)
+FIXED_REGISTER_OPERATION(sra2, (int32_t)value >> 2)
+FIXED_REGISTER_OPERATION(sra3, (int32_t)value >> 3)
+FIXED_REGISTER_OPERATION(sra4, (int32_t)value >> 4)
+FIXED_REGISTER_OPERATION(sra5, (int32_t)value >> 5)
+FIXED_REGISTER_OPERATION(sra6, (int32_t)value >> 6)
+FIXED_REGISTER_OPERATION(sra7, (int32_t)value >> 7)
+FIXED_REGISTER_OPERATION(sra8, (int32_t)value >> 8)
+
+#undef FIXED_REGISTER_OPERATION
+
+OPERATION(major_anda)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+	stage_register(&output, ZLX_ISA_register_identifier_accumulator, value & ac);
+	return output;
+}
+
+OPERATION(major_aand)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+	stage_register(&output, paramaters.source_1, value & ac);
+	return output;
+}
+
+OPERATION(major_ora)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+	stage_register(&output, ZLX_ISA_register_identifier_accumulator, value | ac);
+	return output;
+}
+
+OPERATION(major_aor)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+	stage_register(&output, paramaters.source_1, value | ac);
+	return output;
+}
+
+OPERATION(major_xora)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+	stage_register(&output, ZLX_ISA_register_identifier_accumulator, value ^ ac);
+	return output;
+}
+
+OPERATION(major_axor)
+{
+	OPERATION_SETUP;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+	stage_register(&output, paramaters.source_1, value ^ ac);
+	return output;
+}
+
+OPERATION(major_inca)
+{
+	OPERATION_SETUP;
+	uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+	stage_register(&output, ZLX_ISA_register_identifier_accumulator, ac + paramaters.imm5);
+	return output;
+}
+
+OPERATION(major_deca)
+{
+	OPERATION_SETUP;
+	uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+	stage_register(&output, ZLX_ISA_register_identifier_accumulator, ac - paramaters.imm5);
+	return output;
+}
+
+OPERATION(major_srra)
+{
+	OPERATION_SETUP;
+	uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+	stage_register(&output, ZLX_ISA_register_identifier_accumulator, (int32_t)ac >> paramaters.imm5);
+	return output;
+}
+
+OPERATION(major_srla)
+{
+	OPERATION_SETUP;
+	uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+	stage_register(&output, ZLX_ISA_register_identifier_accumulator, ac >> paramaters.imm5);
+	return output;
+}
+
+OPERATION(major_slla)
+{
+	OPERATION_SETUP;
+	uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+	stage_register(&output, ZLX_ISA_register_identifier_accumulator, ac << paramaters.imm5);
+	return output;
 }
 
 OPERATION(major_branch_equals)
@@ -1426,8 +1661,72 @@ OPERATION(major_returnp)
 }
 
 
-static ZLX_EMU__CPU_operation_t major_operations[] = 
+static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_count] =
 {
+	[ZLX_ISA_major_operation_add] = major_add,
+	[ZLX_ISA_major_operation_sub] = major_sub,
+	[ZLX_ISA_major_operation_sll] = major_sll,
+	[ZLX_ISA_major_operation_srl] = major_srl,
+	[ZLX_ISA_major_operation_sra] = major_sra,
+	[ZLX_ISA_major_operation_xor] = major_xor,
+	[ZLX_ISA_major_operation_or] = major_or,
+	[ZLX_ISA_major_operation_and] = major_and,
+	[ZLX_ISA_major_operation_slli] = major_slli,
+	[ZLX_ISA_major_operation_srli] = major_srli,
+	[ZLX_ISA_major_operation_srai] = major_srai,
+	[ZLX_ISA_major_operation_xori] = major_xori,
+	[ZLX_ISA_major_operation_andi] = major_andi,
+	[ZLX_ISA_major_operation_ori] = major_ori,
+	[ZLX_ISA_major_operation_sext] = major_sext,
+	[ZLX_ISA_major_operation_inc2] = major_inc2,
+	[ZLX_ISA_major_operation_inc3] = major_inc3,
+	[ZLX_ISA_major_operation_inc4] = major_inc4,
+	[ZLX_ISA_major_operation_inc5] = major_inc5,
+	[ZLX_ISA_major_operation_inc6] = major_inc6,
+	[ZLX_ISA_major_operation_inc7] = major_inc7,
+	[ZLX_ISA_major_operation_inc8] = major_inc8,
+	[ZLX_ISA_major_operation_dec2] = major_dec2,
+	[ZLX_ISA_major_operation_dec3] = major_dec3,
+	[ZLX_ISA_major_operation_dec4] = major_dec4,
+	[ZLX_ISA_major_operation_dec5] = major_dec5,
+	[ZLX_ISA_major_operation_dec6] = major_dec6,
+	[ZLX_ISA_major_operation_dec7] = major_dec7,
+	[ZLX_ISA_major_operation_dec8] = major_dec8,
+	[ZLX_ISA_major_operation_sl1] = major_sl1,
+	[ZLX_ISA_major_operation_sl2] = major_sl2,
+	[ZLX_ISA_major_operation_sl3] = major_sl3,
+	[ZLX_ISA_major_operation_sl4] = major_sl4,
+	[ZLX_ISA_major_operation_sl5] = major_sl5,
+	[ZLX_ISA_major_operation_sl6] = major_sl6,
+	[ZLX_ISA_major_operation_sl7] = major_sl7,
+	[ZLX_ISA_major_operation_sl8] = major_sl8,
+	[ZLX_ISA_major_operation_sr1] = major_sr1,
+	[ZLX_ISA_major_operation_sr2] = major_sr2,
+	[ZLX_ISA_major_operation_sr3] = major_sr3,
+	[ZLX_ISA_major_operation_sr4] = major_sr4,
+	[ZLX_ISA_major_operation_sr5] = major_sr5,
+	[ZLX_ISA_major_operation_sr6] = major_sr6,
+	[ZLX_ISA_major_operation_sr7] = major_sr7,
+	[ZLX_ISA_major_operation_sr8] = major_sr8,
+	[ZLX_ISA_major_operation_sra1] = major_sra1,
+	[ZLX_ISA_major_operation_sra2] = major_sra2,
+	[ZLX_ISA_major_operation_sra3] = major_sra3,
+	[ZLX_ISA_major_operation_sra4] = major_sra4,
+	[ZLX_ISA_major_operation_sra5] = major_sra5,
+	[ZLX_ISA_major_operation_sra6] = major_sra6,
+	[ZLX_ISA_major_operation_sra7] = major_sra7,
+	[ZLX_ISA_major_operation_sra8] = major_sra8,
+	[ZLX_ISA_major_operation_anda] = major_anda,
+	[ZLX_ISA_major_operation_xora] = major_xora,
+	[ZLX_ISA_major_operation_ora] = major_ora,
+	[ZLX_ISA_major_operation_aand] = major_aand,
+	[ZLX_ISA_major_operation_axor] = major_axor,
+	[ZLX_ISA_major_operation_aor] = major_aor,
+	[ZLX_ISA_major_operation_inca] = major_inca,
+	[ZLX_ISA_major_operation_deca] = major_deca,
+	[ZLX_ISA_major_operation_srra] = major_srra,
+	[ZLX_ISA_major_operation_srla] = major_srla,
+	[ZLX_ISA_major_operation_slla] = major_slla,
 	[ZLX_ISA_major_operation_pop8] = major_pop8,
 	[ZLX_ISA_major_operation_pop16] = major_pop16,
 	[ZLX_ISA_major_operation_pop32] = major_pop32,
@@ -1532,267 +1831,82 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output, int i
 //exact decoder postions to very
 ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Major_t major)
 {
-	ZLX_EMU__CPU_parameters_t parameters = {};
-	ZLX_EMU__CPU_output_t output;
-	if ((unsigned)major.operation >= ZLX_ISA_major_operation_count)
-		MY_FAULT("unknown major opcode");
-	if (major.type == ZLX_ISA_major_format_type_invalid ||
+	ZLX_EMU__CPU_parameters_t parameters = {0};
+	if ((unsigned)major.operation >= ZLX_ISA_major_operation_count ||
+	    !major_operations[major.operation] ||
 	    major.type != ZLX_ISA_Major_operation_formats[major.operation])
-		MY_FAULT("opcode does not allow this operand format");
-	switch(major.operation)
+		MY_FAULT("invalid major opcode or operand format");
+
+	parameters.instruction_size = ZLX_ISA_Major_operation_size[major.type];
+	switch (major.type)
 	{
-#define ZLX_ALU(name, code, format) case ZLX_ISA_major_operation_##name:
-#include "isa/ISA_alu.def"
-#undef ZLX_ALU
-			return execute_alu(machine->p__cpu, major);
-		
-		case ZLX_ISA_major_operation_ld:
+		case ZLX_ISA_major_format_type_5:
+			parameters.source_1 = major.u__foramt_5.a5;
+			parameters.imm5 = major.u__foramt_5.a5;
+			break;
+		case ZLX_ISA_major_format_type_5_5551:
+			parameters.source_1 = major.u__format_5_5551.a5;
+			parameters.source_2 = major.u__format_5_5551.b5;
+			parameters.source_3 = major.u__format_5_5551.c5;
+			parameters.source_4 = major.u__format_5_5551.d5;
+			parameters.imm1_x = major.u__format_5_5551.e1;
+			break;
+		case ZLX_ISA_major_format_type_5_952:
 			parameters.source_1 = major.u__format_5_952.a5;
-			parameters.source_2 = major.u__format_5_952.c5; 
+			parameters.source_2 = major.u__format_5_952.c5;
 			parameters.imm2 = major.u__format_5_952.d2;
 			parameters.imm9 = major.u__format_5_952.b9;
 			break;
-		case ZLX_ISA_major_operation_st:
-			parameters.source_1 = major.u__format_5_952.a5;
-			parameters.source_2 = major.u__format_5_952.c5; 
-			parameters.imm2 = major.u__format_5_952.d2;
-			parameters.imm9 = major.u__format_5_952.b9;
+		case ZLX_ISA_major_format_type_5_b5:
+			parameters.source_1 = major.u__format_5_b5.a5;
+			parameters.source_2 = major.u__format_5_b5.c5;
+			parameters.imm11 = major.u__format_5_b5.b11;
 			break;
-		case ZLX_ISA_major_operation_push8:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-		case ZLX_ISA_major_operation_push16:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-		case ZLX_ISA_major_operation_push32:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-		case ZLX_ISA_major_operation_pushp:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-		case ZLX_ISA_major_operation_pop8:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-		case ZLX_ISA_major_operation_pop16:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-		case ZLX_ISA_major_operation_pop32:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-		case ZLX_ISA_major_operation_popp:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-		case ZLX_ISA_major_operation_get16:
+		case ZLX_ISA_major_format_type_5_f:
 			parameters.source_1 = major.u__format_5_f.a5;
 			parameters.imm16 = major.u__format_5_f.bf;
 			break;
-		case ZLX_ISA_major_operation_get32:
+		case ZLX_ISA_major_format_type_5_f_f:
 			parameters.source_1 = major.u__format_5_f_f.a5;
-			parameters.imm32 =((uint32_t) major.u__format_5_f_f.bf << 16) | major.u__format_5_f_f.cf;
+			parameters.imm32 = ((uint32_t)major.u__format_5_f_f.bf << 16) | major.u__format_5_f_f.cf;
 			break;
-		case ZLX_ISA_major_operation_inc:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-
-		case ZLX_ISA_major_operation_dec:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-
-		case ZLX_ISA_major_operation_addi:
-
-			parameters.source_1 = major.u__format_5_b5.a5;
-			parameters.source_2 = major.u__format_5_b5.c5;
-			parameters.imm11 = major.u__format_5_b5.b11;
-			break;
-		case ZLX_ISA_major_operation_bneq:
-			parameters.source_1 = major.u__format_5_b5.a5;
-			parameters.source_2 = major.u__format_5_b5.c5;
-			parameters.imm11 = major.u__format_5_b5.b11;
-			break;
-
-		case ZLX_ISA_major_operation_beq:
-			parameters.source_1 = major.u__format_5_b5.a5;
-			parameters.source_2 = major.u__format_5_b5.c5;
-			parameters.imm11 = major.u__format_5_b5.b11;
-
-			break;
-		case ZLX_ISA_major_operation_blt:
-			parameters.source_1 = major.u__format_5_b5.a5;
-			parameters.source_2 = major.u__format_5_b5.c5;
-			parameters.imm11 = major.u__format_5_b5.b11;
-			break;
-		case ZLX_ISA_major_operation_bge:
-			parameters.source_1 = major.u__format_5_b5.a5;
-			parameters.source_2 = major.u__format_5_b5.c5;
-			parameters.imm11 = major.u__format_5_b5.b11;
-			break;
-		case ZLX_ISA_major_operation_bltu:
-			parameters.source_1 = major.u__format_5_b5.a5;
-			parameters.source_2 = major.u__format_5_b5.c5;
-			parameters.imm11 = major.u__format_5_b5.b11;
-			break;
-		case ZLX_ISA_major_operation_bgeu:
-			parameters.source_1 = major.u__format_5_b5.a5;
-			parameters.source_2 = major.u__format_5_b5.c5;
-			parameters.imm11 = major.u__format_5_b5.b11;
-			break;
-		case ZLX_ISA_major_operation_call:
-			parameters.source_1 = major.u__foramt_5.a5;
-			parameters.instruction_size = 1;
-			break;
-		case ZLX_ISA_major_operation_ret:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-		case ZLX_ISA_major_operation_callp:
-			parameters.source_1 = major.u__foramt_5.a5;
-			parameters.instruction_size = 1;
-			break;
-		case ZLX_ISA_major_operation_retp:
-			parameters.source_1 = major.u__foramt_5.a5;
-			break;
-
 		default:
-			MY_FAULT("major failed");
-			break;
-
+			MY_FAULT("unsupported major operand format");
 	}
-	output = major_operations[major.operation](machine, parameters);
-	return output;
+	return major_operations[major.operation](machine, parameters);
 }
-
-
 
 ZLX_EMU__CPU_output_t ZLX_EMU_minor_execution(ZLX_EMU_Machine_t *machine, ZLX_ISA_Minor_t minor)
 {
-	ZLX_EMU__CPU_parameters_t parameters = {};
-	ZLX_EMU__CPU_output_t output;
+	ZLX_EMU__CPU_parameters_t parameters = {0};
 	if ((unsigned)minor.operation >= ZLX_ISA_minor_operation_count ||
-	    minor.type == ZLX_ISA_minor_format_type_invalid ||
+	    !minor_operations[minor.operation] ||
 	    minor.type != ZLX_ISA_Minor_operation_formats[minor.operation])
 		MY_FAULT("invalid minor opcode or operand format");
-	if (minor.operation == ZLX_ISA_minor_operation_bieqc_update ||
-	    minor.operation == ZLX_ISA_minor_operation_bineqc_update)
-	{
-		unsigned selector = minor.u__format_28.a2;
-		bool y = selector & 2;
-		unsigned iter = y ? ZLX_ISA_register_identifier_iterator_y : ZLX_ISA_register_identifier_iterator_x;
-		unsigned counter = y ? ZLX_ISA_register_identifier_counter_y : ZLX_ISA_register_identifier_counter_x;
-		uint32_t old = ZLX_EMU_get_register__CPU(machine->p__cpu, iter);
-		bool equal = old == ZLX_EMU_get_register__CPU(machine->p__cpu, counter);
-		output = register_result(iter, (selector & 1) ? old - 1 : old + 1);
-		output.pc_changed = equal == (minor.operation == ZLX_ISA_minor_operation_bieqc_update);
-		output.pc_set_or_add = true;
-		output.pc_value = 2 * MY_sign_extend32(minor.u__format_28.b8, 8);
-		return output;
-	}
-	switch(minor.operation)
-	{
-		case ZLX_ISA_minor_operation_move:
-			//[rd][rs]
-			//[s1][s2]
 
+	switch (minor.type)
+	{
+		case ZLX_ISA_minor_format_type_55:
 			parameters.source_1 = minor.u__format_55.a5;
 			parameters.source_2 = minor.u__format_55.b5;
 			break;
-		
-		case ZLX_ISA_minor_operation_add:
-			//[5][5]			
-			parameters.source_1 = minor.u__format_55.a5;		
-			parameters.source_2 = minor.u__format_55.b5;
+		case ZLX_ISA_minor_format_type_235:
+			parameters.imm2 = minor.u__format_235.a2;
+			parameters.imm3 = minor.u__format_235.b3;
+			parameters.source_1 = minor.u__format_235.c5;
 			break;
-		case ZLX_ISA_minor_operation_adda:
-			//[5][5]			
-			//r1 = acc + r2
-			parameters.source_1 = minor.u__format_55.a5;		
-			parameters.source_2 = minor.u__format_55.b5;
-			break;
-		case ZLX_ISA_minor_operation_sub:
-			parameters.source_1 = minor.u__format_55.a5;	
-			parameters.source_2 = minor.u__format_55.b5;
-			break;
-		case ZLX_ISA_minor_operation_geta:
-			parameters.imm10 = minor.u__format_a.aa;	
-			break;
-		case ZLX_ISA_minor_operation_get8:
+		case ZLX_ISA_minor_format_type_28:
 			parameters.imm2 = minor.u__format_28.a2;
 			parameters.imm8 = minor.u__format_28.b8;
 			break;
-		case ZLX_ISA_minor_operation_b:
-			parameters.imm10 = minor.u__format_a.aa;	
-			break;
-	
-		case ZLX_ISA_minor_operation_baeqz:
-			parameters.imm10 = minor.u__format_a.aa;	
-			break;
-		case ZLX_ISA_minor_operation_baneqz:
-			parameters.imm10 = minor.u__format_a.aa;	
-			break;
-		case ZLX_ISA_minor_operation_ldsa:
-			parameters.imm2 = minor.u__format_28.a2;
-			parameters.imm8 = minor.u__format_28.b8;
-			break;
-		case ZLX_ISA_minor_operation_stsa:
-			parameters.imm2 = minor.u__format_28.a2;
-			parameters.imm8 = minor.u__format_28.b8;
-			break;
-		case ZLX_ISA_minor_operation_lda:
-			parameters.imm2 = minor.u__format_235.a2;
-			parameters.imm3 = minor.u__format_235.b3; 
-			parameters.source_1 = minor.u__format_235.c5;
-			
-			break;
-		case ZLX_ISA_minor_operation_ald:
-			parameters.imm2 = minor.u__format_235.a2;
-			parameters.imm3 = minor.u__format_235.b3; 
-			parameters.source_1 = minor.u__format_235.c5;
-			break;
-		case ZLX_ISA_minor_operation_sta:
-			parameters.imm2 = minor.u__format_235.a2;
-			parameters.imm3 = minor.u__format_235.b3; 
-			parameters.source_1 = minor.u__format_235.c5;
-			break;
-		case ZLX_ISA_minor_operation_ast:
-			parameters.imm2 = minor.u__format_235.a2;
-			parameters.imm3 = minor.u__format_235.b3; 
-			parameters.source_1 = minor.u__format_235.c5;
-			break;
-		case ZLX_ISA_minor_operation_ld_plus:
-			parameters.imm2 = minor.u__format_235.a2;
-			parameters.imm3 = minor.u__format_235.b3; 
-			parameters.source_1 = minor.u__format_235.c5;
-			break;
-		case ZLX_ISA_minor_operation_st_plus:
-			parameters.imm2 = minor.u__format_235.a2;
-			parameters.imm3 = minor.u__format_235.b3; 
-			parameters.source_1 = minor.u__format_235.c5;
-			break;
-		case ZLX_ISA_minor_operation_bieqc:
-			parameters.imm2 = minor.u__format_28.a2;
-			parameters.imm8 = minor.u__format_28.b8;
-			break;
-		case ZLX_ISA_minor_operation_bteqa:
-			parameters.imm2 = minor.u__format_28.a2;
-			parameters.imm8 = minor.u__format_28.b8;
-			break;
-
-		case ZLX_ISA_minor_operation_btneqa:
-			parameters.imm2 = minor.u__format_28.a2;
-			parameters.imm8 = minor.u__format_28.b8;
-
+		case ZLX_ISA_minor_format_type_a:
+			parameters.imm10 = minor.u__format_a.aa;
 			break;
 		default:
-			printf("ZLX %d\n",minor.operation); 
-
-			MY_FAULT("not a valid instruction");
-			break;
+			MY_FAULT("unsupported minor operand format");
 	}
-
-
-	output = minor_operations[minor.operation](machine, parameters);
-	return output;
+	return minor_operations[minor.operation](machine, parameters);
 }
-
-
 
 ZLX_ISA_Instruction_t ZLX_EMU_decode_instruction(ZLX_EMU_Machine_t *machine)
 {

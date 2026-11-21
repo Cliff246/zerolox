@@ -2,21 +2,25 @@
 from model import Error
 from values import expr, reg
 
-ONE = {'push.8':2,'push.16':3,'push.32':4,'push.p':5,
-       'pop.8':6,'pop.16':7,'pop.32':8,'pop.p':9,
-       'inc':14,'dec':15,'call':23,'ret':24,'callp':25,'retp':26}
-REG_ALU = dict(zip(('add', 'sub', 'sll', 'srl', 'sra', 'xor', 'or', 'and'), range(27, 35)))
-IMM = dict(zip(('slli', 'srli', 'srai', 'xori', 'andi', 'ori', 'sext'), range(35, 42)))
-ONE.update(inc1=14, dec1=15, anda=80, xora=81, ora=82, aand=83, axor=84, aor=85)
-for stem, first, opcode in [('inc', 2, 42), ('dec', 2, 49), ('sl', 1, 56),
-                            ('sr', 1, 64), ('sra', 1, 72)]:
-    for n in range(first, 9):
-        ONE[f'{stem}{n}'] = opcode + n - first
-ACC_IMM = {'inca':86, 'deca':87, 'srra':88, 'srla':89, 'slla':90}
-ITER = {'bieqc+':20, 'bineqc+':21}
-BRANCH = {'bneq':17,'beq':18,'blt':19,'bge':20,'bltu':21,'bgeu':22}
-MINOR28 = {'ldsa':14,'stsa':13,'bieqc':17,'bteqa':18,'btneqa':19}
-PLUS = {'ldplus':15,'stplus':16}
+from opcodes import MAJOR, MINOR
+
+REG_ALU = {name: MAJOR[name] for name in ('add', 'sub', 'sll', 'srl', 'sra', 'xor', 'or', 'and')}
+IMM = {name: MAJOR[name] for name in ('slli', 'srli', 'srai', 'xori', 'andi', 'ori', 'sext')}
+ACC_IMM = {name: MAJOR[name] for name in ('inca', 'deca', 'srra', 'srla', 'slla')}
+ONE = {name: MAJOR[name] for name in ('inc', 'dec', 'call', 'ret', 'callp', 'retp',
+                                       'anda', 'xora', 'ora', 'aand', 'axor', 'aor')}
+ONE.update(inc1=MAJOR['inc'], dec1=MAJOR['dec'])
+for name in ('push', 'pop'):
+    for width in ('8', '16', '32', 'p'):
+        ONE[f'{name}.{width}'] = MAJOR[name + width]
+for stem, first in [('inc', 2), ('dec', 2), ('sl', 1), ('sr', 1), ('sra', 1)]:
+    for count in range(first, 9):
+        name = f'{stem}{count}'
+        ONE[name] = MAJOR[name]
+ITER = {'bieqc+': MINOR['bieqc_update'], 'bineqc+': MINOR['bineqc_update']}
+BRANCH = {name: MAJOR[name] for name in ('bneq', 'beq', 'blt', 'bge', 'bltu', 'bgeu')}
+MINOR28 = {name: MINOR[name] for name in ('ldsa', 'stsa', 'bieqc', 'bteqa', 'btneqa')}
+PLUS = {'ldplus': MINOR['ld_plus'], 'stplus': MINOR['st_plus']}
 WIDTH = {'8':0,'16':1,'32':2,'p':3}
 
 def names():
@@ -51,9 +55,9 @@ def parse(op,args,symbols,pc):
         count(1); return 'one',(ONE[name],reg(args[0]))
     if name in ('get16','get32'):
         count(2); bits=16 if name=='get16' else 32
-        return 'get',(10 if bits==16 else 11,reg(args[0]),immediate(args[1],0,(1<<bits)-1),bits)
+        return 'get',(MAJOR[name],reg(args[0]),immediate(args[1],0,(1<<bits)-1),bits)
     if name=='addi':
-        count(3); return 'imm11',(16,reg(args[1]),reg(args[0]),immediate(args[2],-1024,1023)&2047)
+        count(3); return 'imm11',(MAJOR['addi'],reg(args[1]),reg(args[0]),immediate(args[2],-1024,1023)&2047)
     if name in IMM:
         count(3)
         lo, hi = (-1024, 1023)

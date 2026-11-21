@@ -6,9 +6,8 @@ from model import Error, mnemonic
 from syntax import split_args
 from values import expr, reg, data_size
 
-MINOR = {'m.mv':0, 'm.add':1, 'm.adda':2, 'm.sub':3, 'm.geta':4, 'm.get8':5,
-         'm.b':6, 'm.baeqz':7, 'm.baneqz':8,
-         'm.lda':9, 'm.ald':10, 'm.sta':11, 'm.ast':12}
+from opcodes import MAJOR, MINOR
+
 WIDTH = {'8':0, '16':1, '32':2, 'p':3}
 
 def parcel(value):
@@ -16,6 +15,7 @@ def parcel(value):
 
 def encode(rec, chosen, symbols, pc):
     args=rec['args']; op=mnemonic(rec); base=chosen.rsplit('.',1)[0]
+    minor_name = 'move' if chosen == 'm.mv' else chosen.removeprefix('m.')
     if op in extra.names():
         form,fields=extra.parse(op,args,symbols,pc)
         return extra.encode(form,fields)
@@ -24,13 +24,13 @@ def encode(rec, chosen, symbols, pc):
             d,a,b=map(reg,args)
             a,b=(a,b) if chosen in ('m.add','m.sub') else (d,b)
         else: a,b=map(reg,args)
-        return parcel((MINOR[chosen]<<11)|(a<<6)|(b<<1)|1)
+        return parcel((MINOR[minor_name]<<11)|(a<<6)|(b<<1)|1)
     if chosen in ('m.geta','m.b','m.baeqz','m.baneqz'):
         v=expr(args[0],symbols,pc)
         if chosen!='m.geta': v//=2
-        return parcel((MINOR[chosen]<<11)|((v & 1023)<<1)|1)
+        return parcel((MINOR[minor_name]<<11)|((v & 1023)<<1)|1)
     if chosen=='m.get8':
-        return parcel((MINOR[chosen]<<11)|((reg(args[0])-8)<<9)|(expr(args[1],symbols,pc)<<1)|1)
+        return parcel((MINOR[minor_name]<<11)|((reg(args[0])-8)<<9)|(expr(args[1],symbols,pc)<<1)|1)
     if chosen in ('n.add','n.sub','n.sll','n.srl','n.sra','n.xor','n.or','n.and'):
         d,a,b=map(reg,args)
         direction, move_reg = rec.get('move', ('amv', 'z0'))
@@ -43,9 +43,9 @@ def encode(rec, chosen, symbols, pc):
         value_reg=1 if op.startswith(('m.lda.','m.sta.')) else reg(args[0])
         if base.startswith('m.'):
             operand=address if base in ('m.lda','m.sta') else value_reg
-            return parcel((MINOR[base]<<11)|(WIDTH[width]<<9)|((offset//size)<<6)|(operand<<1)|1)
+            return parcel((MINOR[base[2:]]<<11)|(WIDTH[width]<<9)|((offset//size)<<6)|(operand<<1)|1)
         raw=offset & 0x1ff
-        first=((0 if base=='n.ld' else 1)<<6)|(address<<1)
+        first=(MAJOR[base[2:]]<<6)|(address<<1)
         second=((raw&31)<<11)|(WIDTH[width]<<9)|(((raw>>5)&7)<<6)|(value_reg<<1)|((raw>>8)&1)
         return parcel(first)+parcel(second)
     raise Error(f'no image encoder for {chosen}')
