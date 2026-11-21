@@ -21,7 +21,7 @@ def split_args(s):
     if any(not p for p in parts): raise Error('empty argument')
     return parts
 
-def strip_comment(s):
+def split_comment(s):
     quote, escape = None, False
     for i,c in enumerate(s):
         if quote:
@@ -29,14 +29,15 @@ def strip_comment(s):
             elif c == '\\': escape = True
             elif c == quote: quote = None
         elif c in "'\"": quote = c
-        elif c == ';': return s[:i]
-    return s
+        elif c == ';': return s[:i], s[i+1:]
+    return s, ''
 
 def assemble(source, filename='<input>'):
     import extra
     records=[]; names=set(); errors=[]
     for line_no, raw in enumerate(source.splitlines(),1):
-        line=strip_comment(raw).strip()
+        statement, comment = split_comment(raw)
+        line = statement.strip()
         if not line: continue
         try:
             rec={'line':line_no, 'file':filename}
@@ -63,6 +64,14 @@ def assemble(source, filename='<input>'):
                     form=parts.pop(0) if parts[0] in ('m','n') else None
                     rec.update(kind='instruction',operation=parts[0],form=form,width=parts[1] if len(parts)>1 else None,args=args)
                 else: raise Error(f'unknown operation {op}')
+            # Reserve a move immediately after ';' as the ultra suffix.
+            suffix = comment.partition(';')[0].strip().split()
+            if suffix and suffix[0].lower() in ('mva', 'amv'):
+                if rec['kind'] != 'instruction' or rec['operation'] not in extra.REG_ALU or rec['form'] == 'm':
+                    raise Error('this opcode does not permit an ultra move')
+                if len(suffix) != 2 or suffix[1].lower() not in REGISTERS:
+                    raise Error('ultra move requires one register')
+                rec['move'] = [suffix[0].lower(), suffix[1].lower()]
             records.append(rec)
         except Error as e: errors.append(f'{filename}:{line_no}: {e}')
     if errors: raise Error('\n'.join(errors))

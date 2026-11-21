@@ -7,6 +7,18 @@ from values import expr, reg, data_size
 
 def select(rec,symbols,pc):
     op,args=mnemonic(rec),rec['args']
+    if 'move' in rec:
+        name = op.removeprefix('n.')
+        if name not in extra.REG_ALU:
+            raise Error('this opcode does not permit an ultra move')
+        if len(args) != 3: raise Error(f'{op} requires three registers')
+        dest, _, _ = map(reg, args)
+        direction, move_reg = rec['move']
+        if direction not in ('mva', 'amv'): raise Error('invalid ultra direction')
+        register = reg(move_reg)
+        move_dest = 1 if direction == 'mva' else register
+        if dest and dest == move_dest: raise Error('overlapping ultra destinations')
+        return 'n.' + name, 4
     if op in extra.names():
         form, fields=extra.parse(op,args,symbols,pc)
         return op,extra.size(form,fields)

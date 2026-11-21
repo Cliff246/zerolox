@@ -33,8 +33,10 @@ def encode(rec, chosen, symbols, pc):
         return parcel((MINOR[chosen]<<11)|((reg(args[0])-8)<<9)|(expr(args[1],symbols,pc)<<1)|1)
     if chosen in ('n.add','n.sub','n.sll','n.srl','n.sra','n.xor','n.or','n.and'):
         d,a,b=map(reg,args)
-        selector={'n.add':0,'n.sub':1,'n.sll':2,'n.srl':3,'n.sra':4,'n.xor':5,'n.or':6,'n.and':7}[chosen]
-        return parcel((12<<6)|(a<<1))+parcel((selector<<11)|(d<<6)|(b<<1))
+        direction, move_reg = rec.get('move', ('amv', 'z0'))
+        first = (extra.REG_ALU[chosen[2:]] << 6) | (a << 1)
+        second = (d << 11) | (b << 6) | (reg(move_reg) << 1) | (direction == 'mva')
+        return parcel(first) + parcel(second)
     if base in ('m.lda','m.ald','m.sta','m.ast','n.ld','n.st'):
         fields=split_args(args[-1][1:-1]); address=reg(fields[0]); offset=expr(fields[1],symbols,pc) if len(fields)==2 else 0
         width=chosen.rsplit('.',1)[1]; size={'8':1,'16':2,'32':4,'p':3}[width]

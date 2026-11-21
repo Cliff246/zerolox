@@ -66,6 +66,8 @@ ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[] =
 	[ZLX_ISA_minor_operation_adda] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_sub] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_geta] = ZLX_ISA_minor_format_type_a,
+	[ZLX_ISA_minor_operation_bieqc_update] = ZLX_ISA_minor_format_type_28,
+	[ZLX_ISA_minor_operation_bineqc_update] = ZLX_ISA_minor_format_type_28,
 	[ZLX_ISA_minor_operation_get8] = ZLX_ISA_minor_format_type_28, 
 	[ZLX_ISA_minor_operation_b] = ZLX_ISA_minor_format_type_a, 
 	[ZLX_ISA_minor_operation_baeqz] = ZLX_ISA_minor_format_type_a,
@@ -87,6 +89,9 @@ ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[] =
 
 ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[] = 
 {
+#define ZLX_ALU(name, code, format) [code] = ZLX_ISA_major_format_type_##format,
+#include "ISA_alu.def"
+#undef ZLX_ALU
 	[ZLX_ISA_major_operation_ld] = ZLX_ISA_major_format_type_5_952 ,
 	[ZLX_ISA_major_operation_st] = ZLX_ISA_major_format_type_5_952 ,
 	[ZLX_ISA_major_operation_push8] = ZLX_ISA_major_format_type_5,
@@ -99,8 +104,8 @@ ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[] =
 	[ZLX_ISA_major_operation_popp] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_get16] = ZLX_ISA_major_format_type_5_f,
 	[ZLX_ISA_major_operation_get32] = ZLX_ISA_major_format_type_5_f_f,
-	[ZLX_ISA_major_operation_3form] = ZLX_ISA_major_format_type_5_655,
-	[ZLX_ISA_major_operation_3form_immediate] = ZLX_ISA_major_format_type_5_655,
+
+
 	[ZLX_ISA_major_operation_inc] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_dec] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_addi] = ZLX_ISA_major_format_type_5_b5,

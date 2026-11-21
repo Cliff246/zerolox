@@ -5,14 +5,23 @@ from values import expr, reg
 ONE = {'push.8':2,'push.16':3,'push.32':4,'push.p':5,
        'pop.8':6,'pop.16':7,'pop.32':8,'pop.p':9,
        'inc':14,'dec':15,'call':23,'ret':24,'callp':25,'retp':26}
-IMM = {'slli':0,'srli':1,'srai':2,'xori':3,'andi':4,'ori':5}
+REG_ALU = dict(zip(('add', 'sub', 'sll', 'srl', 'sra', 'xor', 'or', 'and'), range(27, 35)))
+IMM = dict(zip(('slli', 'srli', 'srai', 'xori', 'andi', 'ori', 'sext'), range(35, 42)))
+ONE.update(inc1=14, dec1=15, anda=80, xora=81, ora=82, aand=83, axor=84, aor=85)
+for stem, first, opcode in [('inc', 2, 42), ('dec', 2, 49), ('sl', 1, 56),
+                            ('sr', 1, 64), ('sra', 1, 72)]:
+    for n in range(first, 9):
+        ONE[f'{stem}{n}'] = opcode + n - first
+ACC_IMM = {'inca':86, 'deca':87, 'srra':88, 'srla':89, 'slla':90}
+ITER = {'bieqc+':20, 'bineqc+':21}
 BRANCH = {'bneq':17,'beq':18,'blt':19,'bge':20,'bltu':21,'bgeu':22}
 MINOR28 = {'ldsa':14,'stsa':13,'bieqc':17,'bteqa':18,'btneqa':19}
 PLUS = {'ldplus':15,'stplus':16}
 WIDTH = {'8':0,'16':1,'32':2,'p':3}
 
 def names():
-    return ({'n.'+k for k in ONE} | set(ONE) | {'n.get16','n.get32','get16','get32','n.addi','addi'} |
+    return (set(ITER) | {'m.'+k for k in ITER} | set(ACC_IMM) | {'n.'+k for k in ACC_IMM} |
+            {'n.'+k for k in ONE} | set(ONE) | {'n.get16','n.get32','get16','get32','n.addi','addi'} |
             {'n.'+k for k in IMM} | set(IMM) | {'n.'+k for k in BRANCH} | set(BRANCH) |
             {'m.'+k+'.'+w for k in ('ldsa','stsa','ldplus','stplus') for w in WIDTH} |
             {'m.'+k for k in ('bieqc','bteqa','btneqa')})
@@ -26,6 +35,18 @@ def parse(op,args,symbols,pc):
         v=expr(s,symbols,pc)
         if not lo<=v<=hi: raise Error(f'{op} value {v} outside {lo}..{hi}')
         return v
+    if name in ACC_IMM:
+        count(1)
+        return 'one', (ACC_IMM[name], immediate(args[0], 0, 31))
+    branch = op.removeprefix('m.')
+    if branch in ITER:
+        count(2)
+        modes = {'x+':0, 'x-':1, 'y+':2, 'y-':3}
+        if args[0] not in modes:
+            raise Error(f'{op} requires x+, x-, y+ or y-')
+        offset = immediate(args[1], -256, 254)
+        if offset % 2: raise Error('branch offset must be parcel aligned')
+        return 'minor28', (ITER[branch], modes[args[0]], (offset // 2) & 255)
     if name in ONE:
         count(1); return 'one',(ONE[name],reg(args[0]))
     if name in ('get16','get32'):
@@ -35,8 +56,10 @@ def parse(op,args,symbols,pc):
         count(3); return 'imm11',(16,reg(args[1]),reg(args[0]),immediate(args[2],-1024,1023)&2047)
     if name in IMM:
         count(3)
-        lo,hi=(0,31) if name in ('slli','srli','srai') else (-32,31)
-        return 'imm6',(reg(args[1]),reg(args[0]),IMM[name],immediate(args[2],lo,hi)&63)
+        lo, hi = (-1024, 1023)
+        if name in ('slli','srli','srai'): lo, hi = 0, 2047
+        if name == 'sext': lo, hi = 1, 32
+        return 'imm11', (IMM[name], reg(args[1]), reg(args[0]), immediate(args[2], lo, hi) & 2047)
     if name in BRANCH:
         count(3); offset=immediate(args[2],-2048,2046)
         if offset%2: raise Error('branch offset must be parcel aligned')
@@ -65,7 +88,7 @@ def parse(op,args,symbols,pc):
 
 def size(form, fields):
     if form=='get': return 4 if fields[-1]==16 else 6
-    return 4 if form in ('imm11','imm6') else 2
+    return 4 if form == 'imm11' else 2
 
 def encode(form, f):
     def p(n): return n.to_bytes(2,'little')
@@ -76,9 +99,6 @@ def encode(form, f):
     if form=='imm11':
         op,a,c,v=f
         return p((op<<6)|(a<<1))+p(((v&31)<<11)|(((v>>5)&31)<<6)|(c<<1)|((v>>10)&1))
-    if form=='imm6':
-        a,d,selector,v=f
-        return p((13<<6)|(a<<1))+p(((v&31)<<11)|(d<<6)|(selector<<1)|((v>>5)&1))
     if form=='minor28': return p((f[0]<<11)|(f[1]<<9)|(f[2]<<1)|1)
     if form=='minor235': return p((f[0]<<11)|(f[1]<<9)|(f[2]<<6)|(f[3]<<1)|1)
     raise Error('unknown instruction format')

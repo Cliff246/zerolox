@@ -74,6 +74,9 @@ typedef enum ZLX_ISA_minor_operation
 	ZLX_ISA_minor_operation_bieqc,
 	ZLX_ISA_minor_operation_bteqa,
 	ZLX_ISA_minor_operation_btneqa,
+	ZLX_ISA_minor_operation_bieqc_update,
+	ZLX_ISA_minor_operation_bineqc_update,
+	ZLX_ISA_minor_operation_count,
 }ZLX_ISA_minor_operation_t;
 
 
@@ -81,6 +84,7 @@ typedef enum ZLX_ISA_minor_operation
 
 typedef enum ZLX_ISA_minor_format_type
 {
+	ZLX_ISA_minor_format_type_invalid,
 	ZLX_ISA_minor_format_type_55,
 	ZLX_ISA_minor_format_type_235,
 	ZLX_ISA_minor_format_type_28,
@@ -147,32 +151,6 @@ extern ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[];
 //
 //
 
-typedef enum ZLX_ISA_major_3form
-{
-	ZLX_ISA_major_3form_add,
-	ZLX_ISA_major_3form_sub,
-	ZLX_ISA_major_3form_sll,
-	ZLX_ISA_major_3form_srl,
-	ZLX_ISA_major_3form_sra,
-	ZLX_ISA_major_3form_xor,
-	ZLX_ISA_major_3form_or,
-	ZLX_ISA_major_3form_and,
-
-}ZLX_ISA_major_3form_t;
-
-typedef enum ZLX_ISA_major_3form_immediate
-{
-	ZLX_ISA_major_3form_immediate_slli,
-	ZLX_ISA_major_3form_immediate_srli,
-	ZLX_ISA_major_3form_immediate_srai,
-	ZLX_ISA_major_3form_immediate_xori,
-	ZLX_ISA_major_3form_immediate_andi,
-	ZLX_ISA_major_3form_immediate_ori,
-
-}ZLX_ISA_major_3form_immediate_t;
-
-
-
 typedef enum ZLX_ISA_major_operation
 {
 	ZLX_ISA_major_operation_ld,
@@ -187,9 +165,7 @@ typedef enum ZLX_ISA_major_operation
 	ZLX_ISA_major_operation_popp,
 	ZLX_ISA_major_operation_get16,
 	ZLX_ISA_major_operation_get32,
-	ZLX_ISA_major_operation_3form,
-	ZLX_ISA_major_operation_3form_immediate,
-	ZLX_ISA_major_operation_inc,
+	ZLX_ISA_major_operation_inc = 14, /* 12 and 13 were grouped opcodes. */
 	ZLX_ISA_major_operation_dec,
 	ZLX_ISA_major_operation_addi,
 	ZLX_ISA_major_operation_bneq,
@@ -205,6 +181,10 @@ typedef enum ZLX_ISA_major_operation
 
 	ZLX_ISA_major_operation_retp,
 
+#define ZLX_ALU(name, code, format) ZLX_ISA_major_operation_##name = code,
+#include "ISA_alu.def"
+#undef ZLX_ALU
+	ZLX_ISA_major_operation_count
 }ZLX_ISA_major_operation_t;
 /*
  *add
@@ -234,6 +214,7 @@ typedef enum ZLX_ISA_major_operation
 
 typedef enum ZLX_ISA_major_format_type
 {
+	ZLX_ISA_major_format_type_invalid, /* unassigned opcode table entry */
 	ZLX_ISA_major_format_type_5,
 	ZLX_ISA_major_format_type_5_5551,
 	ZLX_ISA_major_format_type_5_952,
@@ -249,7 +230,7 @@ typedef enum ZLX_ISA_major_format_type
 
 typedef struct ZLX_ISA_Major_format_5_5551
 {
-	//[opcode][a5][1] [b5][c5][d5][e1]
+	// [opcode][left][0] [destination][right][move register][direction]
 
 	//parcel1
 	uint8_t a5;
