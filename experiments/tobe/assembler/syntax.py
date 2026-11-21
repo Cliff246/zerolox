@@ -1,6 +1,6 @@
 """Parser and structured object creation for the syntax experiment."""
 import re
-from model import Error, REGISTERS
+from model import Error, REGISTERS, SOURCE_SYNTAX, LEGACY_ISA
 
 def split_args(s):
     parts, start, depth, quote, escape = [], 0, 0, None, False
@@ -34,6 +34,7 @@ def strip_comment(s):
 
 def assemble(source, filename='<input>'):
     import extra
+    from dialect import accepts
     records=[]; names=set(); errors=[]
     for line_no, raw in enumerate(source.splitlines(),1):
         line=strip_comment(raw).strip()
@@ -58,7 +59,7 @@ def assemble(source, filename='<input>'):
                 elif op in ('@jumpto','%align'):
                     if len(args)!=1: raise Error(f'{op} requires one value')
                     rec.update(kind=op[1:],value=args[0])
-                elif op in extra.names() or op in ('add','m.add','m.adda','n.add','sub','m.sub','n.sub','sll','srl','sra','xor','or','and','n.sll','n.srl','n.sra','n.xor','n.or','n.and','mv','m.mv','m.geta','m.get8','b','m.b','beqz','bnez','m.baeqz','m.baneqz') or re.fullmatch(r'(?:m\.(?:lda|ald|sta|ast)|n\.(?:ld|st)|ld|st)\.(?:8|16|32|p)',op):
+                elif accepts(op) or op in extra.names() or op in ('add','m.add','m.adda','n.add','sub','m.sub','n.sub','sll','srl','sra','xor','or','and','n.sll','n.srl','n.sra','n.xor','n.or','n.and','mv','m.mv','m.geta','m.get8','b','m.b','beqz','bnez','m.baeqz','m.baneqz') or re.fullmatch(r'(?:m\.(?:lda|ald|sta|ast)|n\.(?:ld|st)|ld|st)\.(?:8|16|32|p)',op):
                     parts=op.split('.')
                     form=parts.pop(0) if parts[0] in ('m','n') else None
                     rec.update(kind='instruction',operation=parts[0],form=form,width=parts[1] if len(parts)>1 else None,args=args)
@@ -66,5 +67,5 @@ def assemble(source, filename='<input>'):
             records.append(rec)
         except Error as e: errors.append(f'{filename}:{line_no}: {e}')
     if errors: raise Error('\n'.join(errors))
-    return {'format':'zerolox-experiment-2','target':'zerolox1','records':records}
+    return {'format':'zerolox-experiment-2','target':LEGACY_ISA,'syntax':SOURCE_SYNTAX,'records':records}
 

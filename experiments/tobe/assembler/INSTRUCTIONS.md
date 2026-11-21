@@ -1,6 +1,6 @@
-# Experimental instruction spellings
+# Legacy emulator encoding forms
 
-This is a review aid for the current C decoder and emulator, not a finalized ISA manual. Each listed form emits one instruction. `m.` and `n.` constrain the form; unprefixed spellings below are experimental selectable aliases. A register is `r`, a value expression is `v`, and branch displacement `d` is in bytes from the instruction start and must be even. Memory syntax is `[base, byte_offset]`.
+This table describes the forms available to the `zerolox1-legacy-emu-v1` backend. See [README.md](README.md) for current source examples and [docs/instructions.md](../../../docs/instructions.md) for the evolving ISA inventory. Each listed form emits one instruction. `m.` and `n.` constrain the form; unprefixed spellings below are experimental selectable aliases. A register is `r`, a value expression is `v`, and branch displacement `d` is in bytes from the instruction start and must be even. Memory syntax is `[base, byte_offset]`.
 
 | Forms | Arguments |
 | --- | --- |

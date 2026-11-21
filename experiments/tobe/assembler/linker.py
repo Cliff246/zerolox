@@ -1,14 +1,19 @@
 """Experimental instruction selection and iterative layout."""
 import re
 import extra
-from model import Error, mnemonic
+from model import Error, LEGACY_ISA, mnemonic
+from dialect import lower
 from syntax import split_args
 from values import expr, reg, data_size
 
 def select(rec,symbols,pc):
     op,args=mnemonic(rec),rec['args']
+    source_op = op
+    op,args = lower(op,args,symbols,pc)
     if op in extra.names():
         form, fields=extra.parse(op,args,symbols,pc)
+        if source_op.startswith(('ld+a', 'st+a', 'm.ld+a', 'm.st+a')):
+            op = op.replace('ldplus', 'ld+a').replace('stplus', 'st+a')
         return op,extra.size(form,fields)
     if op in ('sub','m.sub','n.sub','sll','srl','sra','xor','or','and','n.sll','n.srl','n.sra','n.xor','n.or','n.and'):
         if op=='m.sub':
@@ -71,7 +76,9 @@ def select(rec,symbols,pc):
 def link(obj):
     if obj.get('format') != 'zerolox-experiment-2':
         raise Error('unsupported experimental object format')
-    records=obj['records']; sizes=[6 if r['kind']=='instruction' and mnemonic(r) in ('n.get32','get32') else 4 if r['kind']=='instruction' else 0 for r in records]; seen=set()
+    if obj.get('target') not in (LEGACY_ISA, 'zerolox1'):
+        raise Error(f"unsupported ISA target {obj.get('target')!r}")
+    records=obj['records']; sizes=[6 if r['kind']=='instruction' and mnemonic(r) in ('n.get32','get32','get') else 4 if r['kind']=='instruction' else 0 for r in records]; seen=set()
     for iteration in range(100):
         key=tuple(sizes)
         if key in seen: raise Error('layout did not converge (repeated instruction sizes)')
@@ -103,8 +110,8 @@ def link(obj):
                 if positions[i]%2: raise Error(f'instruction at odd byte index {positions[i]}')
                 chosen,new[i]=select(r,symbols,positions[i]); listing.append((positions[i],new[i],chosen,r['line']))
             except Error as e: errors.append(f"{r['file']}:{r['line']}: {e}")
-        if errors: raise Error('\n'.join(errors))
         if new==sizes:
+            if errors: raise Error('\n'.join(errors))
             constant_errors=[]
             for r in records:
                 if r['kind']=='constant':

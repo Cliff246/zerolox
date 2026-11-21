@@ -2,6 +2,7 @@
 import ast
 import extra
 from linker import link
+from dialect import lower
 from model import Error, mnemonic
 from syntax import split_args
 from values import expr, reg, data_size
@@ -15,7 +16,8 @@ def parcel(value):
     return value.to_bytes(2,'little')
 
 def encode(rec, chosen, symbols, pc):
-    args=rec['args']; op=mnemonic(rec); base=chosen.rsplit('.',1)[0]
+    op,args=lower(mnemonic(rec),rec['args'],symbols,pc)
+    base=chosen.rsplit('.',1)[0]
     if op in extra.names():
         form,fields=extra.parse(op,args,symbols,pc)
         return extra.encode(form,fields)
