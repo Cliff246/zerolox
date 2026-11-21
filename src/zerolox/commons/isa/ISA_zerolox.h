@@ -76,7 +76,7 @@ typedef enum ZLX_ISA_minor_operation
 	ZLX_ISA_minor_operation_btneqa,
 	ZLX_ISA_minor_operation_bieqc_update,
 	ZLX_ISA_minor_operation_bineqc_update,
-	ZLX_ISA_minor_operation_count,
+	ZLX_ISA_minor_operation_count, /* Exclusive table bound. */
 }ZLX_ISA_minor_operation_t;
 
 
@@ -245,7 +245,7 @@ typedef enum ZLX_ISA_major_operation
 	ZLX_ISA_major_operation_srra,
 	ZLX_ISA_major_operation_srla,
 	ZLX_ISA_major_operation_slla,
-	ZLX_ISA_major_operation_count
+	ZLX_ISA_major_operation_count /* Exclusive table bound. */
 }ZLX_ISA_major_operation_t;
 /*
  *add

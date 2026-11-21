@@ -1038,31 +1038,6 @@ OPERATION(major_popp)
 }
 
 
-//inc r1
-//r1 += 1
-OPERATION(major_increment)
-{
-	OPERATION_SETUP; 
-	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
-	output.use_destination = true;
-	output.use_destination_1 = true;
-	output.destination_1 = paramaters.source_1; 
-	output.destination_1_data = data_1 + 1;
-	return output;
-}
-
-//dec r1
-//r1 -= 1
-OPERATION(major_decrement)
-{
-	OPERATION_SETUP; 
-	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
-	output.use_destination = true;
-	output.use_destination_1 = true;
-	output.destination_1 = paramaters.source_1; 
-	output.destination_1_data = data_1 - 1;
-	return output;
-}
 //addi rd rs1 imm
 OPERATION(major_add_immediate)
 {
@@ -1265,6 +1240,7 @@ OPERATION(major_sext)
 		return output; \
 	}
 
+FIXED_REGISTER_OPERATION(inc1, value + 1)
 FIXED_REGISTER_OPERATION(inc2, value + 2)
 FIXED_REGISTER_OPERATION(inc3, value + 3)
 FIXED_REGISTER_OPERATION(inc4, value + 4)
@@ -1273,6 +1249,7 @@ FIXED_REGISTER_OPERATION(inc6, value + 6)
 FIXED_REGISTER_OPERATION(inc7, value + 7)
 FIXED_REGISTER_OPERATION(inc8, value + 8)
 
+FIXED_REGISTER_OPERATION(dec1, value - 1)
 FIXED_REGISTER_OPERATION(dec2, value - 2)
 FIXED_REGISTER_OPERATION(dec3, value - 3)
 FIXED_REGISTER_OPERATION(dec4, value - 4)
@@ -1678,6 +1655,7 @@ static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_c
 	[ZLX_ISA_major_operation_andi] = major_andi,
 	[ZLX_ISA_major_operation_ori] = major_ori,
 	[ZLX_ISA_major_operation_sext] = major_sext,
+	[ZLX_ISA_major_operation_inc] = major_inc1,
 	[ZLX_ISA_major_operation_inc2] = major_inc2,
 	[ZLX_ISA_major_operation_inc3] = major_inc3,
 	[ZLX_ISA_major_operation_inc4] = major_inc4,
@@ -1685,6 +1663,7 @@ static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_c
 	[ZLX_ISA_major_operation_inc6] = major_inc6,
 	[ZLX_ISA_major_operation_inc7] = major_inc7,
 	[ZLX_ISA_major_operation_inc8] = major_inc8,
+	[ZLX_ISA_major_operation_dec] = major_dec1,
 	[ZLX_ISA_major_operation_dec2] = major_dec2,
 	[ZLX_ISA_major_operation_dec3] = major_dec3,
 	[ZLX_ISA_major_operation_dec4] = major_dec4,
@@ -1746,8 +1725,6 @@ static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_c
 	[ZLX_ISA_major_operation_bge] = major_branch_greater_than_equals,
 	[ZLX_ISA_major_operation_bltu] = major_branch_less_than_unsigned,
 	[ZLX_ISA_major_operation_bgeu] = major_branch_greater_than_equals_unsigned,
-	[ZLX_ISA_major_operation_inc] = major_increment,
-	[ZLX_ISA_major_operation_dec] = major_decrement,
 	[ZLX_ISA_major_operation_call] = major_call,
 	[ZLX_ISA_major_operation_callp] = major_callp,
 	[ZLX_ISA_major_operation_ret] = major_return,

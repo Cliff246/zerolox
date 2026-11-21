@@ -6,6 +6,7 @@ import unittest
 
 from assembler import Error, assemble
 from image import build_image
+from opcodes import MINOR
 
 
 def binary(source):
@@ -13,6 +14,15 @@ def binary(source):
 
 
 class EncodingTests(unittest.TestCase):
+    def test_unit_step_aliases(self):
+        for op in ('inc', 'dec'):
+            self.assertEqual(binary(f'{op} t0'), binary(f'{op}1 t0'))
+
+    def test_minor_count_is_excluded(self):
+        self.assertNotIn('count', MINOR)
+        with self.assertRaises(Error):
+            binary('m.count')
+
     def test_ultra_encoding(self):
         plain = binary('n.add t1, t2, t3')
         self.assertEqual(len(plain), 4)
@@ -77,7 +87,8 @@ class ExecutionTests(unittest.TestCase):
                   (binary('n.add ac, t1, t2')[:2] + ((base & 2047) | (1<<11) | 17).to_bytes(2,'little'), 'w1 == w2')]
         for major in (12, 13, 1023):
             faults.append(((major << 6).to_bytes(2,'little'), 'could not decode'))
-        faults.append((((31 << 11) | 1).to_bytes(2,'little'), 'could not decode'))
+        for minor in range(max(MINOR.values()) + 1, 32):
+            faults.append((((minor << 11) | 1).to_bytes(2,'little'), 'could not decode'))
         for width in (0,33):
             second = ((width & 31) << 11) | ((width >> 5) << 6)
             faults.append((binary('sext z0, ac, 1')[:2] + second.to_bytes(2,'little'), 'sext width'))
