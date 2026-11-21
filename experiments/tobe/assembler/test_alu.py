@@ -42,6 +42,21 @@ class EncodingTests(unittest.TestCase):
                     build_image(assemble(invalid, target=target))
         self.assertNotEqual(binary(source), expected)
 
+    def test_compare_encoding(self):
+        from opcodes import MAJOR
+        for op in ('clt', 'cge', 'cltu', 'cgeu', 'ceq', 'cneq'):
+            with self.subTest(op=op):
+                expected = ((MAJOR[op] << 6) | (9 << 1)).to_bytes(2, 'little')
+                expected += ((8 << 11) | (10 << 6)).to_bytes(2, 'little')
+                self.assertEqual(binary(f'{op} t0, t1, t2'), expected)
+                self.assertEqual(binary(f'n.{op} t0, t1, t2'), expected)
+                with self.assertRaises(Error):
+                    build_image(assemble(f'{op} t0, t1, t2', target='zerolox1-legacy-emu-v1'))
+                with self.assertRaises(Error):
+                    binary(f'm.{op} t0, t1, t2')
+                with self.assertRaises(Error):
+                    binary(f'{op} t0, t1')
+
     def test_current_syntax_with_ultras(self):
         self.assertEqual(binary('get t0, 7\nn.add t1, ac, t0 ; mva t0 // save ; ignored'),
                          binary('m.get8 t0, 7\nn.add t1, ac, t0 ; mva t0'))
@@ -80,6 +95,23 @@ class ExecutionTests(unittest.TestCase):
                            {0: 0, 1: 14, 8: 7, 9: 14})
         self.check_program('m.geta 7\nn.add z0, ac, ac\nadd t0, ac, ac ; mva z0',
                            {0: 0, 1: 0, 8: 0})
+
+    def test_register_compares(self):
+        ops = ('clt', 'cge', 'cltu', 'cgeu', 'ceq', 'cneq')
+        cases = [(0x80000000, 0x7fffffff, (1, 0, 0, 1, 0, 1)),
+                 (0x7fffffff, 0x80000000, (0, 1, 1, 0, 0, 1)),
+                 (0xffffffff, 0xffffffff, (0, 1, 0, 1, 1, 0)),
+                 (1, 2, (1, 0, 1, 0, 0, 1))]
+        for left, right, expected in cases:
+            source = [f'get32 t0, {left}', f'get32 t1, {right}']
+            source.extend(f'{op} r{dst}, t0, t1' for dst, op in enumerate(ops, 10))
+            self.check_program('\n'.join(source), dict(enumerate(expected, 10)))
+
+        self.check_program('get ac, 9\nget t1, 9\nceq ac, t0, t1 ; amv t0',
+                           {1: 1, 8: 9})
+        self.check_program('get t0, 7\ncneq t0, ac, t0 ; mva t0', {1: 7, 8: 0})
+        with self.assertRaises(Error):
+            binary('cltu ac, t0, t1 ; mva t0')
 
     def test_invalid_raw_images(self):
         base = int.from_bytes(binary('n.add t0, t1, t2')[2:], 'little')

@@ -6,6 +6,7 @@ This table describes the forms available to the `zerolox1-emu-v2` backend. See [
 | --- | --- |
 | `mv`, `m.mv` | `destination, source` |
 | `add`, `sub`, `sll`, `srl`, `sra`, `xor`, `or`, `and` and `n.` versions | `destination, left, right` |
+| `clt`, `cge`, `cltu`, `cgeu`, `ceq`, `cneq` and `n.` versions | `destination, left, right`. The destination receives 1 for true or 0 for false. |
 | `m.add`, `m.adda`, `m.sub` | `register, register`; implicit accumulator as defined by the ISA |
 | `m.geta` | signed 10-bit immediate |
 | `m.get8` | `t0..t3, unsigned byte` |
@@ -36,7 +37,7 @@ The C code's comments say stack-relative accumulator operations subtract their o
 ## Bundled accumulator moves
 
 Append ` ; amv r` (r receives ac) or ` ; mva r` (ac receives r) to a three-register
-`add`, `sub`, `sll`, `srl`, `sra`, `xor`, `or` or `and`. This selects the
+ALU operation (including any of the six register comparisons). This selects the
 four-byte major. A bare major encodes `amv z0`. The move executes first and
 forwards its value to either ALU input. Both destinations commit together.
 The assembler and emulator reject overlapping nonzero destinations.

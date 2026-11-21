@@ -4,7 +4,8 @@ from values import expr, reg
 
 from opcodes import MAJOR, MINOR, LEGACY_MAJOR, LEGACY_MINOR, LEGACY_IMM_SELECTOR
 
-REG_ALU = {'add', 'sub', 'sll', 'srl', 'sra', 'xor', 'or', 'and'}
+COMPARE = {'clt', 'cge', 'cltu', 'cgeu', 'ceq', 'cneq'}
+REG_ALU = COMPARE | {'add', 'sub', 'sll', 'srl', 'sra', 'xor', 'or', 'and'}
 IMM = {'slli', 'srli', 'srai', 'xori', 'andi', 'ori', 'sext'}
 ACC_IMM = {'inca', 'deca', 'srra', 'srla', 'slla'}
 ONE = {name: name for name in ('inc', 'dec', 'call', 'ret', 'callp', 'retp',

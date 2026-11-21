@@ -41,8 +41,13 @@ majors:
 	1 | callp	|			|
 	1 | retp	|			|
     2 | add, sub, sll, srl, sra, xor, or, and | 5_5551 | optional accumulator move
+    2 | clt, cge, cltu, cgeu, ceq, cneq | 5_5551 | register comparison with optional accumulator move
 
-Each of these eight register majors has its own provisional opcode. In parcel two,
+Comparisons take `rd, lhs, rhs` and write 1 for true or 0 for false to `rd`.
+`clt` and `cge` compare signed 32-bit integers. The `u` forms compare unsigned
+values. `ceq` and `cneq` compare all 32 bits for equality and inequality.
+
+Each register major above has its own provisional opcode. In parcel two,
 the low six bits are the move register followed by the direction bit. Direction
 zero copies ac to the named register. Direction one copies that register to ac.
 Six zero bits discard the copy into z0.

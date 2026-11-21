@@ -34,7 +34,7 @@ def encode(rec, chosen, symbols, pc, target=CURRENT_ISA):
         return parcel((minor[minor_name]<<11)|((v & 1023)<<1)|1)
     if chosen=='m.get8':
         return parcel((minor[minor_name]<<11)|((reg(args[0])-8)<<9)|(expr(args[1],symbols,pc)<<1)|1)
-    if chosen in ('n.add','n.sub','n.sll','n.srl','n.sra','n.xor','n.or','n.and'):
+    if chosen.startswith('n.') and chosen[2:] in extra.REG_ALU:
         d,a,b=map(reg,args)
         if target != CURRENT_ISA:
             selector = LEGACY_REG_SELECTOR[chosen[2:]]

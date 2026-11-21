@@ -1171,6 +1171,54 @@ OPERATION(major_and)
 	return output;
 }
 
+OPERATION(major_clt)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = (int32_t)v.left < (int32_t)v.right;
+	return output;
+}
+
+OPERATION(major_cge)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = (int32_t)v.left >= (int32_t)v.right;
+	return output;
+}
+
+OPERATION(major_cltu)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left < v.right;
+	return output;
+}
+
+OPERATION(major_cgeu)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left >= v.right;
+	return output;
+}
+
+OPERATION(major_ceq)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left == v.right;
+	return output;
+}
+
+OPERATION(major_cneq)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left != v.right;
+	return output;
+}
+
 OPERATION(major_slli)
 {
 	OPERATION_SETUP;
@@ -1648,6 +1696,12 @@ static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_c
 	[ZLX_ISA_major_operation_xor] = major_xor,
 	[ZLX_ISA_major_operation_or] = major_or,
 	[ZLX_ISA_major_operation_and] = major_and,
+	[ZLX_ISA_major_operation_clt] = major_clt,
+	[ZLX_ISA_major_operation_cge] = major_cge,
+	[ZLX_ISA_major_operation_cltu] = major_cltu,
+	[ZLX_ISA_major_operation_cgeu] = major_cgeu,
+	[ZLX_ISA_major_operation_ceq] = major_ceq,
+	[ZLX_ISA_major_operation_cneq] = major_cneq,
 	[ZLX_ISA_major_operation_slli] = major_slli,
 	[ZLX_ISA_major_operation_srli] = major_srli,
 	[ZLX_ISA_major_operation_srai] = major_srai,

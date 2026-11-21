@@ -8,9 +8,11 @@ from values import expr, reg, data_size
 
 def select(rec,symbols,pc,target=CURRENT_ISA):
     op,args=mnemonic(rec),rec['args']
+    name = op.removeprefix('n.')
+    if name in extra.COMPARE and target != CURRENT_ISA:
+        raise Error(f'{op} is unavailable for the legacy target')
     if 'move' in rec:
         if target != CURRENT_ISA: raise Error('legacy target has no ultra move')
-        name = op.removeprefix('n.')
         if name not in extra.REG_ALU:
             raise Error('this opcode does not permit an ultra move')
         if len(args) != 3: raise Error(f'{op} requires three registers')
@@ -20,6 +22,10 @@ def select(rec,symbols,pc,target=CURRENT_ISA):
         register = reg(move_reg)
         move_dest = 1 if direction == 'mva' else register
         if dest and dest == move_dest: raise Error('overlapping ultra destinations')
+        return 'n.' + name, 4
+    if name in extra.COMPARE:
+        if len(args) != 3: raise Error(f'{op} requires destination, left and right registers')
+        list(map(reg, args))
         return 'n.' + name, 4
     source_op = op
     op,args = lower(op,args,symbols,pc)

@@ -245,6 +245,12 @@ typedef enum ZLX_ISA_major_operation
 	ZLX_ISA_major_operation_srra,
 	ZLX_ISA_major_operation_srla,
 	ZLX_ISA_major_operation_slla,
+	ZLX_ISA_major_operation_clt,
+	ZLX_ISA_major_operation_cge,
+	ZLX_ISA_major_operation_cltu,
+	ZLX_ISA_major_operation_cgeu,
+	ZLX_ISA_major_operation_ceq,
+	ZLX_ISA_major_operation_cneq,
 	ZLX_ISA_major_operation_count /* Exclusive table bound. */
 }ZLX_ISA_major_operation_t;
 /*
