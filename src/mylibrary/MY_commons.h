@@ -28,9 +28,10 @@ void MY_entry(char *file, int line, char *msg);
 #define MY_ENTRYF(X, ...) {MY_entryf(__FILE__, __LINE__,X, __VA_ARGS__);}
 #define MY_ENTRY(X) {MY_entry(__FILE__, __LINE__, X);}
 
-#define MY_SET_BIT(n, k) (n | (1 << (k - 1)))
-#define MY_CLR_BIT(n, k) (n & (~(1 << (k - 1))))
-#define MY_GET_BIT(n, k) ((n >> k) & 1)
+// Bit indices are zero-based and must be smaller than the width of unsigned int.
+#define MY_SET_BIT(n, k) ((n) | (1u << (k)))
+#define MY_CLR_BIT(n, k) ((n) & ~(1u << (k)))
+#define MY_GET_BIT(n, k) (((unsigned int)(n) >> (k)) & 1u)
 #define MY_ARRAY_SIZE(ary) sizeof(ary)/sizeof(*ary)
 
 uint64_t MY_cap_to_bytes(int64_t data, uint8_t bytes);

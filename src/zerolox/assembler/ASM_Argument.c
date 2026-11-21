@@ -8,11 +8,10 @@ static char get_first_child(ZLX_ASM_Argument_group_t *group, int index)
 {
 	if(!group || index < 0)
 		MY_FAULT("bad paramaters");
-	if(index > group->arguments_count)
+	if(index >= ZLX_ASM_MAX_ARGUMENTS || index >= group->arguments_count)
 		MY_FAULT("index > arguments count");	
 
 
-	char next_neigbour = group->a__tree[index][ZLX_ASM_ARGUMENT_NEXT_NEIGHBOUR];	
 	char first_child = group->a__tree[index][ZLX_ASM_ARGUMENT_FIRST_CHILD];
 
 	return first_child;	
@@ -22,19 +21,18 @@ static char get_next_argument(ZLX_ASM_Argument_group_t *group, int index)
 {
 	if(!group || index < 0)
 		MY_FAULT("bad paramaters");
-	if(index > group->arguments_count)
+	if(index >= ZLX_ASM_MAX_ARGUMENTS || index >= group->arguments_count)
 		MY_FAULT("index > arguments count");	
 
 
 	char next_neigbour = group->a__tree[index][ZLX_ASM_ARGUMENT_NEXT_NEIGHBOUR];	
-	char first_child = group->a__tree[index][ZLX_ASM_ARGUMENT_FIRST_CHILD];
 
 	return next_neigbour;
 }
 
 static bool get_argument_enabled(ZLX_ASM_Argument_group_t *group, int index)
 {
-	if(index > ZLX_ASM_MAX_ARGUMENTS || index < 0)
+	if(!group || index >= ZLX_ASM_MAX_ARGUMENTS || index < 0)
 		MY_FAULT("index out of bounds");
 	bool result = MY_GET_BIT(group->enabled, index);
 	return result;
@@ -42,7 +40,7 @@ static bool get_argument_enabled(ZLX_ASM_Argument_group_t *group, int index)
 
 static void set_argument_enabled(ZLX_ASM_Argument_group_t *group, int index)
 {
-	if(index > ZLX_ASM_MAX_ARGUMENTS || index < 0)
+	if(!group || index >= ZLX_ASM_MAX_ARGUMENTS || index < 0)
 		MY_FAULT("index out of bounds");
 	group->enabled = MY_SET_BIT(group->enabled, index);
 
@@ -50,6 +48,8 @@ static void set_argument_enabled(ZLX_ASM_Argument_group_t *group, int index)
 
 int ZLX_ASM_set_first_argument_Argument_group(ZLX_ASM_Argument_group_t *_group, ZLX_ASM_Argument_t _argument)
 {
+	if(!_group)
+		MY_FAULT("bad paramaters");
 	if(_group->first_argument != -1)
 		MY_FAULT("must be init once");
 	_group->arguments_count = 1;
@@ -70,7 +70,7 @@ int ZLX_ASM_add_neigbour_Argument_group(ZLX_ASM_Argument_group_t *_group, int he
 	//i need to study binary tree's fuck
 	for(int i = 0; i < ZLX_ASM_MAX_ARGUMENTS; ++i)
 	{
-		if(get_argument_enabled(_group, i))
+		if(!get_argument_enabled(_group, i))
 		{
 			first_free = i;
 			break;	
@@ -85,6 +85,7 @@ int ZLX_ASM_add_neigbour_Argument_group(ZLX_ASM_Argument_group_t *_group, int he
 	set_argument_enabled(_group, first_free);
 	_group->a__tree[head][ZLX_ASM_ARGUMENT_NEXT_NEIGHBOUR] = first_free;
 	_group->a__arguments[first_free] = _argument;
+	++_group->arguments_count;
 	
 
 
@@ -98,7 +99,7 @@ int ZLX_ASM_add_child_Argument_group(ZLX_ASM_Argument_group_t *_group, int head,
 	//i need to study binary tree's fuck
 	for(int i = 0; i < ZLX_ASM_MAX_ARGUMENTS; ++i)
 	{
-		if(get_argument_enabled(_group, i))
+		if(!get_argument_enabled(_group, i))
 		{
 			first_free = i;
 			break;	
@@ -113,6 +114,7 @@ int ZLX_ASM_add_child_Argument_group(ZLX_ASM_Argument_group_t *_group, int head,
 	set_argument_enabled(_group, first_free);
 	_group->a__tree[head][ZLX_ASM_ARGUMENT_FIRST_CHILD] = first_free;
 	_group->a__arguments[first_free] = _argument;
+	++_group->arguments_count;
 	
 
 
