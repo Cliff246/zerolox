@@ -48,6 +48,8 @@ int main(void)
 	check_statement(" \t ", ZLX_ASM_statement_type_invalid);
 	check_statement("\tm. r1", ZLX_ASM_statement_type_invalid);
 	check_opcode("j t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_j);
+	check_opcode("extb t0, t1, 31", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_extb);
+	check_opcode("andn t0, t1, t2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_andn);
 	check_opcode("clt t0, t1, t2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_clt);
 	check_opcode("n.cgeu t0, t1, t2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_cgeu);
 	check_opcode("n.add t0, t1, t2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_add);

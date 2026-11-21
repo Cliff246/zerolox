@@ -1171,6 +1171,14 @@ OPERATION(major_and)
 	return output;
 }
 
+OPERATION(major_andn)
+{
+	OPERATION_SETUP;
+	ultra_operands_t v = stage_ultra_move(cpu, paramaters, &output);
+	output.destination_2_data = v.left & ~v.right;
+	return output;
+}
+
 OPERATION(major_clt)
 {
 	OPERATION_SETUP;
@@ -1264,6 +1272,16 @@ OPERATION(major_xori)
 	OPERATION_SETUP;
 	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
 	stage_register(&output, paramaters.source_2, value ^ MY_sign_extend32(paramaters.imm11, 11));
+	return output;
+}
+
+OPERATION(major_extb)
+{
+	OPERATION_SETUP;
+	unsigned index = paramaters.imm11;
+	if (index >= 32) MY_FAULT("extb index outside 0..31");
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	stage_register(&output, paramaters.source_2, (value >> index) & 1u);
 	return output;
 }
 
@@ -1708,6 +1726,7 @@ static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_c
 	[ZLX_ISA_major_operation_xor] = major_xor,
 	[ZLX_ISA_major_operation_or] = major_or,
 	[ZLX_ISA_major_operation_and] = major_and,
+	[ZLX_ISA_major_operation_andn] = major_andn,
 	[ZLX_ISA_major_operation_clt] = major_clt,
 	[ZLX_ISA_major_operation_cge] = major_cge,
 	[ZLX_ISA_major_operation_cltu] = major_cltu,
@@ -1720,6 +1739,7 @@ static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_c
 	[ZLX_ISA_major_operation_xori] = major_xori,
 	[ZLX_ISA_major_operation_andi] = major_andi,
 	[ZLX_ISA_major_operation_ori] = major_ori,
+	[ZLX_ISA_major_operation_extb] = major_extb,
 	[ZLX_ISA_major_operation_sext] = major_sext,
 	[ZLX_ISA_major_operation_inc] = major_inc1,
 	[ZLX_ISA_major_operation_inc2] = major_inc2,

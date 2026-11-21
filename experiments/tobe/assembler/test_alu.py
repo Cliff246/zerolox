@@ -122,6 +122,32 @@ class ExecutionTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('jump target must be parcel aligned', result.stdout + result.stderr)
 
+    def test_extb(self):
+        value = 0x8f01a55a
+        for index in range(32):
+            self.check_program(f'get32 t0, {value}\nextb t0, t0, {index}',
+                               {8: (value >> index) & 1})
+        self.assertEqual(binary('extb t0, t1, 31'), binary('n.extb t0, t1, 31'))
+        with self.assertRaises(Error):
+            build_image(assemble('extb t0, t1, 1', target='zerolox1-legacy-emu-v1'))
+        for index in (-1, 32, 63, 2047):
+            with self.assertRaises(Error):
+                binary(f'extb t0, t1, {index}')
+        # Bit 5 of imm11 occupies bit 6 of the second parcel.
+        raw = bytearray(binary('extb t0, t1, 0'))
+        raw[2] |= 0x40
+        result = self.execute(raw, 1)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('extb index outside 0..31', result.stdout + result.stderr)
+
+    def test_andn(self):
+        self.check_program('get32 t0, 0xf0f0a55a\nget32 t1, 0xff0000ff\n'
+                           'andn t2, t0, t1\nget ac, 15\nandn ac, t1, t0 ; amv t0',
+                           {8: 15, 9: 0xff0000ff, 10: 0x00f0a500, 1: 0xff0000f0})
+        self.assertEqual(binary('andn t0, t1, t2'), binary('n.andn t0, t1, t2'))
+        with self.assertRaises(Error):
+            build_image(assemble('andn ac, t1, t2', target='zerolox1-legacy-emu-v1'))
+
     def test_register_compares(self):
         ops = ('clt', 'cge', 'cltu', 'cgeu', 'ceq', 'cneq')
         cases = [(0x80000000, 0x7fffffff, (1, 0, 0, 1, 0, 1)),

@@ -2,6 +2,7 @@
 import re
 import extra
 from model import Error, CURRENT_ISA, LEGACY_ISA, mnemonic
+from opcodes import LEGACY_REG_SELECTOR
 from dialect import lower
 from syntax import split_args
 from values import expr, reg, data_size
@@ -9,7 +10,7 @@ from values import expr, reg, data_size
 def select(rec,symbols,pc,target=CURRENT_ISA):
     op,args=mnemonic(rec),rec['args']
     name = op.removeprefix('n.')
-    if name in extra.COMPARE and target != CURRENT_ISA:
+    if target != CURRENT_ISA and name in extra.REG_ALU and name not in LEGACY_REG_SELECTOR:
         raise Error(f'{op} is unavailable for the legacy target')
     if 'move' in rec:
         if target != CURRENT_ISA: raise Error('legacy target has no ultra move')
@@ -23,7 +24,7 @@ def select(rec,symbols,pc,target=CURRENT_ISA):
         move_dest = 1 if direction == 'mva' else register
         if dest and dest == move_dest: raise Error('overlapping ultra destinations')
         return 'n.' + name, 4
-    if name in extra.COMPARE:
+    if name in extra.REG_ALU and name not in ('add', 'sub'):
         if len(args) != 3: raise Error(f'{op} requires destination, left and right registers')
         list(map(reg, args))
         return 'n.' + name, 4
@@ -34,7 +35,7 @@ def select(rec,symbols,pc,target=CURRENT_ISA):
         if source_op.startswith(('ld+a', 'st+a', 'm.ld+a', 'm.st+a')):
             op = op.replace('ldplus', 'ld+a').replace('stplus', 'st+a')
         return op,extra.size(form,fields)
-    if op in ('sub','m.sub','n.sub','sll','srl','sra','xor','or','and','n.sll','n.srl','n.sra','n.xor','n.or','n.and'):
+    if op in ('sub','m.sub','n.sub'):
         if op=='m.sub':
             if len(args)!=2: raise Error('m.sub requires two registers')
             list(map(reg,args)); return op,2

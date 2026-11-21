@@ -6,6 +6,7 @@ This table describes the forms available to the `zerolox1-emu-v2` backend. See [
 | --- | --- |
 | `mv`, `m.mv` | `destination, source` |
 | `add`, `sub`, `sll`, `srl`, `sra`, `xor`, `or`, `and` and `n.` versions | `destination, left, right` |
+| `andn`, `n.andn` | `destination, left, right` clears the bits of left selected by right. Supports the bundled accumulator move. |
 | `clt`, `cge`, `cltu`, `cgeu`, `ceq`, `cneq` and `n.` versions | `destination, left, right`. The destination receives 1 for true or 0 for false. |
 | `m.add`, `m.adda`, `m.sub` | `register, register`; implicit accumulator as defined by the ISA |
 | `m.geta` | signed 10-bit immediate |
@@ -24,6 +25,7 @@ This table describes the forms available to the `zerolox1-emu-v2` backend. See [
 | `bieqc+`, `bineqc+` and `m.` versions | `x± or y±, d`. The high selector bit picks x/y. The low bit picks increment/decrement. Both outcomes update the iterator after comparing its old value. |
 | `m.bteqa`, `m.btneqa` | `t0..t3, d` |
 | `push.W`, `pop.W`, `n.push.W`, `n.pop.W` | register |
+| `extb`, `n.extb` | `destination, source, index` returns bit `index` as 0 or 1. The unsigned 11-bit field holds the index. ZLX-1 faults on values above 31. |
 | `sext` | `destination, source, width` with width in bits from 1 through 32 |
 | `inc1..8`, `dec1..8`, `sl1..8`, `sr1..8`, `sra1..8` | register |
 | `anda`, `xora`, `ora`, `aand`, `axor`, `aor` | register. A trailing `a` writes ac. A leading `a` writes the register. |

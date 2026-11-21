@@ -21,6 +21,7 @@ majors:
 	3 | get32	|			|
     2 | ori, andi, xori     | 5_b5 | signed 11-bit immediate
     2 | slli, srli, srai    | 5_b5 | low 5 bits of the 11-bit shift count
+    2 | extb                | 5_b5 | rd = (rs >> index) & 1, bit 0 is least significant, ZLX-1 accepts 0..31
     2 | sext                | 5_b5 | sign-extend the low 1..32 bits of the source
     1 | inc1..8, dec1..8    | 5    | inc and dec are aliases for inc1 and dec1
     1 | sl1..8, sr1..8, sra1..8 | 5 | shift the named register in place
@@ -42,6 +43,7 @@ majors:
 	1 | callp	|			|
 	1 | retp	|			|
     2 | add, sub, sll, srl, sra, xor, or, and | 5_5551 | optional accumulator move
+    2 | andn | 5_5551 | rd = lhs & ~rhs, optional accumulator move
     2 | clt, cge, cltu, cgeu, ceq, cneq | 5_5551 | register comparison with optional accumulator move
 
 Comparisons take `rd, lhs, rhs` and write 1 for true or 0 for false to `rd`.

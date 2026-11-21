@@ -5,8 +5,8 @@ from values import expr, reg
 from opcodes import MAJOR, MINOR, LEGACY_MAJOR, LEGACY_MINOR, LEGACY_IMM_SELECTOR
 
 COMPARE = {'clt', 'cge', 'cltu', 'cgeu', 'ceq', 'cneq'}
-REG_ALU = COMPARE | {'add', 'sub', 'sll', 'srl', 'sra', 'xor', 'or', 'and'}
-IMM = {'slli', 'srli', 'srai', 'xori', 'andi', 'ori', 'sext'}
+REG_ALU = COMPARE | {'add', 'sub', 'sll', 'srl', 'sra', 'xor', 'or', 'and', 'andn'}
+IMM = {'slli', 'srli', 'srai', 'xori', 'andi', 'ori', 'sext', 'extb'}
 ACC_IMM = {'inca', 'deca', 'srra', 'srla', 'slla'}
 ONE = {name: name for name in ('inc', 'dec', 'j', 'call', 'ret', 'callp', 'retp',
                                 'anda', 'xora', 'ora', 'aand', 'axor', 'aor')}
@@ -36,7 +36,7 @@ def parse(op,args,symbols,pc,target=CURRENT_ISA):
     legacy = target != CURRENT_ISA
     major, minor = (LEGACY_MAJOR, LEGACY_MINOR) if legacy else (MAJOR, MINOR)
     name=op.removeprefix('n.')
-    if legacy and (name in ACC_IMM or name == 'sext' or op.removeprefix('m.') in ITER
+    if legacy and (name in ACC_IMM or (name in IMM and name not in LEGACY_IMM_SELECTOR) or op.removeprefix('m.') in ITER
                    or (name in ONE and ONE[name] not in major)):
         raise Error(f'{op} is unavailable for the legacy target')
     def count(n):
@@ -73,6 +73,7 @@ def parse(op,args,symbols,pc,target=CURRENT_ISA):
         lo, hi = (-1024, 1023)
         if name in ('slli','srli','srai'): lo, hi = 0, 2047
         if name == 'sext': lo, hi = 1, 32
+        if name == 'extb': lo, hi = 0, 31
         return 'imm11', (major[name], reg(args[1]), reg(args[0]), immediate(args[2], lo, hi) & 2047)
     if name in BRANCH:
         count(3); offset=immediate(args[2],-2048,2046)
