@@ -29,7 +29,7 @@ def strip_comment(s):
             elif c == '\\': escape = True
             elif c == quote: quote = None
         elif c in "'\"": quote = c
-        elif c == ';': return s[:i]
+        elif c == ';' or s.startswith(('//', '/:'), i): return s[:i]
     return s
 
 def assemble(source, filename='<input>'):

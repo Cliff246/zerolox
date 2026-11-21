@@ -4,6 +4,27 @@ from assembler import Error, assemble, link
 from image import build_image
 
 class DesignCases(unittest.TestCase):
+    def test_line_comments(self):
+        plain = 'm.get8 t0, 7\nld.16 ac, [t0, (1 + 2) * 2]\n'
+        expected = build_image(assemble(plain))
+        for marker in (';', '//', '/:'):
+            source = (f'{marker} comment-only line\n'
+                      f'm.get8 t0, 7 {marker} ignored, [ operands\n'
+                      f'ld.16 ac, [t0, (1 + 2) * 2]{marker} EOF comment')
+            with self.subTest(marker=marker):
+                obj = assemble(source)
+                self.assertEqual(build_image(obj), expected)
+                self.assertEqual([r['line'] for r in obj['records']], [2, 3])
+                self.assertEqual(assemble(marker)['records'], [])
+
+    def test_comment_markers_in_literals(self):
+        self.assertEqual(build_image(assemble('!db "// /: ;" // comment')),
+                         b'// /: ;\0')
+        self.assertEqual(build_image(assemble("!db '/', ':', ';' /: comment")),
+                         b'/:;')
+        self.assertEqual(build_image(assemble(r'!db "say \"//\" /:" // comment')),
+                         b'say "//" /:\0')
+
     def test_selection_and_roundtrip(self):
         source = 'add ac, r8, r9\nadd r8, ac, r9\nadd r8, r9, r10\nld.16 ac, [r8, 3s]\nld.16 ac, [r8, 3]\nld.32 ac, [r8, -8]\n'
         obj = assemble(source)
