@@ -4,6 +4,67 @@ from assembler import Error, assemble, link
 from image import build_image
 
 class DesignCases(unittest.TestCase):
+    def test_current_memory_spelling(self):
+        pairs = [
+            ('ld t1, [t0, 5]', 'ld.8 t1, [t0, 5]'),
+            ('lda [t0, 5]', 'm.lda.8 [t0, 5]'),
+            ('ald t1, [5]', 'm.ald.8 t1, [ac, 5]'),
+            ('stsa [5]', 'm.stsa.8 5'),
+            ('ld+a [t4{1}]', 'm.ldplus.8 t4, 1'),
+            ('st+a.p [s0{-1}]', 'm.stplus.p s0, -1'),
+            ('ret', 'ret ac'),
+            ('push8 t1', 'push.8 t1'),
+        ]
+        for current, legacy in pairs:
+            with self.subTest(current=current):
+                self.assertEqual(build_image(assemble(current)), build_image(assemble(legacy)))
+        for invalid in ('ld+a [t4, 1]', 'ld+a [t4{1}, 5]', 'ld+a [t4{0}]', 'lda t0, 5'):
+            with self.subTest(invalid=invalid), self.assertRaises(Error):
+                build_image(assemble(invalid))
+
+    def test_current_branch_selection_and_forward_reference(self):
+        for selector, alias, comparison in (
+            (0, 'bxeqc', 'beq ix, cx'), (1, 'bxneqc', 'bneq cx, ix'),
+            (2, 'byeqc', 'beq iy, cy'), (3, 'byneqc', 'bneq iy, cy'),
+        ):
+            expected = build_image(assemble(f'm.bieqc {selector}, 2'))
+            self.assertEqual(build_image(assemble(f'{alias} 2')), expected)
+            self.assertEqual(build_image(assemble(f'{comparison}, #done\ndone:')), expected)
+        self.assertEqual(link(assemble('beq ix, cx, 256'))[0][0][1:3], (4, 'beq'))
+        # The initial layout puts the target at 256. Shrinking mv makes it fit.
+        source = 'bxeqc #done\nmv ac, t0\n!db "' + 'x' * 247 + '"\ndone:'
+        self.assertEqual(link(assemble(source))[1]['done']['value'], 252)
+
+    def test_current_get_and_versioned_objects(self):
+        obj = assemble('get t0, 44\nget ac, -1\nget t0, 256\nget t0, 65536')
+        self.assertEqual(obj['syntax'], 'zerolox-source-v1')
+        self.assertEqual(obj['target'], 'zerolox1-emu-v2')
+        self.assertEqual([entry[1] for entry in link(obj)[0]], [2, 2, 4, 6])
+        self.assertEqual(build_image(obj), build_image(dict(obj, target='zerolox1')))
+        with self.assertRaisesRegex(Error, 'unsupported ISA target'):
+            build_image(dict(obj, target='unknown'))
+
+    def test_line_comments(self):
+        plain = 'm.get8 t0, 7\nld.16 ac, [t0, (1 + 2) * 2]\n'
+        expected = build_image(assemble(plain))
+        for marker in (';', '//', '/:'):
+            source = (f'{marker} comment-only line\n'
+                      f'm.get8 t0, 7 {marker} ignored, [ operands\n'
+                      f'ld.16 ac, [t0, (1 + 2) * 2]{marker} EOF comment')
+            with self.subTest(marker=marker):
+                obj = assemble(source)
+                self.assertEqual(build_image(obj), expected)
+                self.assertEqual([r['line'] for r in obj['records']], [2, 3])
+                self.assertEqual(assemble(marker)['records'], [])
+
+    def test_comment_markers_in_literals(self):
+        self.assertEqual(build_image(assemble('!db "// /: ;" // comment')),
+                         b'// /: ;\0')
+        self.assertEqual(build_image(assemble("!db '/', ':', ';' /: comment")),
+                         b'/:;')
+        self.assertEqual(build_image(assemble(r'!db "say \"//\" /:" // comment')),
+                         b'say "//" /:\0')
+
     def test_selection_and_roundtrip(self):
         source = 'add ac, r8, r9\nadd r8, ac, r9\nadd r8, r9, r10\nld.16 ac, [r8, 3s]\nld.16 ac, [r8, 3]\nld.32 ac, [r8, -8]\n'
         obj = assemble(source)
@@ -74,6 +135,7 @@ class DesignCases(unittest.TestCase):
         emulator = os.environ.get('ZEROLOX_EMULATOR')
         if not emulator: self.skipTest('set ZEROLOX_EMULATOR to a built C emulator')
         cases = [
+            ('get t4, 80\nget ac, 41\nst+a [t4{1}]\ndec t4\nld+a [t4{1}]\nbeq ix, cx, #done\nget ac, 99\ndone:\n', 6, {1:41,12:81}),
             ('m.get8 t0, 7\nm.get8 t1, 3\nadd ac, t0, t1\nadd t2, ac, t1\nadd t3, t0, t1\n', 5, {1:10, 10:13, 11:10}),
             ('m.get8 t0, 64\nm.get8 t1, 123\nst.8 t1, [t0]\nld.8 ac, [t0]\n', 4, {1:123}),
             ('m.geta 0\nbeqz #target\nm.geta 99\ntarget:\nm.geta 7\n', 3, {1:7}),

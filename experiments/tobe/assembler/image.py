@@ -2,39 +2,45 @@
 import ast
 import extra
 from linker import link
-from model import Error, mnemonic
+from dialect import lower
+from model import Error, CURRENT_ISA, mnemonic
 from syntax import split_args
 from values import expr, reg, data_size
 
-from opcodes import MAJOR, MINOR
+from opcodes import MAJOR, MINOR, LEGACY_MAJOR, LEGACY_MINOR, LEGACY_REG_SELECTOR
 
 WIDTH = {'8':0, '16':1, '32':2, 'p':3}
 
 def parcel(value):
     return value.to_bytes(2,'little')
 
-def encode(rec, chosen, symbols, pc):
-    args=rec['args']; op=mnemonic(rec); base=chosen.rsplit('.',1)[0]
+def encode(rec, chosen, symbols, pc, target=CURRENT_ISA):
+    op,args=lower(mnemonic(rec),rec['args'],symbols,pc)
+    base=chosen.rsplit('.',1)[0]
     minor_name = 'move' if chosen == 'm.mv' else chosen.removeprefix('m.')
+    major, minor = (MAJOR, MINOR) if target == CURRENT_ISA else (LEGACY_MAJOR, LEGACY_MINOR)
     if op in extra.names():
-        form,fields=extra.parse(op,args,symbols,pc)
+        form,fields=extra.parse(op,args,symbols,pc,target)
         return extra.encode(form,fields)
     if chosen in ('m.mv','m.add','m.adda','m.sub'):
         if op in ('add','n.add','sub','n.sub'):
             d,a,b=map(reg,args)
             a,b=(a,b) if chosen in ('m.add','m.sub') else (d,b)
         else: a,b=map(reg,args)
-        return parcel((MINOR[minor_name]<<11)|(a<<6)|(b<<1)|1)
+        return parcel((minor[minor_name]<<11)|(a<<6)|(b<<1)|1)
     if chosen in ('m.geta','m.b','m.baeqz','m.baneqz'):
         v=expr(args[0],symbols,pc)
         if chosen!='m.geta': v//=2
-        return parcel((MINOR[minor_name]<<11)|((v & 1023)<<1)|1)
+        return parcel((minor[minor_name]<<11)|((v & 1023)<<1)|1)
     if chosen=='m.get8':
-        return parcel((MINOR[minor_name]<<11)|((reg(args[0])-8)<<9)|(expr(args[1],symbols,pc)<<1)|1)
+        return parcel((minor[minor_name]<<11)|((reg(args[0])-8)<<9)|(expr(args[1],symbols,pc)<<1)|1)
     if chosen in ('n.add','n.sub','n.sll','n.srl','n.sra','n.xor','n.or','n.and'):
         d,a,b=map(reg,args)
+        if target != CURRENT_ISA:
+            selector = LEGACY_REG_SELECTOR[chosen[2:]]
+            return parcel((major['reg_group']<<6)|(a<<1))+parcel((selector<<11)|(d<<6)|(b<<1))
         direction, move_reg = rec.get('move', ('amv', 'z0'))
-        first = (extra.REG_ALU[chosen[2:]] << 6) | (a << 1)
+        first = (major[chosen[2:]] << 6) | (a << 1)
         second = (d << 11) | (b << 6) | (reg(move_reg) << 1) | (direction == 'mva')
         return parcel(first) + parcel(second)
     if base in ('m.lda','m.ald','m.sta','m.ast','n.ld','n.st'):
@@ -43,9 +49,9 @@ def encode(rec, chosen, symbols, pc):
         value_reg=1 if op.startswith(('m.lda.','m.sta.')) else reg(args[0])
         if base.startswith('m.'):
             operand=address if base in ('m.lda','m.sta') else value_reg
-            return parcel((MINOR[base[2:]]<<11)|(WIDTH[width]<<9)|((offset//size)<<6)|(operand<<1)|1)
+            return parcel((minor[base[2:]]<<11)|(WIDTH[width]<<9)|((offset//size)<<6)|(operand<<1)|1)
         raw=offset & 0x1ff
-        first=(MAJOR[base[2:]]<<6)|(address<<1)
+        first=(major[base[2:]]<<6)|(address<<1)
         second=((raw&31)<<11)|(WIDTH[width]<<9)|(((raw>>5)&7)<<6)|(value_reg<<1)|((raw>>8)&1)
         return parcel(first)+parcel(second)
     raise Error(f'no image encoder for {chosen}')
@@ -71,7 +77,7 @@ def build_image(obj):
         if kind=='instruction':
             position,size,chosen,_=next(selected)
             if position!=pc: raise Error('internal layout mismatch')
-            code=encode(rec,chosen,symbols,pc)
+            code=encode(rec,chosen,symbols,pc,obj['target'])
             if len(code)!=size: raise Error('internal instruction size mismatch')
             out.extend(code)
         elif kind=='data':

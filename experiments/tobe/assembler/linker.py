@@ -1,13 +1,15 @@
 """Experimental instruction selection and iterative layout."""
 import re
 import extra
-from model import Error, mnemonic
+from model import Error, CURRENT_ISA, LEGACY_ISA, mnemonic
+from dialect import lower
 from syntax import split_args
 from values import expr, reg, data_size
 
-def select(rec,symbols,pc):
+def select(rec,symbols,pc,target=CURRENT_ISA):
     op,args=mnemonic(rec),rec['args']
     if 'move' in rec:
+        if target != CURRENT_ISA: raise Error('legacy target has no ultra move')
         name = op.removeprefix('n.')
         if name not in extra.REG_ALU:
             raise Error('this opcode does not permit an ultra move')
@@ -19,8 +21,12 @@ def select(rec,symbols,pc):
         move_dest = 1 if direction == 'mva' else register
         if dest and dest == move_dest: raise Error('overlapping ultra destinations')
         return 'n.' + name, 4
+    source_op = op
+    op,args = lower(op,args,symbols,pc)
     if op in extra.names():
-        form, fields=extra.parse(op,args,symbols,pc)
+        form, fields=extra.parse(op,args,symbols,pc,target)
+        if source_op.startswith(('ld+a', 'st+a', 'm.ld+a', 'm.st+a')):
+            op = op.replace('ldplus', 'ld+a').replace('stplus', 'st+a')
         return op,extra.size(form,fields)
     if op in ('sub','m.sub','n.sub','sll','srl','sra','xor','or','and','n.sll','n.srl','n.sra','n.xor','n.or','n.and'):
         if op=='m.sub':
@@ -83,7 +89,9 @@ def select(rec,symbols,pc):
 def link(obj):
     if obj.get('format') != 'zerolox-experiment-2':
         raise Error('unsupported experimental object format')
-    records=obj['records']; sizes=[6 if r['kind']=='instruction' and mnemonic(r) in ('n.get32','get32') else 4 if r['kind']=='instruction' else 0 for r in records]; seen=set()
+    if obj.get('target') not in (CURRENT_ISA, LEGACY_ISA, 'zerolox1'):
+        raise Error(f"unsupported ISA target {obj.get('target')!r}")
+    records=obj['records']; sizes=[6 if r['kind']=='instruction' and mnemonic(r) in ('n.get32','get32','get') else 4 if r['kind']=='instruction' else 0 for r in records]; seen=set()
     for iteration in range(100):
         key=tuple(sizes)
         if key in seen: raise Error('layout did not converge (repeated instruction sizes)')
@@ -113,10 +121,10 @@ def link(obj):
             if r['kind']!='instruction': continue
             try:
                 if positions[i]%2: raise Error(f'instruction at odd byte index {positions[i]}')
-                chosen,new[i]=select(r,symbols,positions[i]); listing.append((positions[i],new[i],chosen,r['line']))
+                chosen,new[i]=select(r,symbols,positions[i],obj['target']); listing.append((positions[i],new[i],chosen,r['line']))
             except Error as e: errors.append(f"{r['file']}:{r['line']}: {e}")
-        if errors: raise Error('\n'.join(errors))
         if new==sizes:
+            if errors: raise Error('\n'.join(errors))
             constant_errors=[]
             for r in records:
                 if r['kind']=='constant':

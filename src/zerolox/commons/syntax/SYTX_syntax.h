@@ -36,6 +36,11 @@ extern const size_t ZLX_SYTX_instruction_postfix_count;
 typedef enum ZLX_SYTX_pattern_form
 {
 	ZLX_SYTX_pattern_form_2_register,
+	ZLX_SYTX_pattern_form_register,
+	ZLX_SYTX_pattern_form_accumulator_immediate,
+	ZLX_SYTX_pattern_form_register_register_immediate,
+	ZLX_SYTX_pattern_form_register_ultra,
+	ZLX_SYTX_pattern_form_iterator_branch,
 }ZLX_SYTX_pattern_form_t;
 
 
@@ -54,6 +59,7 @@ extern ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[];
 extern const size_t ZLX_SYTX_mnemonics_count;
 
 int ZLX_SYTX_get_mnemonic_code(char *string);
+int ZLX_SYTX_find_mnemonic(char *string, ZLX_SYTX_instruction_prefix_t prefix);
 ZLX_SYTX_instruction_postfix_t ZLX_SYTX_get_instruction_postfix(char *string);
 ZLX_SYTX_instruction_prefix_t ZLX_SYTX_get_instruction_prefix(char *string);
 

@@ -21,6 +21,22 @@ class EncodingTests(unittest.TestCase):
         for move, bits in [('amv t0', 16), ('mva t0', 17)]:
             self.assertEqual(binary('add t1, t2, t3 ; ' + move)[2] & 63, bits)
 
+    def test_legacy_grouped_encodings(self):
+        source = 'n.add t0, t1, t2\nxori t1, t0, -1'
+        expected = bytes.fromhex('12 03 14 02 50 03 47 fa')
+        for target in ('zerolox1-legacy-emu-v1', 'zerolox1'):
+            self.assertEqual(build_image(assemble(source, target=target)), expected)
+            for invalid in ('xori t1, t0, 32', 'inc8 t0', 'bieqc+ x+, 2',
+                            'n.add t1, t0, ac ; mva t0'):
+                with self.subTest(target=target, source=invalid), self.assertRaises(Error):
+                    build_image(assemble(invalid, target=target))
+        self.assertNotEqual(binary(source), expected)
+
+    def test_current_syntax_with_ultras(self):
+        self.assertEqual(binary('get t0, 7\nn.add t1, ac, t0 ; mva t0 // save ; ignored'),
+                         binary('m.get8 t0, 7\nn.add t1, ac, t0 ; mva t0'))
+        self.assertEqual(binary('n.add t1, ac, t0 /: mva t0'), binary('n.add t1, ac, t0'))
+
     def test_invalid_combinations(self):
         for source in ('n.add t0, t1, t2 ; amv t0', 'add ac, t1, t2 ; mva t0',
                        'm.add t0, t1 ; amv t2', 'andi t0, ac, 4 ; amv t1',

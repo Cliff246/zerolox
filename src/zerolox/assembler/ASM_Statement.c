@@ -162,6 +162,17 @@ static ZLX_ASM_statement_type_t classify_statement(ZLX_ASM_Statement_information
 		return ZLX_ASM_statement_type_label;
 
 	
+	// A trailing '+' is part of a registered iterator-branch mnemonic.
+	if (last >= 2 && statement_information.a__token_types[last - 1] == MY_token_type_add)
+	{
+		int start = (last == 4 && statement_information.a__token_types[1] == MY_token_type_period) ? 2 : 0;
+		char name[ZLX_SYTX_MNEMONIC_SIZE];
+		if (last - start == 2 && valid_form(statement_information.a__token_types, last - 1) &&
+		    MY_get_substring_Token_group(statement_information.group, start, 2, name, sizeof name) >= 0 &&
+		    ZLX_SYTX_get_mnemonic_code(name) >= 0)
+			return ZLX_ASM_statement_type_operation_mnemonic;
+		return ZLX_ASM_statement_type_invalid;
+	}
 	if(valid_form(statement_information.a__token_types, last ))
 		return ZLX_ASM_statement_type_operation_mnemonic;
 	return ZLX_ASM_statement_type_invalid;
@@ -184,7 +195,6 @@ ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assemb
 
 
 	ZLX_ASM_Statement_information_t information = get_statement_tokentypes(_group); 
-
 	
 	
 	MY_print_token_group(_group);

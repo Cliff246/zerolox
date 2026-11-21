@@ -14,11 +14,6 @@ const char *internal_string = "%mv";
 int32_t main(int32_t argc, char *argv[])
 {
 
-	
-	
-
-
-
 	ZLX_ASM_Assembler_t *assembler = ZLX_ASM_init_Assembler();
 	if(!USE_INTERNAL)
 	{
@@ -32,8 +27,6 @@ int32_t main(int32_t argc, char *argv[])
 
 	//ZLX_ASM_test_Assembler(assembler);
 	ZLX_ASM_temp_frontend(assembler);
-
-
 
 	return 0;
 }

@@ -27,3 +27,14 @@ header = (Path(__file__).resolve().parents[3] / 'src/zerolox/commons/isa/ISA_zer
 header = re.sub(r'/\*.*?\*/|//[^\n]*', '', header, flags=re.S)
 MAJOR = read_operations(header, 'major')
 MINOR = read_operations(header, 'minor')
+
+
+# These encoding numbers belong to existing legacy JSON objects.
+LEGACY_MAJOR = {name: code for code, name in enumerate(
+    'ld st push8 push16 push32 pushp pop8 pop16 pop32 popp get16 get32 '
+    'reg_group imm_group inc dec addi bneq beq blt bge bltu bgeu call ret callp retp'.split())}
+LEGACY_MINOR = {name: code for code, name in enumerate(
+    'move add adda sub geta get8 b baeqz baneqz lda ald sta ast stsa ldsa ld_plus '
+    'st_plus bieqc bteqa btneqa'.split())}
+LEGACY_REG_SELECTOR = {name: n for n, name in enumerate('add sub sll srl sra xor or and'.split())}
+LEGACY_IMM_SELECTOR = {name: n for n, name in enumerate('slli srli srai xori andi ori'.split())}

@@ -132,7 +132,7 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 			MY_FAULT("could not fit substring in buffer");
 		
 		prefix = ZLX_SYTX_instruction_prefix_none;		
-		opcode = ZLX_SYTX_get_mnemonic_code(buffer1);
+		opcode = ZLX_SYTX_find_mnemonic(buffer1, prefix);
 		postfix = ZLX_SYTX_instruction_postfix_none;
 		//printf("0:%s\n", buffer1);
 		//printf("dots count -1\n");
@@ -154,7 +154,7 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 			test_size1 = MY_get_substring_Token_group(information.group, dots[0] + 1, length - dots[0] - 1, buffer1, 16);
 			if(test_size1 < 0)
 				MY_FAULT("could not fit substring in buffer");
-			test = ZLX_SYTX_get_mnemonic_code(buffer1);
+			test = ZLX_SYTX_find_mnemonic(buffer1, prefix);
 			if(test == -1)
 			{
 				MY_FAULT("opcode not found");
@@ -212,7 +212,7 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 	
 
 		
-		opcode = ZLX_SYTX_get_mnemonic_code(buffer1);
+		opcode = ZLX_SYTX_find_mnemonic(buffer1, prefix);
 		//printf("dots count 1\n");
 	}
 
@@ -238,11 +238,9 @@ ZLX_ASM_Operation_t ZLX_ASM_init_mnemonic_Operation(ZLX_ASM_Statement_informatio
 
 	struct segments seg = find_segments(_statement_information); 
 
-	ZLX_ASM_collect_mnemonic_Operation_mnemonic(_statement_information, seg.segments[0], seg.length[0]); 	
-	ZLX_ASM_Argument_t argument; 
-
-
-	ZLX_ASM_Operation_t operation = {0};
+	ZLX_ASM_Operation_t operation = {.type = ZLX_ASM_operation_type_mnemonic};
+	operation.u__mnemonic = ZLX_ASM_collect_mnemonic_Operation_mnemonic(
+		_statement_information, seg.segments[0], seg.length[0]);
 	return operation;
 }
 

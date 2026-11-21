@@ -18,6 +18,22 @@ static void check_statement(char *_source, ZLX_ASM_statement_type_t _expected)
 	MY_free_Lexer(lexer);
 }
 
+static void check_opcode(char *source, ZLX_ISA_instruction_type_t type, unsigned opcode)
+{
+	MY_Lexer_t *lexer = MY_init_Lexer(source);
+	MY_lex_Lexer(lexer);
+	MY_Token_group_t group = MY_init_Token_group(lexer, 0, lexer->token_count);
+	ZLX_ASM_Assembler_t assembler = {0};
+	ZLX_ASM_Statement_t *statement = ZLX_ASM_convert_token_to_statement_Assembler(&assembler, group);
+	assert(statement->type == ZLX_ASM_statement_type_operation_mnemonic);
+	assert(statement->u__operation.type == ZLX_ASM_operation_type_mnemonic);
+	int index = statement->u__operation.u__mnemonic.opcode;
+	assert(ZLX_SYTX_mnemonics[index].type == type);
+	assert(ZLX_SYTX_mnemonics[index].opcode == opcode);
+	free(statement);
+	MY_free_Lexer(lexer);
+}
+
 int main(void)
 {
 	check_statement("m.mv r1, r2", ZLX_ASM_statement_type_operation_mnemonic);
@@ -31,5 +47,11 @@ int main(void)
 	check_statement("", ZLX_ASM_statement_type_invalid);
 	check_statement(" \t ", ZLX_ASM_statement_type_invalid);
 	check_statement("\tm. r1", ZLX_ASM_statement_type_invalid);
+	check_opcode("n.add t0, t1, t2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_add);
+	check_opcode("m.add t0, t1", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_add);
+	check_opcode("inc8 t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_inc8);
+	check_opcode("m.bieqc+ x+, 2", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_bieqc_update);
+	check_opcode("bineqc+ y-, 2", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_bineqc_update);
+	check_statement("add+ t0", ZLX_ASM_statement_type_invalid);
 	return 0;
 }
