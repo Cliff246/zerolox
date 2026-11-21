@@ -184,7 +184,6 @@ ZLX_ASM_Statement_t *ZLX_ASM_convert_token_to_statement_Assembler(ZLX_ASM_Assemb
 
 
 	ZLX_ASM_Statement_information_t information = get_statement_tokentypes(_group); 
-
 	
 	
 	MY_print_token_group(_group);
