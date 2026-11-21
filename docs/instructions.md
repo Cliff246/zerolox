@@ -36,6 +36,7 @@ majors:
 	2 | bge		|			|
 	2 | bltu	|			|
 	2 | bgeu	|			|
+    1 | j       | 5         | jump to the even byte address in the register and preserve all registers
     1 | call	|			|
     1 | ret		|			|
 	1 | callp	|			|

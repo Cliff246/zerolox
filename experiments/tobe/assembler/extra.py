@@ -8,7 +8,7 @@ COMPARE = {'clt', 'cge', 'cltu', 'cgeu', 'ceq', 'cneq'}
 REG_ALU = COMPARE | {'add', 'sub', 'sll', 'srl', 'sra', 'xor', 'or', 'and'}
 IMM = {'slli', 'srli', 'srai', 'xori', 'andi', 'ori', 'sext'}
 ACC_IMM = {'inca', 'deca', 'srra', 'srla', 'slla'}
-ONE = {name: name for name in ('inc', 'dec', 'call', 'ret', 'callp', 'retp',
+ONE = {name: name for name in ('inc', 'dec', 'j', 'call', 'ret', 'callp', 'retp',
                                 'anda', 'xora', 'ora', 'aand', 'axor', 'aor')}
 ONE.update(inc1='inc', dec1='dec')
 for name in ('push', 'pop'):

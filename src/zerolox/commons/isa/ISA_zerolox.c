@@ -112,6 +112,7 @@ ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[] =
 	[ZLX_ISA_major_operation_bge] = ZLX_ISA_major_format_type_5_b5,
 	[ZLX_ISA_major_operation_bltu] = ZLX_ISA_major_format_type_5_b5,
 	[ZLX_ISA_major_operation_bgeu] = ZLX_ISA_major_format_type_5_b5,
+	[ZLX_ISA_major_operation_j] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_call] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_ret] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_callp] = ZLX_ISA_major_format_type_5,

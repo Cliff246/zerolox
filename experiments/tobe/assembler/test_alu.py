@@ -4,7 +4,7 @@ import subprocess
 import tempfile
 import unittest
 
-from assembler import Error, assemble
+from assembler import Error, assemble, link
 from image import build_image
 from opcodes import MINOR
 
@@ -41,6 +41,18 @@ class EncodingTests(unittest.TestCase):
                 with self.subTest(target=target, source=invalid), self.assertRaises(Error):
                     build_image(assemble(invalid, target=target))
         self.assertNotEqual(binary(source), expected)
+
+    def test_register_jump_encoding(self):
+        from opcodes import MAJOR
+        for reg in range(32):
+            expected = ((MAJOR['j'] << 6) | (reg << 1)).to_bytes(2, 'little')
+            self.assertEqual(binary(f'j r{reg}'), expected)
+            self.assertEqual(binary(f'n.j r{reg}'), expected)
+        for source in ('m.j t0', 'j 8', 'j t0, t1', 'j t0 ; amv t1'):
+            with self.subTest(source=source), self.assertRaises(Error):
+                binary(source)
+        with self.assertRaises(Error):
+            build_image(assemble('j t0', target='zerolox1-legacy-emu-v1'))
 
     def test_compare_encoding(self):
         from opcodes import MAJOR
@@ -95,6 +107,20 @@ class ExecutionTests(unittest.TestCase):
                            {0: 0, 1: 14, 8: 7, 9: 14})
         self.check_program('m.geta 7\nn.add z0, ac, ac\nadd t0, ac, ac ; mva z0',
                            {0: 0, 1: 0, 8: 0})
+
+    def test_register_jump_tail_call(self):
+        source = ('get16 t0, &caller\nget16 t1, &callee\nget16 sp, 0x8000\n'
+                  'get ac, 41\ncall t0\nresume:\ninc t2\nb #done\n'
+                  'caller:\nj t1\nget ac, -1\ncallee:\ninca 1\nret t3\ndone:')
+        _, labels = link(assemble(source))
+        self.check_program(source, {1: 42, 2: 0x8000, 3: labels['resume']['value'],
+                                    8: labels['caller']['value'], 9: labels['callee']['value'],
+                                    10: 1, 11: 42}, steps=10)
+
+    def test_register_jump_odd_address(self):
+        result = self.execute(binary('get t0, 7\nj t0'), 2)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('jump target must be parcel aligned', result.stdout + result.stderr)
 
     def test_register_compares(self):
         ops = ('clt', 'cge', 'cltu', 'cgeu', 'ceq', 'cneq')

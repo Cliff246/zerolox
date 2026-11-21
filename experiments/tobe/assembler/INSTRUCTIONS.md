@@ -28,6 +28,7 @@ This table describes the forms available to the `zerolox1-emu-v2` backend. See [
 | `inc1..8`, `dec1..8`, `sl1..8`, `sr1..8`, `sra1..8` | register |
 | `anda`, `xora`, `ora`, `aand`, `axor`, `aor` | register. A trailing `a` writes ac. A leading `a` writes the register. |
 | `inca`, `deca`, `srra`, `srla`, `slla` | unsigned five-bit immediate |
+| `j`, `n.j` | One register holding an absolute byte address. An odd target faults. All registers, including `rp`, retain their values. |
 | `inc`, `dec`, `call`, `ret`, `callp`, `retp` and `n.` versions | register |
 
 `W` is `8`, `16`, `32` or `p`; `p` is three bytes on zerolox one. `m.ldplus` and `m.stplus` accept only -4, -2, -1, 1, 2, 3, 4, 8 as their increment, matching the current emulator's encoded selector; the operation accesses the old address, then updates the base. `m.ldplus` rejects `ac` as base because it conflicts with its implicit accumulator destination. `ret` and `retp` have a register operand because the current emulator copies `ac` to it. These spellings do not imply an ABI.

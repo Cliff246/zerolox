@@ -1552,6 +1552,18 @@ OPERATION(major_branch_greater_than_equals_unsigned)
 
 }
 
+OPERATION(major_jump)
+{
+	OPERATION_SETUP;
+	uint32_t target = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	if (target & 1)
+		MY_FAULT("jump target must be parcel aligned");
+	output.pc_set_or_add = false;
+	output.pc_changed = true;
+	output.pc_value = target;
+	return output;
+}
+
 OPERATION(major_call)
 {
 	
@@ -1779,6 +1791,7 @@ static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_c
 	[ZLX_ISA_major_operation_bge] = major_branch_greater_than_equals,
 	[ZLX_ISA_major_operation_bltu] = major_branch_less_than_unsigned,
 	[ZLX_ISA_major_operation_bgeu] = major_branch_greater_than_equals_unsigned,
+	[ZLX_ISA_major_operation_j] = major_jump,
 	[ZLX_ISA_major_operation_call] = major_call,
 	[ZLX_ISA_major_operation_callp] = major_callp,
 	[ZLX_ISA_major_operation_ret] = major_return,

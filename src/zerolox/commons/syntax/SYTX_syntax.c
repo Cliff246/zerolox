@@ -34,6 +34,7 @@ ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[] =
 #define MAJOR_MNEMONIC(name, form_name) \
 	{.type = ZLX_ISA_instruction_type_major, .form = ZLX_SYTX_pattern_form_##form_name, \
 	 .a__mnemonic = #name, .opcode = ZLX_ISA_major_operation_##name}
+	MAJOR_MNEMONIC(j, register),
 	MAJOR_MNEMONIC(add, register_ultra),
 	MAJOR_MNEMONIC(sub, register_ultra),
 	MAJOR_MNEMONIC(sll, register_ultra),
