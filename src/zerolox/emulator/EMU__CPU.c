@@ -716,18 +716,6 @@ OPERATION(minor_bineqc_update)
 	return output;
 }
 
-static int32_t nonzero_imm5(uint8_t field)
-{
-	return field == 0 ? 16 : MY_sign_extend32(field, 5);
-}
-
-OPERATION(minor_get5)
-{
-	OPERATION_SETUP;
-	stage_register(&output, paramaters.source_2, nonzero_imm5(paramaters.imm5));
-	return output;
-}
-
 OPERATION(minor_calli)
 {
 	OPERATION_SETUP;
@@ -738,47 +726,9 @@ OPERATION(minor_calli)
 	return output;
 }
 
-OPERATION(minor_addi)
-{
-	OPERATION_SETUP;
-	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);
-	int32_t delta = nonzero_imm5(paramaters.imm5);
-	stage_register(&output, paramaters.source_2, value + delta);
-	return output;
-}
-
-OPERATION(minor_slli)
-{
-	OPERATION_SETUP;
-	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);
-	stage_register(&output, paramaters.source_2, value << paramaters.imm5);
-	return output;
-}
-
-OPERATION(minor_srli)
-{
-	OPERATION_SETUP;
-	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);
-	stage_register(&output, paramaters.source_2, value >> paramaters.imm5);
-	return output;
-}
-
-OPERATION(minor_srai)
-{
-	OPERATION_SETUP;
-	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);
-	stage_register(&output, paramaters.source_2, (int32_t)value >> paramaters.imm5);
-	return output;
-}
-
 static const ZLX_EMU__CPU_operation_t minor_operations[ZLX_ISA_minor_operation_count] =
 {
 	[ZLX_ISA_minor_operation_calli] = minor_calli,
-	[ZLX_ISA_minor_operation_get5] = minor_get5,
-	[ZLX_ISA_minor_operation_addi] = minor_addi,
-	[ZLX_ISA_minor_operation_slli] = minor_slli,
-	[ZLX_ISA_minor_operation_srli] = minor_srli,
-	[ZLX_ISA_minor_operation_srai] = minor_srai,
 	[ZLX_ISA_minor_operation_bieqc_update] = minor_bieqc_update,
 	[ZLX_ISA_minor_operation_bineqc_update] = minor_bineqc_update,
 	[ZLX_ISA_minor_operation_move] = minor_move,
@@ -1679,6 +1629,13 @@ OPERATION(major_returnp)
 
 static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_count] =
 {
+	[ZLX_ISA_major_operation_inc] = major_add_immediate,
+	[ZLX_ISA_major_operation_dec] = major_add_immediate,
+	[ZLX_ISA_major_operation_shift_left] = major_slli,
+	[ZLX_ISA_major_operation_shift_right] = major_srli,
+	[ZLX_ISA_major_operation_shift_arith] = major_srai,
+	[ZLX_ISA_major_operation_get_pos] = major_add_immediate,
+	[ZLX_ISA_major_operation_get_neg] = major_add_immediate,
 	[ZLX_ISA_major_operation_add] = major_add,
 	[ZLX_ISA_major_operation_sub] = major_sub,
 	[ZLX_ISA_major_operation_sll] = major_sll,
@@ -1820,6 +1777,21 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 	parameters.instruction_size = ZLX_ISA_Major_operation_size[major.type];
 	switch (major.type)
 	{
+		case ZLX_ISA_major_format_type_imm5_reg5:
+		{
+			/* Present compact forms to the existing immediate ALU handlers. */
+			unsigned amount = major.u__imm5_reg5.field ? major.u__imm5_reg5.field : 32;
+			parameters.source_2 = major.u__imm5_reg5.reg;
+			parameters.source_1 = parameters.source_2;
+			if (major.operation == ZLX_ISA_major_operation_get_pos ||
+			    major.operation == ZLX_ISA_major_operation_get_neg)
+				parameters.source_1 = ZLX_ISA_register_identifier_zero;
+			if (major.operation == ZLX_ISA_major_operation_dec ||
+			    major.operation == ZLX_ISA_major_operation_get_neg)
+				amount = -amount;
+			parameters.imm11 = amount & 0x7ff;
+			break;
+		}
 		case ZLX_ISA_major_format_type_5:
 			parameters.source_1 = major.u__foramt_5.a5;
 			break;

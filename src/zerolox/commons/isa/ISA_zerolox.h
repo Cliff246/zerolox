@@ -76,13 +76,11 @@ typedef enum ZLX_ISA_minor_operation
 	ZLX_ISA_minor_operation_btneqa,
 	ZLX_ISA_minor_operation_bieqc_update,
 	ZLX_ISA_minor_operation_bineqc_update,
-	ZLX_ISA_minor_operation_addi,
-	ZLX_ISA_minor_operation_slli,
-	ZLX_ISA_minor_operation_srli,
-	ZLX_ISA_minor_operation_srai,
-	ZLX_ISA_minor_operation_calli,
-	ZLX_ISA_minor_operation_get5,
-	ZLX_ISA_minor_operation_count, /* Exclusive table bound. */
+	/* W transfer slots are allocated for a later ISA generation. */
+	ZLX_ISA_minor_operation_mvw = 22,
+	ZLX_ISA_minor_operation_wmv,
+	ZLX_ISA_minor_operation_calli = 26,
+	ZLX_ISA_minor_operation_count, /* Exclusive slot bound, including holes. */
 }ZLX_ISA_minor_operation_t;
 
 
@@ -215,8 +213,29 @@ typedef enum ZLX_ISA_major_operation
 	ZLX_ISA_major_operation_j,
 	ZLX_ISA_major_operation_andn,
 	ZLX_ISA_major_operation_extb,
+	/* Start of decoded family IDs. Wire classes are assigned separately. */
+	ZLX_ISA_major_operation_inc,
+	ZLX_ISA_major_operation_dec,
+	ZLX_ISA_major_operation_shift_left,
+	ZLX_ISA_major_operation_shift_right,
+	ZLX_ISA_major_operation_shift_arith,
+	ZLX_ISA_major_operation_get_pos,
+	ZLX_ISA_major_operation_get_neg,
 	ZLX_ISA_major_operation_count /* Exclusive table bound. */
 }ZLX_ISA_major_operation_t;
+/* Wire classes for one-parcel immediate families. The operation enum above
+ * indexes the decoded instruction and execution tables. */
+typedef enum ZLX_ISA_major_class
+{
+	ZLX_ISA_major_class_inc = 2,
+	ZLX_ISA_major_class_dec = 3,
+	ZLX_ISA_major_class_shift_left = 4,
+	ZLX_ISA_major_class_shift_right = 5,
+	ZLX_ISA_major_class_shift_arith = 6,
+	ZLX_ISA_major_class_get_pos = 7,
+	ZLX_ISA_major_class_get_neg = 8,
+} ZLX_ISA_major_class_t;
+
 /*
  *add
  *sub
@@ -247,6 +266,7 @@ typedef enum ZLX_ISA_major_format_type
 {
 	ZLX_ISA_major_format_type_invalid, /* unassigned opcode table entry */
 	ZLX_ISA_major_format_type_5,
+	ZLX_ISA_major_format_type_imm5_reg5,
 	ZLX_ISA_major_format_type_5_5551,
 	ZLX_ISA_major_format_type_5_952,
 	ZLX_ISA_major_format_type_32,
@@ -353,6 +373,7 @@ typedef struct ZLX_ISA_Major
 	ZLX_ISA_major_format_type_t type;
 	union
 	{
+		struct { uint8_t field, reg; } u__imm5_reg5;
 		ZLX_ISA_Major_format_5_b5_t u__format_5_b5;
 		ZLX_ISA_Major_format_5_655_t u__format_5_655;
 		ZLX_ISA_Major_format_5_952_t u__format_5_952;
@@ -404,6 +425,10 @@ typedef struct ZLX_ISA_Parcel
 	uint16_t parcel;
 }ZLX_ISA_Parcel_t;
 
+
+/* Fetch width in parcels, or zero if the class hierarchy has no width.
+ * A known width alone does not establish that an encoding is executable. */
+uint8_t ZLX_ISA_parcel_count(uint16_t first);
 
 //continue to push into the parcel, it fills then return true on completion
 bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parcel_t parcels[8], int *count, int position);

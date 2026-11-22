@@ -3,7 +3,7 @@ import re
 
 from extra import IN_PLACE
 
-from model import CURRENT_ISA, Error, REGISTERS
+from model import CURRENT_ISA, V3_ISA, legacy_encoding, Error, REGISTERS
 from syntax import split_args
 from values import expr, reg
 
@@ -21,7 +21,7 @@ def accepts(op):
 
 def lower(op, args, symbols, pc, target=CURRENT_ISA):
     """Return an encoding mnemonic and operands without changing the object."""
-    if op in IN_PLACE and len(args) == 2:
+    if target == V3_ISA and op in IN_PLACE and len(args) == 2:
         return 'm.' + op, args
     if op == 'get':
         if len(args) != 2:
@@ -32,12 +32,14 @@ def lower(op, args, symbols, pc, target=CURRENT_ISA):
             return 'm.geta', args[1:]
         if dest in range(reg('t0'), reg('t3') + 1) and 0 <= value <= 255:
             return 'm.get8', args
-        if target == CURRENT_ISA:
-            if 0xfffffff0 <= value <= 0xffffffff:
+        if not legacy_encoding(target):
+            if 0xffffffe0 <= value <= 0xffffffff:
                 value -= 1 << 32
             if value == 0:
                 return 'm.mv', [args[0], 'z0']
-            if -16 <= value <= 16:
+            if target == CURRENT_ISA and -32 <= value <= 32:
+                return 'get5', [args[0], str(value)]
+            if target == V3_ISA and -16 <= value <= 16:
                 return 'm.get5', [args[0], str(value)]
         return ('n.get16' if 0 <= value <= 65535 else 'n.get32'), args
 

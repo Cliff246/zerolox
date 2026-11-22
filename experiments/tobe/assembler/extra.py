@@ -1,13 +1,16 @@
 """Additional ISA forms, spelled explicitly while syntax remains experimental."""
-from model import Error, CURRENT_ISA
+from model import Error, CURRENT_ISA, V3_ISA, legacy_encoding
 from values import expr, reg
 
-from opcodes import MAJOR, MINOR, LEGACY_MAJOR, LEGACY_MINOR, LEGACY_IMM_SELECTOR
+from opcodes import MAJOR, MAJOR_CLASS, MINOR, V3_MINOR, LEGACY_MAJOR, LEGACY_MINOR, LEGACY_IMM_SELECTOR
 
 COMPARE = {'clt', 'cge', 'cltu', 'cgeu', 'ceq', 'cneq'}
 REG_ALU = COMPARE | {'add', 'sub', 'sll', 'srl', 'sra', 'xor', 'or', 'and', 'andn'}
 IMM = {'slli', 'srli', 'srai', 'xori', 'andi', 'ori', 'sext', 'extb'}
 IN_PLACE = {'addi', 'slli', 'srli', 'srai'}
+CLASS_NAMES = {'inc': 'inc', 'dec': 'dec', 'slli': 'shift_left', 'srli': 'shift_right',
+               'srai': 'shift_arith', 'getpos': 'get_pos', 'getneg': 'get_neg'}
+COMPACT_IMMEDIATE = CLASS_NAMES.keys() | {'addi', 'get5'}
 LEGACY_STEP = {'inc': 'inc', 'inc1': 'inc', 'dec': 'dec', 'dec1': 'dec'}
 ONE = {name: name for name in ('j', 'call', 'ret', 'callp', 'retp',
                                 'anda', 'xora', 'ora', 'aand', 'axor', 'aor')}
@@ -21,9 +24,17 @@ PLUS = {'ldplus': 'ld_plus', 'stplus': 'st_plus'}
 WIDTH = {'8':0,'16':1,'32':2,'p':3}
 
 def names(target=CURRENT_ISA):
-    steps = set(LEGACY_STEP) if target != CURRENT_ISA else set()
-    added = {'calli', 'm.calli', 'get5', 'm.get5'} if target == CURRENT_ISA else set()
-    return (added | set(ITER) | {'m.'+k for k in ITER} | {'m.'+k for k in IN_PLACE} | steps | {'n.'+k for k in steps} |
+    steps = set(LEGACY_STEP) if legacy_encoding(target) else set()
+    added = set()
+    if not legacy_encoding(target):
+        added.update(('calli', 'm.calli', 'get5'))
+    if target == CURRENT_ISA:
+        added.update(CLASS_NAMES)
+        added.update('n.' + k for k in CLASS_NAMES)
+        added.add('n.get5')
+    if target == V3_ISA:
+        added.update('m.' + k for k in IN_PLACE | {'get5'})
+    return (added | set(ITER) | {'m.'+k for k in ITER} | steps | {'n.'+k for k in steps} |
             {'n.'+k for k in ONE} | set(ONE) | {'n.get16','n.get32','get16','get32','n.addi','addi'} |
             {'n.'+k for k in IMM} | set(IMM) | {'n.'+k for k in BRANCH} | set(BRANCH) |
             {'m.'+k+'.'+w for k in ('ldsa','stsa','ldplus','stplus') for w in WIDTH} |
@@ -31,8 +42,10 @@ def names(target=CURRENT_ISA):
 
 def parse(op,args,symbols,pc,target=CURRENT_ISA):
     """Return (form, parcel fields) after strict operand checks."""
-    legacy = target != CURRENT_ISA
+    legacy = legacy_encoding(target)
     major, minor = (LEGACY_MAJOR, LEGACY_MINOR) if legacy else (MAJOR, MINOR)
+    if target == V3_ISA:
+        minor = V3_MINOR
     name=op.removeprefix('n.')
     if legacy and ((name in IMM and name not in LEGACY_IMM_SELECTOR) or op.removeprefix('m.') in ITER
                    or (name in ONE and ONE[name] not in major)):
@@ -52,11 +65,26 @@ def parse(op,args,symbols,pc,target=CURRENT_ISA):
         if offset % 2:
             raise Error('calli displacement must be parcel aligned')
         return 'minor10', (minor['calli'], (offset // 2) & 1023)
-    if op == 'get5':
+    if target == CURRENT_ISA and name in COMPACT_IMMEDIATE and len(args) == 2:
+        if name in ('get5', 'addi'):
+            value = immediate(args[1], -32, 32)
+            if not value:
+                raise Error(f'{op} requires a nonzero immediate')
+            if name == 'get5':
+                family = 'get_pos' if value > 0 else 'get_neg'
+            else:
+                family = 'inc' if value > 0 else 'dec'
+            amount = abs(value)
+        else:
+            family = CLASS_NAMES[name]
+            amount = immediate(args[1], 1, 31 if name in ('slli', 'srli', 'srai') else 32)
+        opcode = (MAJOR_CLASS[family] << 5) | (amount & 31)
+        return 'one', (opcode, reg(args[0]))
+    if target == V3_ISA and op == 'get5':
         op = 'm.get5'
     if op == 'm.get5' or (op.startswith('m.') and op[2:] in IN_PLACE):
-        if legacy:
-            raise Error(f'{op} is unavailable for the legacy target')
+        if target != V3_ISA:
+            raise Error(f'{op} is unavailable for this target')
         count(2)
         if op in ('m.addi', 'm.get5'):
             value = immediate(args[1], -16, 16)

@@ -38,7 +38,7 @@ class DesignCases(unittest.TestCase):
     def test_current_get_and_versioned_objects(self):
         obj = assemble('get t0, 44\nget ac, -1\nget t0, 256\nget t0, 65536')
         self.assertEqual(obj['syntax'], 'zerolox-source-v1')
-        self.assertEqual(obj['target'], 'zerolox1-emu-v3')
+        self.assertEqual(obj['target'], 'zerolox1-emu-v4')
         self.assertEqual([entry[1] for entry in link(obj)[0]], [2, 2, 4, 6])
         self.assertEqual(build_image(obj), build_image(dict(obj, target='zerolox1')))
         with self.assertRaisesRegex(Error, 'unsupported ISA target'):
@@ -165,7 +165,7 @@ class DesignCases(unittest.TestCase):
             **{x:'t0, t1, 1' for x in extra.IMM},
             **{x:'t0, t1, 2' for x in extra.BRANCH},
             **{x:'t0' for x in extra.ONE},
-            **{'m.'+x:'t0, 7' for x in extra.IN_PLACE},
+            **{x:'t0, 7' for x in ('inc','dec','getpos','getneg')},
             **{x:'x+, 2' for x in extra.ITER},
             **{'m.'+x:'y-, 2' for x in extra.ITER},
             **{'m.'+x+'.'+w:'0' for x in ('ldsa','stsa') for w in extra.WIDTH},

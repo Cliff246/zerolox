@@ -38,6 +38,8 @@ typedef enum ZLX_SYTX_pattern_form
 	ZLX_SYTX_pattern_form_2_register,
 	ZLX_SYTX_pattern_form_register,
 	ZLX_SYTX_pattern_form_register_immediate,
+	/* Positive family in opcode, adjacent negative family for a negative value. */
+	ZLX_SYTX_pattern_form_signed_immediate_pair,
 	ZLX_SYTX_pattern_form_register_register_immediate,
 	ZLX_SYTX_pattern_form_register_ultra,
 	ZLX_SYTX_pattern_form_iterator_branch,

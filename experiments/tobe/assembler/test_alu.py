@@ -6,7 +6,7 @@ import unittest
 
 from assembler import Error, assemble, link
 from image import build_image
-from opcodes import MAJOR, MINOR
+from opcodes import MAJOR, MAJOR_CLASS, MINOR
 
 
 def binary(source):
@@ -15,23 +15,28 @@ def binary(source):
 
 class EncodingTests(unittest.TestCase):
     def test_in_place_encodings(self):
-        for op in ('addi', 'slli', 'srli', 'srai'):
-            for field in range(32):
-                immediate = field
-                if op == 'addi':
-                    immediate = 16 if field == 0 else (field ^ 16) - 16
-                source = f'{op} r31, {immediate}'
-                word = (MINOR[op] << 11) | (field << 6) | (31 << 1) | 1
-                self.assertEqual(binary('m.' + source), word.to_bytes(2, 'little'))
-                self.assertEqual(binary(source), binary('m.' + source))
-            for imm in ((-17, 0, 17) if op == 'addi' else (-1, 32)):
+        for name, family in [('inc','inc'), ('dec','dec'), ('getpos','get_pos'),
+                             ('getneg','get_neg'), ('slli','shift_left'),
+                             ('srli','shift_right'), ('srai','shift_arith')]:
+            limit = 31 if family.startswith('shift') else 32
+            for amount in range(1, limit + 1):
+                word = (MAJOR_CLASS[family] << 11) | ((amount & 31) << 6) | 62
+                self.assertEqual(binary(f'{name} r31, {amount}'), word.to_bytes(2, 'little'))
+            for amount in (-1, 0, limit+1):
                 with self.assertRaises(Error):
-                    binary(f'm.{op} t0, {imm}')
-            for invalid in (f'm.{op} t0, t1, 1', f'n.{op} t0, 1'):
-                with self.assertRaises(Error):
-                    binary(invalid)
+                    binary(f'{name} t0, {amount}')
+        for amount in range(1, 33):
+            for alias, pos, neg in [('addi','inc','dec'), ('get5','getpos','getneg')]:
+                self.assertEqual(binary(f'{alias} t0, {amount}'), binary(f'{pos} t0, {amount}'))
+                self.assertEqual(binary(f'{alias} t0, -{amount}'), binary(f'{neg} t0, {amount}'))
+        for name in ('addi','get5','slli','srli','srai'):
             with self.assertRaises(Error):
-                build_image(assemble(f'm.{op} t0, 1', target='zerolox1-legacy-emu-v1'))
+                binary(f'm.{name} t0, 1')
+
+    def test_previous_target_bytes(self):
+        source = 'm.addi t0, 16\nm.slli t0, 0\nm.srli t0, 31\nm.srai t0, 1\nm.get5 t0, -16\ncalli 2'
+        data = build_image(assemble(source, target='zerolox1-emu-v3'))
+        self.assertEqual(data, bytes.fromhex('11 b0 11 b8 d1 c7 51 c8 11 dc 03 d0'))
 
     def test_retired_forms(self):
         names = ['inc', 'dec', 'inca', 'deca', 'srra', 'srla', 'slla']
@@ -51,8 +56,8 @@ class EncodingTests(unittest.TestCase):
         # The initial layout must allow a forward label at the maximum distance.
         self.assertEqual(binary('calli #far\n!db "' + 'x' * 1019 + '"\nfar:')[:2],
                          binary('m.calli 1022'))
-        for source in ('calli -1026', 'calli 1024', 'calli 1', 'm.get5 a0, 0',
-                       'm.get5 a0, -17', 'm.get5 a0, 17'):
+        for source in ('calli -1026', 'calli 1024', 'calli 1', 'get5 a0, 0',
+                       'get5 a0, -33', 'get5 a0, 33'):
             with self.subTest(source=source), self.assertRaises(Error):
                 binary(source)
         for source in ('calli 2', 'm.get5 a0, 1'):
@@ -212,7 +217,9 @@ class ExecutionTests(unittest.TestCase):
                   (binary('n.add ac, t1, t2')[:2] + ((base & 2047) | (1<<11) | 17).to_bytes(2,'little'), 'w1 == w2')]
         for major in (max(MAJOR.values()) + 1, 1023):
             faults.append(((major << 6).to_bytes(2,'little'), 'could not decode'))
-        for minor in range(max(MINOR.values()) + 1, 32):
+        for family in ('shift_left', 'shift_right', 'shift_arith'):
+            faults.append(((MAJOR_CLASS[family] << 11).to_bytes(2,'little'), 'could not decode'))
+        for minor in set(range(32)) - (set(MINOR.values()) - {MINOR['mvw'], MINOR['wmv']}):
             faults.append((((minor << 11) | 1).to_bytes(2,'little'), 'could not decode'))
         for width in (0,33):
             second = ((width & 31) << 11) | ((width >> 5) << 6)
@@ -225,16 +232,17 @@ class ExecutionTests(unittest.TestCase):
 
     def test_calli_and_tiny_get_results(self):
         self.check_program('calli #callee\naddi a0, 1\nb #done\ncallee:\n'
-                           'm.get5 a0, -16\nret z0\ndone:', {3: 2, 24: 0xfffffff1}, 5)
+                           'get5 a0, -16\nret z0\ndone:', {3: 2, 24: 0xfffffff1}, 5)
         self.check_program('b #entry\ncallee:\nget5 a0, 16\nret z0\n'
                            'entry:\ncalli #callee', {3: 8, 24: 16}, 4)
-        for value in range(-16, 17):
+        for value in range(-32, 33):
             self.assertEqual(len(binary(f'get a0, {value}')), 2)
             self.check_program(f'get a0, 1234\nget a0, {value}', {24: value & 0xffffffff})
 
     def test_in_place_results(self):
-        for field in range(32):
-            delta = 16 if field == 0 else (field ^ 16) - 16
+        self.check_program('dec t0, 32\ninc t1, 32\ninc z0, 32', {0: 0, 8: 0xffffffe0, 9: 32})
+        for field in range(1, 32):
+            delta = field if field % 2 else -field
             source = (f'get32 t0, 0x80000001\nget32 t1, 0x80000001\nget32 t2, 0x80000001\n'
                       f'slli t0, {field}\nsrli t1, {field}\nsrai t2, {field}\n'
                       f'addi ac, {delta}\naddi z0, {delta}')

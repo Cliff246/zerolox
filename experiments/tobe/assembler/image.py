@@ -3,7 +3,7 @@ import ast
 import extra
 from linker import link
 from dialect import lower
-from model import Error, CURRENT_ISA, mnemonic
+from model import Error, CURRENT_ISA, legacy_encoding, mnemonic
 from syntax import split_args
 from values import expr, reg, data_size
 
@@ -18,7 +18,7 @@ def encode(rec, chosen, symbols, pc, target=CURRENT_ISA):
     op,args=lower(mnemonic(rec),rec['args'],symbols,pc,target)
     base=chosen.rsplit('.',1)[0]
     minor_name = 'move' if chosen == 'm.mv' else chosen.removeprefix('m.')
-    major, minor = (MAJOR, MINOR) if target == CURRENT_ISA else (LEGACY_MAJOR, LEGACY_MINOR)
+    major, minor = (MAJOR, MINOR) if not legacy_encoding(target) else (LEGACY_MAJOR, LEGACY_MINOR)
     if op in extra.names(target):
         form,fields=extra.parse(op,args,symbols,pc,target)
         return extra.encode(form,fields)
@@ -36,7 +36,7 @@ def encode(rec, chosen, symbols, pc, target=CURRENT_ISA):
         return parcel((minor[minor_name]<<11)|((reg(args[0])-8)<<9)|(expr(args[1],symbols,pc)<<1)|1)
     if chosen.startswith('n.') and chosen[2:] in extra.REG_ALU:
         d,a,b=map(reg,args)
-        if target != CURRENT_ISA:
+        if legacy_encoding(target):
             selector = LEGACY_REG_SELECTOR[chosen[2:]]
             return parcel((major['reg_group']<<6)|(a<<1))+parcel((selector<<11)|(d<<6)|(b<<1))
         direction, move_reg = rec.get('move', ('amv', 'z0'))

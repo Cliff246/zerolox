@@ -59,14 +59,9 @@ ZLX_ISA_register_identifier_t ZLX_ISA_get_register_number(char *string)
 	return (ZLX_ISA_register_identifier_t) found;
 }
 
-ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[] = 
+ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[ZLX_ISA_minor_operation_count] =
 {
 	[ZLX_ISA_minor_operation_calli] = ZLX_ISA_minor_format_type_a,
-	[ZLX_ISA_minor_operation_get5] = ZLX_ISA_minor_format_type_55,
-	[ZLX_ISA_minor_operation_addi] = ZLX_ISA_minor_format_type_55,
-	[ZLX_ISA_minor_operation_slli] = ZLX_ISA_minor_format_type_55,
-	[ZLX_ISA_minor_operation_srli] = ZLX_ISA_minor_format_type_55,
-	[ZLX_ISA_minor_operation_srai] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_move] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_add] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_adda] = ZLX_ISA_minor_format_type_55,
@@ -93,8 +88,15 @@ ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[] =
 };
 
 
-ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[] = 
+ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[ZLX_ISA_major_operation_count] =
 {
+	[ZLX_ISA_major_operation_inc] = ZLX_ISA_major_format_type_imm5_reg5,
+	[ZLX_ISA_major_operation_dec] = ZLX_ISA_major_format_type_imm5_reg5,
+	[ZLX_ISA_major_operation_shift_left] = ZLX_ISA_major_format_type_imm5_reg5,
+	[ZLX_ISA_major_operation_shift_right] = ZLX_ISA_major_format_type_imm5_reg5,
+	[ZLX_ISA_major_operation_shift_arith] = ZLX_ISA_major_format_type_imm5_reg5,
+	[ZLX_ISA_major_operation_get_pos] = ZLX_ISA_major_format_type_imm5_reg5,
+	[ZLX_ISA_major_operation_get_neg] = ZLX_ISA_major_format_type_imm5_reg5,
 	[ZLX_ISA_major_operation_ld] = ZLX_ISA_major_format_type_5_952 ,
 	[ZLX_ISA_major_operation_st] = ZLX_ISA_major_format_type_5_952 ,
 	[ZLX_ISA_major_operation_push8] = ZLX_ISA_major_format_type_5,
@@ -155,6 +157,7 @@ ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[] =
 uint8_t ZLX_ISA_Major_operation_size[] = 
 {
 	[ZLX_ISA_major_format_type_5] = 1,
+	[ZLX_ISA_major_format_type_imm5_reg5] = 1,
 	[ZLX_ISA_major_format_type_5_5551] = 2,
 	[ZLX_ISA_major_format_type_5_952] = 2,
 	[ZLX_ISA_major_format_type_32] = 1,
@@ -174,6 +177,51 @@ char *ZLX_ISA_opcodes[] =
 
 
 
+
+/* A class may declare its width or defer to its assigned suboperations.
+ * subops == 0 means the low five bits are an operand for a declared class. */
+typedef struct {
+	ZLX_ISA_major_operation_t base;
+	uint8_t subops;
+	uint8_t parcels;
+} MajorClass;
+
+/* The ordinary operations preceding inc retain their 10-bit wire values. */
+_Static_assert(ZLX_ISA_major_operation_inc >= 32 && ZLX_ISA_major_operation_inc <= 64,
+               "adjust the suboperation pages when extending ordinary opcodes");
+static const MajorClass major_classes[32] = {
+	[0] = {0, 32, 0},
+	[1] = {32, ZLX_ISA_major_operation_inc - 32, 0},
+	[ZLX_ISA_major_class_inc] = {ZLX_ISA_major_operation_inc, 0, 1},
+	[ZLX_ISA_major_class_dec] = {ZLX_ISA_major_operation_dec, 0, 1},
+	[ZLX_ISA_major_class_shift_left] = {ZLX_ISA_major_operation_shift_left, 0, 1},
+	[ZLX_ISA_major_class_shift_right] = {ZLX_ISA_major_operation_shift_right, 0, 1},
+	[ZLX_ISA_major_class_shift_arith] = {ZLX_ISA_major_operation_shift_arith, 0, 1},
+	[ZLX_ISA_major_class_get_pos] = {ZLX_ISA_major_operation_get_pos, 0, 1},
+	[ZLX_ISA_major_class_get_neg] = {ZLX_ISA_major_operation_get_neg, 0, 1},
+};
+
+static ZLX_ISA_major_operation_t major_operation(MajorClass group, unsigned field)
+{
+	if (group.subops == 0 && group.parcels != 0)
+		return group.base;
+	if (field < group.subops)
+		return group.base + field;
+	return ZLX_ISA_major_operation_count;
+}
+
+uint8_t ZLX_ISA_parcel_count(uint16_t first)
+{
+	if (first & 1)
+		return 1;
+	MajorClass group = major_classes[first >> 11];
+	if (group.parcels)
+		return group.parcels;
+	ZLX_ISA_major_operation_t op = major_operation(group, (first >> 6) & 31);
+	if (op == ZLX_ISA_major_operation_count)
+		return 0;
+	return ZLX_ISA_Major_operation_size[ZLX_ISA_Major_operation_formats[op]];
+}
 
 bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parcel_t parcels[8], int *count, int position)
 {
@@ -228,30 +276,20 @@ bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parc
 			return true;
 		}
 
-		// Major: [opcode10][a5][0], possibly followed by more parcels.
-		uint32_t opcode = (first >> 6) & 0x3FF;
-		if(opcode >= sizeof(ZLX_ISA_Major_operation_formats) / sizeof(ZLX_ISA_Major_operation_formats[0]))
+		unsigned field = (first >> 6) & 31;
+		ZLX_ISA_major_operation_t op = major_operation(major_classes[first >> 11], field);
+		*count = ZLX_ISA_parcel_count(first);
+		if (*count == 0 || op == ZLX_ISA_major_operation_count ||
+		    (field == 0 && (op == ZLX_ISA_major_operation_shift_left ||
+		                    op == ZLX_ISA_major_operation_shift_right ||
+		                    op == ZLX_ISA_major_operation_shift_arith)))
 		{
 			*count = 0;
 			return false;
 		}
-
 		instruction->type = ZLX_ISA_instruction_type_major;
-		instruction->u__major.operation = (ZLX_ISA_major_operation_t)opcode;
-		ZLX_ISA_major_format_type_t type = ZLX_ISA_Major_operation_formats[opcode];
-		instruction->u__major.type = type;
-
-		if((uint32_t)type >= sizeof(ZLX_ISA_Major_operation_size) / sizeof(ZLX_ISA_Major_operation_size[0]))
-		{
-			*count = 0;
-			return false;
-		}
-		*count = ZLX_ISA_Major_operation_size[type];
-		if(*count < 1 || *count > 8)
-		{
-			*count = 0;
-			return false;
-		}
+		instruction->u__major.operation = op;
+		instruction->u__major.type = ZLX_ISA_Major_operation_formats[op];
 		if(*count > 1)
 		{
 			return false;
@@ -272,6 +310,10 @@ bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parc
 
 	switch(instruction->u__major.type)
 	{
+		case ZLX_ISA_major_format_type_imm5_reg5:
+			instruction->u__major.u__imm5_reg5.field = (first >> 6) & 31;
+			instruction->u__major.u__imm5_reg5.reg = a5;
+			break;
 		case ZLX_ISA_major_format_type_5:
 			instruction->u__major.u__foramt_5.a5 = a5;
 			break;

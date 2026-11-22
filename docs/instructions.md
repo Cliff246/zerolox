@@ -55,12 +55,27 @@ The move latches its source first. The ALU then reads its operands, including th
 moved value if it reads the move destination. Both writes commit together. Two
 writes to the same nonzero register fault before either write commits.
 
-minors 
+One-parcel immediate majors use `[class5][magnitude5][register5][0]`.
+
+| Class | Instruction | Magnitude |
+| --- | --- | --- |
+| 2, 3 | inc, dec | 1…32. Field zero encodes 32. |
+| 4, 5, 6 | slli, srli, srai in place | 1…31. Field zero is reserved on ZLX-1. |
+| 7, 8 | getpos, getneg | 1…32. Write the positive or negative magnitude. |
+
+The assembler accepts signed two-operand `addi` and `get5`. Each selects the
+corresponding positive or negative family. Ordinary `get` also accepts zero.
+
+Fetch checks the minor tag first. For a major, the upper five bits select a
+class. Classes 2…8 declare one parcel independently of the immediate. Classes
+0 and 1 defer to the assigned suboperation's format to determine length.
+Unassigned classes have no declared length. A known fetch length does not
+authorize execution of reserved encodings.
+
+minors
     1 | calli disp          | a  | rp = pc + 2, pc += signed imm10 * 2 (byte displacement -1024..1022)
-    1 | get5 reg, value      | 55 | write -16..-1 or +1..+16. Zero field encodes +16. Plain get can copy z0 for zero.
-    1 | addi reg, delta     | 55 | add in place, -16..-1 or +1..+16. Imm5 is signed, with 0 encoding +16.
-    1 | slli, srli, srai    | 55 | shift reg in place by unsigned imm5 (0..31), including ac
-    // Each encoding is [minor5][imm5][reg5][1].
+    Reserved for W hardware: mvw and wmv (slots 22 and 23). ZLX-1 faults on both.
+    25 slots allocated including the two W reservations. Seven slots remain free.
 	1 |	mv		|			| 
 	1 | add		|			|
 	1 | adda	|			|

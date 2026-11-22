@@ -1,7 +1,7 @@
 """Experimental instruction selection and iterative layout."""
 import re
 import extra
-from model import Error, CURRENT_ISA, LEGACY_ISA, mnemonic
+from model import Error, CURRENT_ISA, V3_ISA, LEGACY_ISA, legacy_encoding, mnemonic
 from opcodes import LEGACY_REG_SELECTOR
 from dialect import lower
 from syntax import split_args
@@ -10,10 +10,10 @@ from values import expr, reg, data_size
 def select(rec,symbols,pc,target=CURRENT_ISA):
     op,args=mnemonic(rec),rec['args']
     name = op.removeprefix('n.')
-    if target != CURRENT_ISA and name in extra.REG_ALU and name not in LEGACY_REG_SELECTOR:
+    if legacy_encoding(target) and name in extra.REG_ALU and name not in LEGACY_REG_SELECTOR:
         raise Error(f'{op} is unavailable for the legacy target')
     if 'move' in rec:
-        if target != CURRENT_ISA: raise Error('legacy target has no ultra move')
+        if legacy_encoding(target): raise Error('legacy target has no ultra move')
         if name not in extra.REG_ALU:
             raise Error('this opcode does not permit an ultra move')
         if len(args) != 3: raise Error(f'{op} requires three registers')
@@ -96,13 +96,16 @@ def select(rec,symbols,pc,target=CURRENT_ISA):
 def link(obj):
     if obj.get('format') != 'zerolox-experiment-2':
         raise Error('unsupported experimental object format')
-    if obj.get('target') not in (CURRENT_ISA, LEGACY_ISA, 'zerolox1'):
+    if obj.get('target') not in (CURRENT_ISA, V3_ISA, LEGACY_ISA, 'zerolox1'):
         raise Error(f"unsupported ISA target {obj.get('target')!r}")
     records = obj['records']
     sizes = []
     for record in records:
         if record['kind'] != 'instruction':
             sizes.append(0)
+        elif (obj['target'] == CURRENT_ISA and record['operation'] in extra.COMPACT_IMMEDIATE
+              and len(record['args']) == 2):
+            sizes.append(2)
         elif mnemonic(record) in ('calli', 'm.calli', 'get5', 'm.get5'):
             sizes.append(2)
         elif mnemonic(record) in ('n.get32', 'get32', 'get'):

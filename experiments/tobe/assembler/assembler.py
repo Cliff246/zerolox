@@ -4,7 +4,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from model import Error, CURRENT_ISA, LEGACY_ISA, SOURCE_SYNTAX
+from model import Error, CURRENT_ISA, V3_ISA, LEGACY_ISA, SOURCE_SYNTAX
 from syntax import assemble
 from linker import link
 from image import build_image
@@ -12,7 +12,7 @@ from image import build_image
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--version', action='version', version=f'{SOURCE_SYNTAX} / {CURRENT_ISA}')
-    parser.add_argument('--target', choices=(CURRENT_ISA, LEGACY_ISA), default=CURRENT_ISA)
+    parser.add_argument('--target', choices=(CURRENT_ISA, V3_ISA, LEGACY_ISA), default=CURRENT_ISA)
     parser.add_argument('source',type=Path); parser.add_argument('--object',type=Path,help='write structured JSON object')
     parser.add_argument('-o', '--output', type=Path, help='write experimental flat binary image')
     args=parser.parse_args()

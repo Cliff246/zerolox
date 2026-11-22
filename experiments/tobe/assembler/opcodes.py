@@ -3,8 +3,7 @@ from pathlib import Path
 import re
 
 
-def read_operations(header, kind):
-    prefix = f'ZLX_ISA_{kind}_operation'
+def read_enum(header, prefix):
     body = re.search(rf'typedef\s+enum\s+{prefix}\s*\{{([^}}]+)\}}', header).group(1)
     operations = {}
     value = 0
@@ -25,8 +24,13 @@ def read_operations(header, kind):
 
 header = (Path(__file__).resolve().parents[3] / 'src/zerolox/commons/isa/ISA_zerolox.h').read_text()
 header = re.sub(r'/\*.*?\*/|//[^\n]*', '', header, flags=re.S)
-MAJOR = read_operations(header, 'major')
-MINOR = read_operations(header, 'minor')
+MAJOR = read_enum(header, 'ZLX_ISA_major_operation')
+MINOR = read_enum(header, 'ZLX_ISA_minor_operation')
+MAJOR_CLASS = read_enum(header, 'ZLX_ISA_major_class')
+# Family operation IDs index C dispatch tables, not individual wire opcodes.
+MAJOR = {name: code for name, code in MAJOR.items() if name not in MAJOR_CLASS}
+V3_MINOR = {name: code for name, code in MINOR.items() if name not in ('mvw', 'wmv')}
+V3_MINOR.update(addi=22, slli=23, srli=24, srai=25, get5=27)
 
 
 # These encoding numbers belong to existing legacy JSON objects.

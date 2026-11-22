@@ -9,6 +9,9 @@ add_subdirectory(src)
 
 include(CTest)
 if(BUILD_TESTING)
+    add_executable(ZLX_ISA_width_test tests/isa_width_test.c)
+    target_link_libraries(ZLX_ISA_width_test PRIVATE ZLX_commons)
+    add_test(NAME isa_width COMMAND ZLX_ISA_width_test)
     add_executable(ZLX_ASM_argument_test
         tests/argument_test.c
         src/zerolox/assembler/ASM_Argument.c

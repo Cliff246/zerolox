@@ -133,22 +133,6 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 		
 		prefix = ZLX_SYTX_instruction_prefix_none;		
 		opcode = ZLX_SYTX_find_mnemonic(buffer1, prefix);
-		// In-place and three-operand immediates share an unprefixed mnemonic.
-		if (opcode >= 0 && ZLX_SYTX_mnemonics[opcode].form == ZLX_SYTX_pattern_form_register_immediate)
-		{
-			unsigned commas = 0;
-			for (int j = start + length; j < information.group.length; ++j)
-			{
-				MY_token_type_t type = information.a__token_types[j];
-				if (type == MY_token_type_semicolon || type == MY_token_type_newline)
-					break;
-				if (type == MY_token_type_comma && ++commas == 2)
-				{
-					opcode = ZLX_SYTX_find_mnemonic(buffer1, ZLX_SYTX_instruction_prefix_natural);
-					break;
-				}
-			}
-		}
 		postfix = ZLX_SYTX_instruction_postfix_none;
 		//printf("0:%s\n", buffer1);
 		//printf("dots count -1\n");
@@ -233,6 +217,32 @@ ZLX_ASM_Operation_mnemonic_t ZLX_ASM_collect_mnemonic_Operation_mnemonic(ZLX_ASM
 	}
 
 	//printf("%s\n", buffer1);	
+	/* Both major forms accept n.; distinguish their operand counts after
+	 * reading the prefix. Two-operand signed aliases resolve at emission. */
+	if (opcode >= 0 &&
+	    (ZLX_SYTX_mnemonics[opcode].form == ZLX_SYTX_pattern_form_register_immediate ||
+	     ZLX_SYTX_mnemonics[opcode].form == ZLX_SYTX_pattern_form_signed_immediate_pair))
+	{
+		unsigned commas = 0;
+		for (int j = start + length; j < information.group.length; ++j)
+		{
+			MY_token_type_t type = information.a__token_types[j];
+			if (type == MY_token_type_semicolon || type == MY_token_type_newline)
+				break;
+			if (type == MY_token_type_comma)
+				++commas;
+		}
+		if (commas == 2)
+		{
+			for (size_t i = 0; i < ZLX_SYTX_mnemonics_count; ++i)
+				if (ZLX_SYTX_mnemonics[i].form == ZLX_SYTX_pattern_form_register_register_immediate &&
+				    strcmp(buffer1, ZLX_SYTX_mnemonics[i].a__mnemonic) == 0)
+				{
+					opcode = (int)i;
+					break;
+				}
+		}
+	}
 	if(opcode == -1)
 	{
 		MY_FAULT("opcode does not match any");

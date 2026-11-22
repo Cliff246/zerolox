@@ -1,6 +1,6 @@
 # ZLX-1 emulator encoding forms
 
-This table describes the forms available to the `zerolox1-emu-v3` backend. See [README.md](README.md) for current source examples and [docs/instructions.md](../../../docs/instructions.md) for the evolving ISA inventory. Each listed form emits one instruction. `m.` and `n.` constrain the form; unprefixed spellings below are experimental selectable aliases. A register is `r`, a value expression is `v`, and branch displacement `d` is in bytes from the instruction start and must be even. Memory syntax is `[base, byte_offset]`.
+This table describes the forms available to the `zerolox1-emu-v4` backend. See [README.md](README.md) for current source examples and [docs/instructions.md](../../../docs/instructions.md) for the evolving ISA inventory. Each listed form emits one instruction. `m.` and `n.` constrain the form; unprefixed spellings below are experimental selectable aliases. A register is `r`, a value expression is `v`, and branch displacement `d` is in bytes from the instruction start and must be even. Memory syntax is `[base, byte_offset]`.
 
 | Forms | Arguments |
 | --- | --- |
@@ -28,9 +28,9 @@ This table describes the forms available to the `zerolox1-emu-v3` backend. See [
 | `extb`, `n.extb` | `destination, source, index` returns bit `index` as 0 or 1. The unsigned 11-bit field holds the index. ZLX-1 faults on values above 31. |
 | `sext` | `destination, source, width` with width in bits from 1 through 32 |
 | `calli`, `m.calli` | Even byte displacement from the call, −1024…+1022. Writes the following instruction address to rp. |
-| `get5`, `m.get5` | `register, value` writes −16…−1 or +1…+16. Plain `get` also selects a two-byte form for zero. |
-| `m.addi` | `register, delta` adds −16…−1 or +1…+16 in place. |
-| `m.slli`, `m.srli`, `m.srai` | `register, count` shifts in place by 0…31. All four in-place operations also accept the two-operand spelling without `m.`. |
+| `get5` | `register, value` from −32…−1 or +1…+32. Selects `getneg` or `getpos`. Plain `get` can also produce zero in one parcel. |
+| `inc`, `dec` | `register, magnitude` from 1…32. Two-operand `addi` selects the family by the sign of its delta. |
+| `slli`, `srli`, `srai` | Two operands shift the register in place by 1…31. Field zero is reserved for a future shift by 32. |
 | `anda`, `xora`, `ora`, `aand`, `axor`, `aor` | register. A trailing `a` writes ac. A leading `a` writes the register. |
 | `j`, `n.j` | One register holding an absolute byte address. An odd target faults. All registers, including `rp`, retain their values. |
 | `call`, `ret`, `callp`, `retp` and `n.` versions | register |
