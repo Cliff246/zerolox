@@ -80,6 +80,8 @@ typedef enum ZLX_ISA_minor_operation
 	ZLX_ISA_minor_operation_slli,
 	ZLX_ISA_minor_operation_srli,
 	ZLX_ISA_minor_operation_srai,
+	ZLX_ISA_minor_operation_calli,
+	ZLX_ISA_minor_operation_get5,
 	ZLX_ISA_minor_operation_count, /* Exclusive table bound. */
 }ZLX_ISA_minor_operation_t;
 

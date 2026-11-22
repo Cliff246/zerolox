@@ -61,6 +61,8 @@ ZLX_ISA_register_identifier_t ZLX_ISA_get_register_number(char *string)
 
 ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[] = 
 {
+	[ZLX_ISA_minor_operation_calli] = ZLX_ISA_minor_format_type_a,
+	[ZLX_ISA_minor_operation_get5] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_addi] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_slli] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_srli] = ZLX_ISA_minor_format_type_55,

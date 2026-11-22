@@ -716,11 +716,33 @@ OPERATION(minor_bineqc_update)
 	return output;
 }
 
+static int32_t nonzero_imm5(uint8_t field)
+{
+	return field == 0 ? 16 : MY_sign_extend32(field, 5);
+}
+
+OPERATION(minor_get5)
+{
+	OPERATION_SETUP;
+	stage_register(&output, paramaters.source_2, nonzero_imm5(paramaters.imm5));
+	return output;
+}
+
+OPERATION(minor_calli)
+{
+	OPERATION_SETUP;
+	stage_register(&output, ZLX_ISA_register_identifier_return_pointer, ZLX_EMU_get_pc__CPU(cpu) + 2);
+	output.pc_changed = true;
+	output.pc_set_or_add = true;
+	output.pc_value = 2 * MY_sign_extend32(paramaters.imm10, 10);
+	return output;
+}
+
 OPERATION(minor_addi)
 {
 	OPERATION_SETUP;
 	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_2);
-	int32_t delta = paramaters.imm5 == 0 ? 16 : MY_sign_extend32(paramaters.imm5, 5);
+	int32_t delta = nonzero_imm5(paramaters.imm5);
 	stage_register(&output, paramaters.source_2, value + delta);
 	return output;
 }
@@ -751,6 +773,8 @@ OPERATION(minor_srai)
 
 static const ZLX_EMU__CPU_operation_t minor_operations[ZLX_ISA_minor_operation_count] =
 {
+	[ZLX_ISA_minor_operation_calli] = minor_calli,
+	[ZLX_ISA_minor_operation_get5] = minor_get5,
 	[ZLX_ISA_minor_operation_addi] = minor_addi,
 	[ZLX_ISA_minor_operation_slli] = minor_slli,
 	[ZLX_ISA_minor_operation_srli] = minor_srli,

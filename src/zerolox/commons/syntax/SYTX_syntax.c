@@ -35,6 +35,8 @@ ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[] =
 	{.type = ZLX_ISA_instruction_type_minor, .form = ZLX_SYTX_pattern_form_register_immediate, .a__mnemonic = "slli", .opcode = ZLX_ISA_minor_operation_slli},
 	{.type = ZLX_ISA_instruction_type_minor, .form = ZLX_SYTX_pattern_form_register_immediate, .a__mnemonic = "srli", .opcode = ZLX_ISA_minor_operation_srli},
 	{.type = ZLX_ISA_instruction_type_minor, .form = ZLX_SYTX_pattern_form_register_immediate, .a__mnemonic = "srai", .opcode = ZLX_ISA_minor_operation_srai},
+	{.type = ZLX_ISA_instruction_type_minor, .form = ZLX_SYTX_pattern_form_displacement, .a__mnemonic = "calli", .opcode = ZLX_ISA_minor_operation_calli},
+	{.type = ZLX_ISA_instruction_type_minor, .form = ZLX_SYTX_pattern_form_register_immediate, .a__mnemonic = "get5", .opcode = ZLX_ISA_minor_operation_get5},
 #define MAJOR_MNEMONIC(name, form_name) \
 	{.type = ZLX_ISA_instruction_type_major, .form = ZLX_SYTX_pattern_form_##form_name, \
 	 .a__mnemonic = #name, .opcode = ZLX_ISA_major_operation_##name}

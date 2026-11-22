@@ -29,7 +29,7 @@ def select(rec,symbols,pc,target=CURRENT_ISA):
         list(map(reg, args))
         return 'n.' + name, 4
     source_op = op
-    op,args = lower(op,args,symbols,pc)
+    op,args = lower(op,args,symbols,pc,target)
     if op in extra.names(target):
         form, fields=extra.parse(op,args,symbols,pc,target)
         if source_op.startswith(('ld+a', 'st+a', 'm.ld+a', 'm.st+a')):
@@ -98,7 +98,18 @@ def link(obj):
         raise Error('unsupported experimental object format')
     if obj.get('target') not in (CURRENT_ISA, LEGACY_ISA, 'zerolox1'):
         raise Error(f"unsupported ISA target {obj.get('target')!r}")
-    records=obj['records']; sizes=[6 if r['kind']=='instruction' and mnemonic(r) in ('n.get32','get32','get') else 4 if r['kind']=='instruction' else 0 for r in records]; seen=set()
+    records = obj['records']
+    sizes = []
+    for record in records:
+        if record['kind'] != 'instruction':
+            sizes.append(0)
+        elif mnemonic(record) in ('calli', 'm.calli', 'get5', 'm.get5'):
+            sizes.append(2)
+        elif mnemonic(record) in ('n.get32', 'get32', 'get'):
+            sizes.append(6)
+        else:
+            sizes.append(4)
+    seen = set()
     for iteration in range(100):
         key=tuple(sizes)
         if key in seen: raise Error('layout did not converge (repeated instruction sizes)')

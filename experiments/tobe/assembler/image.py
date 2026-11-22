@@ -15,7 +15,7 @@ def parcel(value):
     return value.to_bytes(2,'little')
 
 def encode(rec, chosen, symbols, pc, target=CURRENT_ISA):
-    op,args=lower(mnemonic(rec),rec['args'],symbols,pc)
+    op,args=lower(mnemonic(rec),rec['args'],symbols,pc,target)
     base=chosen.rsplit('.',1)[0]
     minor_name = 'move' if chosen == 'm.mv' else chosen.removeprefix('m.')
     major, minor = (MAJOR, MINOR) if target == CURRENT_ISA else (LEGACY_MAJOR, LEGACY_MINOR)

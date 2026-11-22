@@ -44,6 +44,21 @@ class EncodingTests(unittest.TestCase):
             self.assertEqual(build_image(assemble(f'{name} t0', target='zerolox1-legacy-emu-v1')),
                              ((opcode << 6) | 16).to_bytes(2, 'little'))
 
+    def test_calli_and_tiny_get_encodings(self):
+        for offset in range(-1024, 1024, 2):
+            word = (MINOR['calli'] << 11) | (((offset // 2) & 1023) << 1) | 1
+            self.assertEqual(binary(f'calli {offset}'), word.to_bytes(2, 'little'))
+        # The initial layout must allow a forward label at the maximum distance.
+        self.assertEqual(binary('calli #far\n!db "' + 'x' * 1019 + '"\nfar:')[:2],
+                         binary('m.calli 1022'))
+        for source in ('calli -1026', 'calli 1024', 'calli 1', 'm.get5 a0, 0',
+                       'm.get5 a0, -17', 'm.get5 a0, 17'):
+            with self.subTest(source=source), self.assertRaises(Error):
+                binary(source)
+        for source in ('calli 2', 'm.get5 a0, 1'):
+            with self.assertRaises(Error):
+                build_image(assemble(source, target='zerolox1-legacy-emu-v1'))
+
     def test_minor_count_is_excluded(self):
         self.assertNotIn('count', MINOR)
         with self.assertRaises(Error):
@@ -207,6 +222,15 @@ class ExecutionTests(unittest.TestCase):
                 result = self.execute(data, 1)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(reason, result.stdout + result.stderr)
+
+    def test_calli_and_tiny_get_results(self):
+        self.check_program('calli #callee\naddi a0, 1\nb #done\ncallee:\n'
+                           'm.get5 a0, -16\nret z0\ndone:', {3: 2, 24: 0xfffffff1}, 5)
+        self.check_program('b #entry\ncallee:\nget5 a0, 16\nret z0\n'
+                           'entry:\ncalli #callee', {3: 8, 24: 16}, 4)
+        for value in range(-16, 17):
+            self.assertEqual(len(binary(f'get a0, {value}')), 2)
+            self.check_program(f'get a0, 1234\nget a0, {value}', {24: value & 0xffffffff})
 
     def test_in_place_results(self):
         for field in range(32):

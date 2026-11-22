@@ -22,7 +22,8 @@ WIDTH = {'8':0,'16':1,'32':2,'p':3}
 
 def names(target=CURRENT_ISA):
     steps = set(LEGACY_STEP) if target != CURRENT_ISA else set()
-    return (set(ITER) | {'m.'+k for k in ITER} | {'m.'+k for k in IN_PLACE} | steps | {'n.'+k for k in steps} |
+    added = {'calli', 'm.calli', 'get5', 'm.get5'} if target == CURRENT_ISA else set()
+    return (added | set(ITER) | {'m.'+k for k in ITER} | {'m.'+k for k in IN_PLACE} | steps | {'n.'+k for k in steps} |
             {'n.'+k for k in ONE} | set(ONE) | {'n.get16','n.get32','get16','get32','n.addi','addi'} |
             {'n.'+k for k in IMM} | set(IMM) | {'n.'+k for k in BRANCH} | set(BRANCH) |
             {'m.'+k+'.'+w for k in ('ldsa','stsa','ldplus','stplus') for w in WIDTH} |
@@ -45,14 +46,22 @@ def parse(op,args,symbols,pc,target=CURRENT_ISA):
     if legacy and name in LEGACY_STEP:
         count(1)
         return 'one', (major[LEGACY_STEP[name]], reg(args[0]))
-    if op.startswith('m.') and op[2:] in IN_PLACE:
+    if op in ('calli', 'm.calli'):
+        count(1)
+        offset = immediate(args[0], -1024, 1022)
+        if offset % 2:
+            raise Error('calli displacement must be parcel aligned')
+        return 'minor10', (minor['calli'], (offset // 2) & 1023)
+    if op == 'get5':
+        op = 'm.get5'
+    if op == 'm.get5' or (op.startswith('m.') and op[2:] in IN_PLACE):
         if legacy:
             raise Error(f'{op} is unavailable for the legacy target')
         count(2)
-        if op == 'm.addi':
+        if op in ('m.addi', 'm.get5'):
             value = immediate(args[1], -16, 16)
             if value == 0:
-                raise Error('m.addi requires a nonzero immediate')
+                raise Error(f'{op} requires a nonzero immediate')
             field = 0 if value == 16 else value & 31
         else:
             field = immediate(args[1], 0, 31)
@@ -126,6 +135,7 @@ def encode(form, f):
     if form=='imm11':
         op,a,c,v=f
         return p((op<<6)|(a<<1))+p(((v&31)<<11)|(((v>>5)&31)<<6)|(c<<1)|((v>>10)&1))
+    if form=='minor10': return p((f[0]<<11)|(f[1]<<1)|1)
     if form=='minor55': return p((f[0]<<11)|(f[1]<<6)|(f[2]<<1)|1)
     if form=='minor28': return p((f[0]<<11)|(f[1]<<9)|(f[2]<<1)|1)
     if form=='minor235': return p((f[0]<<11)|(f[1]<<9)|(f[2]<<6)|(f[3]<<1)|1)

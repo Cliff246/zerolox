@@ -47,6 +47,8 @@ int main(void)
 	check_statement("", ZLX_ASM_statement_type_invalid);
 	check_statement(" \t ", ZLX_ASM_statement_type_invalid);
 	check_statement("\tm. r1", ZLX_ASM_statement_type_invalid);
+	check_opcode("calli 2", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_calli);
+	check_opcode("m.get5 a0, 16", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_get5);
 	check_opcode("j t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_j);
 	check_opcode("extb t0, t1, 31", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_extb);
 	check_opcode("andn t0, t1, t2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_andn);

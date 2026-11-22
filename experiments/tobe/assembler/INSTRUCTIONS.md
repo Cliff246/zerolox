@@ -27,6 +27,8 @@ This table describes the forms available to the `zerolox1-emu-v3` backend. See [
 | `push.W`, `pop.W`, `n.push.W`, `n.pop.W` | register |
 | `extb`, `n.extb` | `destination, source, index` returns bit `index` as 0 or 1. The unsigned 11-bit field holds the index. ZLX-1 faults on values above 31. |
 | `sext` | `destination, source, width` with width in bits from 1 through 32 |
+| `calli`, `m.calli` | Even byte displacement from the call, −1024…+1022. Writes the following instruction address to rp. |
+| `get5`, `m.get5` | `register, value` writes −16…−1 or +1…+16. Plain `get` also selects a two-byte form for zero. |
 | `m.addi` | `register, delta` adds −16…−1 or +1…+16 in place. |
 | `m.slli`, `m.srli`, `m.srai` | `register, count` shifts in place by 0…31. All four in-place operations also accept the two-operand spelling without `m.`. |
 | `anda`, `xora`, `ora`, `aand`, `axor`, `aor` | register. A trailing `a` writes ac. A leading `a` writes the register. |

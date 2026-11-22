@@ -41,6 +41,7 @@ typedef enum ZLX_SYTX_pattern_form
 	ZLX_SYTX_pattern_form_register_register_immediate,
 	ZLX_SYTX_pattern_form_register_ultra,
 	ZLX_SYTX_pattern_form_iterator_branch,
+	ZLX_SYTX_pattern_form_displacement,
 }ZLX_SYTX_pattern_form_t;
 
 

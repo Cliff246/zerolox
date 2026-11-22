@@ -56,6 +56,8 @@ moved value if it reads the move destination. Both writes commit together. Two
 writes to the same nonzero register fault before either write commits.
 
 minors 
+    1 | calli disp          | a  | rp = pc + 2, pc += signed imm10 * 2 (byte displacement -1024..1022)
+    1 | get5 reg, value      | 55 | write -16..-1 or +1..+16. Zero field encodes +16. Plain get can copy z0 for zero.
     1 | addi reg, delta     | 55 | add in place, -16..-1 or +1..+16. Imm5 is signed, with 0 encoding +16.
     1 | slli, srli, srai    | 55 | shift reg in place by unsigned imm5 (0..31), including ac
     // Each encoding is [minor5][imm5][reg5][1].
@@ -113,13 +115,3 @@ majors:
 	2 | push3	|			| push 3 registers of 3 sizes. 
 	2 | pop3	|			| push 3 registers of 3 sizes. 
 	1 | auipc	|			|
-	
-	
-minors:
-	1 | calli	| imm10		|
-
-
-
-
-
-
