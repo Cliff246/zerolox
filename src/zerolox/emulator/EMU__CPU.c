@@ -1777,11 +1777,11 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 	parameters.instruction_size = ZLX_ISA_Major_operation_size[major.type];
 	switch (major.type)
 	{
-		case ZLX_ISA_major_format_type_imm5_reg5:
+		case ZLX_ISA_major_format_type_55:
 		{
 			/* Present compact forms to the existing immediate ALU handlers. */
-			unsigned amount = major.u__imm5_reg5.field ? major.u__imm5_reg5.field : 32;
-			parameters.source_2 = major.u__imm5_reg5.reg;
+			unsigned amount = major.u__format_55.a5 ? major.u__format_55.a5 : 32;
+			parameters.source_2 = major.u__format_55.b5;
 			parameters.source_1 = parameters.source_2;
 			if (major.operation == ZLX_ISA_major_operation_get_pos ||
 			    major.operation == ZLX_ISA_major_operation_get_neg)

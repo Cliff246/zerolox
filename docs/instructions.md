@@ -55,7 +55,7 @@ The move latches its source first. The ALU then reads its operands, including th
 moved value if it reads the move destination. Both writes commit together. Two
 writes to the same nonzero register fault before either write commits.
 
-One-parcel immediate majors use `[class5][magnitude5][register5][0]`.
+The one-parcel major `55` format uses `[class5][magnitude5][register5][0]`.
 
 | Class | Instruction | Magnitude |
 | --- | --- | --- |

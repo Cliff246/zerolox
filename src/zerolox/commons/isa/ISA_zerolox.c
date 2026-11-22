@@ -90,13 +90,13 @@ ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[ZLX_ISA_minor_operat
 
 ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[ZLX_ISA_major_operation_count] =
 {
-	[ZLX_ISA_major_operation_inc] = ZLX_ISA_major_format_type_imm5_reg5,
-	[ZLX_ISA_major_operation_dec] = ZLX_ISA_major_format_type_imm5_reg5,
-	[ZLX_ISA_major_operation_shift_left] = ZLX_ISA_major_format_type_imm5_reg5,
-	[ZLX_ISA_major_operation_shift_right] = ZLX_ISA_major_format_type_imm5_reg5,
-	[ZLX_ISA_major_operation_shift_arith] = ZLX_ISA_major_format_type_imm5_reg5,
-	[ZLX_ISA_major_operation_get_pos] = ZLX_ISA_major_format_type_imm5_reg5,
-	[ZLX_ISA_major_operation_get_neg] = ZLX_ISA_major_format_type_imm5_reg5,
+	[ZLX_ISA_major_operation_inc] = ZLX_ISA_major_format_type_55,
+	[ZLX_ISA_major_operation_dec] = ZLX_ISA_major_format_type_55,
+	[ZLX_ISA_major_operation_shift_left] = ZLX_ISA_major_format_type_55,
+	[ZLX_ISA_major_operation_shift_right] = ZLX_ISA_major_format_type_55,
+	[ZLX_ISA_major_operation_shift_arith] = ZLX_ISA_major_format_type_55,
+	[ZLX_ISA_major_operation_get_pos] = ZLX_ISA_major_format_type_55,
+	[ZLX_ISA_major_operation_get_neg] = ZLX_ISA_major_format_type_55,
 	[ZLX_ISA_major_operation_ld] = ZLX_ISA_major_format_type_5_952 ,
 	[ZLX_ISA_major_operation_st] = ZLX_ISA_major_format_type_5_952 ,
 	[ZLX_ISA_major_operation_push8] = ZLX_ISA_major_format_type_5,
@@ -157,7 +157,7 @@ ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[ZLX_ISA_major_operat
 uint8_t ZLX_ISA_Major_operation_size[] = 
 {
 	[ZLX_ISA_major_format_type_5] = 1,
-	[ZLX_ISA_major_format_type_imm5_reg5] = 1,
+	[ZLX_ISA_major_format_type_55] = 1,
 	[ZLX_ISA_major_format_type_5_5551] = 2,
 	[ZLX_ISA_major_format_type_5_952] = 2,
 	[ZLX_ISA_major_format_type_32] = 1,
@@ -310,9 +310,9 @@ bool ZLX_ISA_decode_instruction(ZLX_ISA_Instruction_t *instruction, ZLX_ISA_Parc
 
 	switch(instruction->u__major.type)
 	{
-		case ZLX_ISA_major_format_type_imm5_reg5:
-			instruction->u__major.u__imm5_reg5.field = (first >> 6) & 31;
-			instruction->u__major.u__imm5_reg5.reg = a5;
+		case ZLX_ISA_major_format_type_55:
+			instruction->u__major.u__format_55.a5 = (first >> 6) & 31;
+			instruction->u__major.u__format_55.b5 = a5;
 			break;
 		case ZLX_ISA_major_format_type_5:
 			instruction->u__major.u__foramt_5.a5 = a5;

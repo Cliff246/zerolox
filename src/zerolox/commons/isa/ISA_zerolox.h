@@ -266,7 +266,7 @@ typedef enum ZLX_ISA_major_format_type
 {
 	ZLX_ISA_major_format_type_invalid, /* unassigned opcode table entry */
 	ZLX_ISA_major_format_type_5,
-	ZLX_ISA_major_format_type_imm5_reg5,
+	ZLX_ISA_major_format_type_55,
 	ZLX_ISA_major_format_type_5_5551,
 	ZLX_ISA_major_format_type_5_952,
 	ZLX_ISA_major_format_type_32,
@@ -313,6 +313,12 @@ typedef struct ZLX_ISA_Major_format_5
 	//[opcode][a5][1]
 	uint8_t a5;
 }ZLX_ISA_Major_format_5_t;
+
+typedef struct ZLX_ISA_Major_format_55
+{
+	uint8_t a5; /* magnitude */
+	uint8_t b5; /* register */
+}ZLX_ISA_Major_format_55_t;
 
 typedef struct ZLX_ISA_Major_format_32
 {
@@ -373,7 +379,7 @@ typedef struct ZLX_ISA_Major
 	ZLX_ISA_major_format_type_t type;
 	union
 	{
-		struct { uint8_t field, reg; } u__imm5_reg5;
+		ZLX_ISA_Major_format_55_t u__format_55;
 		ZLX_ISA_Major_format_5_b5_t u__format_5_b5;
 		ZLX_ISA_Major_format_5_655_t u__format_5_655;
 		ZLX_ISA_Major_format_5_952_t u__format_5_952;
