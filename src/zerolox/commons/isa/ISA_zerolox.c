@@ -110,6 +110,8 @@ ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[ZLX_ISA_major_operat
 	[ZLX_ISA_major_operation_popp] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_bcall21] = ZLX_ISA_major_format_type_5_f,
 	[ZLX_ISA_major_operation_blink21] = ZLX_ISA_major_format_type_5_f,
+	[ZLX_ISA_major_operation_b21] = ZLX_ISA_major_format_type_5_f,
+	[ZLX_ISA_major_operation_addpc] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_get16] = ZLX_ISA_major_format_type_5_f,
 	[ZLX_ISA_major_operation_get32] = ZLX_ISA_major_format_type_5_f_f,
 

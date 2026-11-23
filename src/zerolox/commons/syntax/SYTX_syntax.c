@@ -35,6 +35,7 @@ ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[] =
 	{.type = ZLX_ISA_instruction_type_minor, .form = ZLX_SYTX_pattern_form_displacement, .a__mnemonic = "blink10", .opcode = ZLX_ISA_minor_operation_blink10},
 	{.type = ZLX_ISA_instruction_type_major, .form = ZLX_SYTX_pattern_form_displacement, .a__mnemonic = "bcall21", .opcode = ZLX_ISA_major_operation_bcall21},
 	{.type = ZLX_ISA_instruction_type_major, .form = ZLX_SYTX_pattern_form_displacement, .a__mnemonic = "blink21", .opcode = ZLX_ISA_major_operation_blink21},
+	{.type = ZLX_ISA_instruction_type_major, .form = ZLX_SYTX_pattern_form_displacement, .a__mnemonic = "b21", .opcode = ZLX_ISA_major_operation_b21},
 	{.type = ZLX_ISA_instruction_type_major, .form = ZLX_SYTX_pattern_form_signed_immediate_pair,
 	 .a__mnemonic = "addi", .opcode = ZLX_ISA_major_operation_inc},
 	{.type = ZLX_ISA_instruction_type_major, .form = ZLX_SYTX_pattern_form_signed_immediate_pair,
@@ -57,6 +58,7 @@ ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[] =
 	{.type = ZLX_ISA_instruction_type_major, .form = ZLX_SYTX_pattern_form_##form_name, \
 	 .a__mnemonic = #name, .opcode = ZLX_ISA_major_operation_##name}
 	MAJOR_MNEMONIC(j, register),
+	MAJOR_MNEMONIC(addpc, register),
 	MAJOR_MNEMONIC(jlink, register),
 	MAJOR_MNEMONIC(jcall, register),
 	MAJOR_MNEMONIC(jret, register),

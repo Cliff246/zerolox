@@ -161,7 +161,7 @@ class DesignCases(unittest.TestCase):
     def test_all_extra_forms_encode(self):
         import extra
         samples={
-            'bcall10':'2', 'm.bcall10':'-2', 'blink10':'2', 'm.blink10':'-2', 'bcall21':'2', 'blink21':'-2', 'm.get5':'a0, 16', 'get5':'a0, -16', 'get16':'t0, 42', 'get32':'t0, 42', 'addi':'t0, t1, -1',
+            'bcall10':'2', 'm.bcall10':'-2', 'blink10':'2', 'm.blink10':'-2', 'bcall21':'2', 'blink21':'-2', 'b21':'2', 'm.get5':'a0, 16', 'get5':'a0, -16', 'get16':'t0, 42', 'get32':'t0, 42', 'addi':'t0, t1, -1',
             **{x:'t0, t1, 1' for x in extra.IMM},
             **{x:'t0, t1, 2' for x in extra.BRANCH},
             **{x:'t0' for x in extra.ONE},

@@ -1538,6 +1538,23 @@ OPERATION(major_call)
 	return output;
 }
 
+OPERATION(major_b21)
+{
+    OPERATION_SETUP;
+    output.pc_changed = true;
+    output.pc_set_or_add = true;
+    output.pc_value = 2 * MY_sign_extend32(paramaters.imm32, 21);
+    return output;
+}
+
+OPERATION(major_addpc)
+{
+    OPERATION_SETUP;
+    uint32_t ac = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
+    stage_register(&output, paramaters.source_1, ZLX_EMU_get_pc__CPU(cpu) + ac);
+    return output;
+}
+
 OPERATION(major_blink21)
 {
     OPERATION_SETUP;
@@ -1720,6 +1737,8 @@ static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_c
 		[ZLX_ISA_major_operation_jret] = major_returnp,
 	[ZLX_ISA_major_operation_bcall21] = major_bcall21,
 	[ZLX_ISA_major_operation_blink21] = major_blink21,
+	[ZLX_ISA_major_operation_b21] = major_b21,
+	[ZLX_ISA_major_operation_addpc] = major_addpc,
 	[ZLX_ISA_major_operation_get16] = major_get16,
 	[ZLX_ISA_major_operation_get32] = major_get32
 

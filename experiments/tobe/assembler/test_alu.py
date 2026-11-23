@@ -65,7 +65,7 @@ class EncodingTests(unittest.TestCase):
                 build_image(assemble(source, target='zerolox1-legacy-emu-v1'))
 
     def test_wide_call_displacement(self):
-        for name in ('bcall21', 'blink21'):
+        for name in ('bcall21', 'blink21', 'b21'):
             for offset in (-2097152, -131072, -2, 0, 2, 131072, 2097150):
                 raw = (offset // 2) & 0x1fffff
                 expected = ((MAJOR[name] << 6) | ((raw >> 16) << 1)).to_bytes(2, 'little')
@@ -261,6 +261,12 @@ class ExecutionTests(unittest.TestCase):
         source = ('get32 t0, &entry\nj t0\ncallee:\nget ac, 42\nj rp\n'
                   '@jumpto 131072\nentry:\nblink21 #callee')
         self.check_program(source, {1: 42, 3: 131076}, 5)
+
+    def test_pc_relative_address_and_branch(self):
+        self.check_program('get ac, -4\naddpc t0\naddpc ac', {8: 0xfffffffe, 1: 0}, 3)
+        self.check_program('get ac, 6\naddpc t0\nb21 #target\n'
+                           'get t1, 99\ntarget:\nget t1, 7',
+                           {1: 6, 8: 8, 9: 7}, 4)
 
     def test_register_call_and_link(self):
         call = ('get16 sp, 0x8000\nget16 rp, 0x1234\nget16 t0, &callee\n'

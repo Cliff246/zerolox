@@ -217,6 +217,8 @@ typedef enum ZLX_ISA_major_operation
 	ZLX_ISA_major_operation_extb,
 	ZLX_ISA_major_operation_bcall21,
 	ZLX_ISA_major_operation_blink21,
+	ZLX_ISA_major_operation_b21,
+	ZLX_ISA_major_operation_addpc,
 	/* Start of decoded family IDs. Wire classes are assigned separately. */
 	ZLX_ISA_major_operation_inc,
 	ZLX_ISA_major_operation_dec,
