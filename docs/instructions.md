@@ -74,6 +74,8 @@ authorize execution of reserved encodings.
 minors
     1 | bcall10 disp | Push old rp, link and branch by signed imm10 parcels.
     1 | blink10 disp | Link and branch by signed imm10 parcels without pushing rp.
+    2 | b21 | Branch by a signed 21-bit parcel displacement.
+    1 | addpc rd | rd = address of this instruction + ac (32-bit wrap).
     2 | bcall21, blink21 | Corresponding signed imm21-parcel branches. High five bits precede low sixteen bits, as in get32.
     Reserved for W hardware: mvw, wmv and wmvw (slots 22, 23 and 24). ZLX-1 faults on both.
     27 slots allocated including the three W reservations. Five slots remain free.

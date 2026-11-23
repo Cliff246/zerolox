@@ -28,7 +28,7 @@ This table describes the forms available to the `zerolox1-emu-v4` backend. See [
 | `extb`, `n.extb` | `destination, source, index` returns bit `index` as 0 or 1. The unsigned 11-bit field holds the index. ZLX-1 faults on values above 31. |
 | `sext` | `destination, source, width` with width in bits from 1 through 32 |
 | `bcall10`, `blink10` | Even byte displacement from the call, −1024…+1022. Both link to rp. bcall10 also pushes the old rp. |
-| `bcall21`, `blink21` | Even byte displacement from the call, −2097152…+2097150. High five displacement bits are in the first parcel, followed by the low sixteen. bcall21 pushes old rp. |
+| `b21`, `bcall21`, `blink21` | Even byte displacement from the call, −2097152…+2097150. High five displacement bits are in the first parcel, followed by the low sixteen. bcall21 pushes old rp, and b21 branches without linking. |
 | `get5` | `register, value` from −32…−1 or +1…+32. Selects `getneg` or `getpos`. Plain `get` can also produce zero in one parcel. |
 | `inc`, `dec` | `register, magnitude` from 1…32. Two-operand `addi` selects the family by the sign of its delta. |
 | `slli`, `srli`, `srai` | Two operands shift the register in place by 1…31. Field zero is reserved for a future shift by 32. |
@@ -50,3 +50,5 @@ The assembler and emulator reject overlapping nonzero destinations.
 
 For example, with ac = 7 and t1 = 3, `add ac, t0, t1 ; amv t0` leaves
 t0 = 7 and ac = 10. Replacing t0 with ac as the move destination would fault.
+
+`addpc rd` writes the address of the addpc instruction plus ac to rd, wrapping at 32 bits.

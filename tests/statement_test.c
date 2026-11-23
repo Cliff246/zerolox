@@ -50,6 +50,8 @@ int main(void)
 	check_opcode("bcall10 2", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_bcall10);
 	check_opcode("blink10 2", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_blink10);
 	check_opcode("bcall21 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_bcall21);
+	check_opcode("b21 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_b21);
+	check_opcode("addpc t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_addpc);
 	check_opcode("blink21 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_blink21);
 	check_opcode("jcall t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_jcall);
 	check_opcode("jlink t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_jlink);
