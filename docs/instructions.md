@@ -34,10 +34,9 @@ majors:
 	2 | bltu	|			|
 	2 | bgeu	|			|
     1 | j       | 5         | jump to the even byte address in the register and preserve all registers
-    1 | call	|			|
-    1 | ret		|			|
-	1 | callp	|			|
-	1 | retp	|			|
+    1 | jlink | register | link through rp and jump to the absolute register address
+	1 | jcall	|			|
+	1 | jret	|			|
     2 | add, sub, sll, srl, sra, xor, or, and | 5_5551 | optional accumulator move
     2 | andn | 5_5551 | rd = lhs & ~rhs, optional accumulator move
     2 | clt, cge, cltu, cgeu, ceq, cneq | 5_5551 | register comparison with optional accumulator move
@@ -73,9 +72,11 @@ Unassigned classes have no declared length. A known fetch length does not
 authorize execution of reserved encodings.
 
 minors
-    1 | calli disp          | a  | rp = pc + 2, pc += signed imm10 * 2 (byte displacement -1024..1022)
-    Reserved for W hardware: mvw and wmv (slots 22 and 23). ZLX-1 faults on both.
-    25 slots allocated including the two W reservations. Seven slots remain free.
+    1 | bcall10 disp | Push old rp, link and branch by signed imm10 parcels.
+    1 | blink10 disp | Link and branch by signed imm10 parcels without pushing rp.
+    2 | bcall21, blink21 | Corresponding signed imm21-parcel branches. High five bits precede low sixteen bits, as in get32.
+    Reserved for W hardware: mvw, wmv and wmvw (slots 22, 23 and 24). ZLX-1 faults on both.
+    27 slots allocated including the three W reservations. Five slots remain free.
 	1 |	mv		|			| 
 	1 | add		|			|
 	1 | adda	|			|

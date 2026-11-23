@@ -79,7 +79,9 @@ typedef enum ZLX_ISA_minor_operation
 	/* W transfer slots are allocated for a later ISA generation. */
 	ZLX_ISA_minor_operation_mvw = 22,
 	ZLX_ISA_minor_operation_wmv,
-	ZLX_ISA_minor_operation_calli = 26,
+	ZLX_ISA_minor_operation_wmvw = 24,
+	ZLX_ISA_minor_operation_blink10 = 25,
+	ZLX_ISA_minor_operation_bcall10 = 26,
 	ZLX_ISA_minor_operation_count, /* Exclusive slot bound, including holes. */
 }ZLX_ISA_minor_operation_t;
 
@@ -176,12 +178,12 @@ typedef enum ZLX_ISA_major_operation
 	ZLX_ISA_major_operation_bge,
 	ZLX_ISA_major_operation_bltu,
 	ZLX_ISA_major_operation_bgeu,
-	ZLX_ISA_major_operation_call,
-	ZLX_ISA_major_operation_ret,
+	ZLX_ISA_major_operation_jlink,
+	ZLX_ISA_major_operation_reserved_ret,
 
-	ZLX_ISA_major_operation_callp,
+	ZLX_ISA_major_operation_jcall,
 
-	ZLX_ISA_major_operation_retp,
+	ZLX_ISA_major_operation_jret,
 
 	ZLX_ISA_major_operation_add,
 	ZLX_ISA_major_operation_sub,
@@ -213,6 +215,8 @@ typedef enum ZLX_ISA_major_operation
 	ZLX_ISA_major_operation_j,
 	ZLX_ISA_major_operation_andn,
 	ZLX_ISA_major_operation_extb,
+	ZLX_ISA_major_operation_bcall21,
+	ZLX_ISA_major_operation_blink21,
 	/* Start of decoded family IDs. Wire classes are assigned separately. */
 	ZLX_ISA_major_operation_inc,
 	ZLX_ISA_major_operation_dec,

@@ -12,7 +12,7 @@ class DesignCases(unittest.TestCase):
             ('stsa [5]', 'm.stsa.8 5'),
             ('ld+a [t4{1}]', 'm.ldplus.8 t4, 1'),
             ('st+a.p [s0{-1}]', 'm.stplus.p s0, -1'),
-            ('ret', 'ret ac'),
+            ('jret', 'jret ac'),
             ('push8 t1', 'push.8 t1'),
         ]
         for current, legacy in pairs:
@@ -161,7 +161,7 @@ class DesignCases(unittest.TestCase):
     def test_all_extra_forms_encode(self):
         import extra
         samples={
-            'calli':'2', 'm.calli':'-2', 'm.get5':'a0, 16', 'get5':'a0, -16', 'get16':'t0, 42', 'get32':'t0, 42', 'addi':'t0, t1, -1',
+            'bcall10':'2', 'm.bcall10':'-2', 'blink10':'2', 'm.blink10':'-2', 'bcall21':'2', 'blink21':'-2', 'm.get5':'a0, 16', 'get5':'a0, -16', 'get16':'t0, 42', 'get32':'t0, 42', 'addi':'t0, t1, -1',
             **{x:'t0, t1, 1' for x in extra.IMM},
             **{x:'t0, t1, 2' for x in extra.BRANCH},
             **{x:'t0' for x in extra.ONE},

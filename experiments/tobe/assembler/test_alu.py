@@ -49,20 +49,31 @@ class EncodingTests(unittest.TestCase):
             self.assertEqual(build_image(assemble(f'{name} t0', target='zerolox1-legacy-emu-v1')),
                              ((opcode << 6) | 16).to_bytes(2, 'little'))
 
-    def test_calli_and_tiny_get_encodings(self):
+    def test_bcall10_and_tiny_get_encodings(self):
         for offset in range(-1024, 1024, 2):
-            word = (MINOR['calli'] << 11) | (((offset // 2) & 1023) << 1) | 1
-            self.assertEqual(binary(f'calli {offset}'), word.to_bytes(2, 'little'))
+            word = (MINOR['bcall10'] << 11) | (((offset // 2) & 1023) << 1) | 1
+            self.assertEqual(binary(f'bcall10 {offset}'), word.to_bytes(2, 'little'))
         # The initial layout must allow a forward label at the maximum distance.
-        self.assertEqual(binary('calli #far\n!db "' + 'x' * 1019 + '"\nfar:')[:2],
-                         binary('m.calli 1022'))
-        for source in ('calli -1026', 'calli 1024', 'calli 1', 'get5 a0, 0',
+        self.assertEqual(binary('bcall10 #far\n!db "' + 'x' * 1019 + '"\nfar:')[:2],
+                         binary('m.bcall10 1022'))
+        for source in ('bcall10 -1026', 'bcall10 1024', 'bcall10 1', 'get5 a0, 0',
                        'get5 a0, -33', 'get5 a0, 33'):
             with self.subTest(source=source), self.assertRaises(Error):
                 binary(source)
-        for source in ('calli 2', 'm.get5 a0, 1'):
+        for source in ('bcall10 2', 'm.get5 a0, 1'):
             with self.assertRaises(Error):
                 build_image(assemble(source, target='zerolox1-legacy-emu-v1'))
+
+    def test_wide_call_displacement(self):
+        for name in ('bcall21', 'blink21'):
+            for offset in (-2097152, -131072, -2, 0, 2, 131072, 2097150):
+                raw = (offset // 2) & 0x1fffff
+                expected = ((MAJOR[name] << 6) | ((raw >> 16) << 1)).to_bytes(2, 'little')
+                expected += (raw & 0xffff).to_bytes(2, 'little')
+                self.assertEqual(binary(f'{name} {offset}'), expected)
+            for offset in (-2097154, 2097152, 1):
+                with self.assertRaises(Error):
+                    binary(f'{name} {offset}')
 
     def test_minor_count_is_excluded(self):
         self.assertNotIn('count', MINOR)
@@ -156,12 +167,12 @@ class ExecutionTests(unittest.TestCase):
 
     def test_register_jump_tail_call(self):
         source = ('get16 t0, &caller\nget16 t1, &callee\nget16 sp, 0x8000\n'
-                  'get ac, 41\ncall t0\nresume:\naddi t2, 1\nb #done\n'
-                  'caller:\nj t1\nget ac, -1\ncallee:\naddi ac, 1\nret t3\ndone:')
+                  'get ac, 41\njlink t0\nresume:\naddi t2, 1\nb #done\n'
+                  'caller:\nj t1\nget ac, -1\ncallee:\naddi ac, 1\nmv t3, ac\nj rp\ndone:')
         _, labels = link(assemble(source))
         self.check_program(source, {1: 42, 2: 0x8000, 3: labels['resume']['value'],
                                     8: labels['caller']['value'], 9: labels['callee']['value'],
-                                    10: 1, 11: 42}, steps=10)
+                                    10: 1, 11: 42}, steps=11)
 
     def test_register_jump_odd_address(self):
         result = self.execute(binary('get t0, 7\nj t0'), 2)
@@ -230,14 +241,34 @@ class ExecutionTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(reason, result.stdout + result.stderr)
 
-    def test_calli_and_tiny_get_results(self):
-        self.check_program('calli #callee\naddi a0, 1\nb #done\ncallee:\n'
-                           'get5 a0, -16\nret z0\ndone:', {3: 2, 24: 0xfffffff1}, 5)
-        self.check_program('b #entry\ncallee:\nget5 a0, 16\nret z0\n'
-                           'entry:\ncalli #callee', {3: 8, 24: 16}, 4)
+    def test_call_and_link_results(self):
+        for call, size in [('bcall10', 2), ('bcall21', 4)]:
+            source = ('get16 sp, 0x8000\nget16 rp, 0x1234\n' + call +
+                      ' #callee\nget t0, 7\nb #done\ncallee:\nget ac, 42\njret t1\ndone:')
+            self.check_program(source, {1: 42, 2: 0x8000, 3: 0x1234, 8: 7, 9: 42}, 7)
+        for link in ('blink10', 'blink21'):
+            source = ('get16 sp, 0x8000\n' + link +
+                      ' #callee\nget t0, 7\nb #done\ncallee:\nget ac, 42\nj rp\ndone:')
+            self.check_program(source, {1: 42, 2: 0x8000, 8: 7}, 6)
         for value in range(-32, 33):
             self.assertEqual(len(binary(f'get a0, {value}')), 2)
             self.check_program(f'get a0, 1234\nget a0, {value}', {24: value & 0xffffffff})
+
+    def test_wide_forward_and_backward_branches(self):
+        source = ('blink21 #far\nget t0, 7\nb 0\n'
+                  '@jumpto 131072\nfar:\nget ac, 42\nj rp')
+        self.check_program(source, {1: 42, 3: 4, 8: 7}, 5)
+        source = ('get32 t0, &entry\nj t0\ncallee:\nget ac, 42\nj rp\n'
+                  '@jumpto 131072\nentry:\nblink21 #callee')
+        self.check_program(source, {1: 42, 3: 131076}, 5)
+
+    def test_register_call_and_link(self):
+        call = ('get16 sp, 0x8000\nget16 rp, 0x1234\nget16 t0, &callee\n'
+                'jcall t0\nget t1, 7\nb #done\ncallee:\nget ac, 42\njret t2\ndone:')
+        self.check_program(call, {1: 42, 2: 0x8000, 3: 0x1234, 9: 7, 10: 42}, 8)
+        link = ('get16 t0, &callee\njlink t0\nget t1, 7\nb #done\n'
+                'callee:\nget ac, 42\nj rp\ndone:')
+        self.check_program(link, {1: 42, 9: 7}, 6)
 
     def test_in_place_results(self):
         self.check_program('dec t0, 32\ninc t1, 32\ninc z0, 32', {0: 0, 8: 0xffffffe0, 9: 32})

@@ -47,7 +47,13 @@ int main(void)
 	check_statement("", ZLX_ASM_statement_type_invalid);
 	check_statement(" \t ", ZLX_ASM_statement_type_invalid);
 	check_statement("\tm. r1", ZLX_ASM_statement_type_invalid);
-	check_opcode("calli 2", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_calli);
+	check_opcode("bcall10 2", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_bcall10);
+	check_opcode("blink10 2", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_blink10);
+	check_opcode("bcall21 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_bcall21);
+	check_opcode("blink21 2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_blink21);
+	check_opcode("jcall t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_jcall);
+	check_opcode("jlink t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_jlink);
+	check_opcode("jret t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_jret);
 	check_opcode("dec t0, 32", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_dec);
 	check_opcode("getneg a0, 32", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_get_neg);
 	check_opcode("get5 a0, 16", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_get_pos);
