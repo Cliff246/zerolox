@@ -12,7 +12,7 @@ CLASS_NAMES = {'inc': 'inc', 'dec': 'dec', 'slli': 'shift_left', 'srli': 'shift_
                'srai': 'shift_arith', 'getpos': 'get_pos', 'getneg': 'get_neg'}
 COMPACT_IMMEDIATE = CLASS_NAMES.keys() | {'addi', 'get5'}
 LEGACY_STEP = {'inc': 'inc', 'inc1': 'inc', 'dec': 'dec', 'dec1': 'dec'}
-ONE = {name: name for name in ('j', 'call', 'ret', 'callp', 'retp',
+ONE = {name: name for name in ('j', 'jlink', 'jcall', 'jret',
                                 'anda', 'xora', 'ora', 'aand', 'axor', 'aor')}
 for name in ('push', 'pop'):
     for width in ('8', '16', '32', 'p'):
@@ -27,7 +27,11 @@ def names(target=CURRENT_ISA):
     steps = set(LEGACY_STEP) if legacy_encoding(target) else set()
     added = set()
     if not legacy_encoding(target):
-        added.update(('calli', 'm.calli', 'get5'))
+        added.add('get5')
+        if target == CURRENT_ISA:
+            added.update(('bcall10', 'm.bcall10', 'blink10', 'm.blink10', 'bcall21', 'blink21'))
+        else:
+            added.update(('calli', 'm.calli'))
     if target == CURRENT_ISA:
         added.update(CLASS_NAMES)
         added.update('n.' + k for k in CLASS_NAMES)
@@ -59,12 +63,17 @@ def parse(op,args,symbols,pc,target=CURRENT_ISA):
     if legacy and name in LEGACY_STEP:
         count(1)
         return 'one', (major[LEGACY_STEP[name]], reg(args[0]))
-    if op in ('calli', 'm.calli'):
+    if op in ('bcall10', 'm.bcall10', 'blink10', 'm.blink10', 'calli', 'm.calli'):
         count(1)
         offset = immediate(args[0], -1024, 1022)
         if offset % 2:
             raise Error('calli displacement must be parcel aligned')
-        return 'minor10', (minor['calli'], (offset // 2) & 1023)
+        return 'minor10', (minor[op.removeprefix('m.')], (offset // 2) & 1023)
+    if name in ('bcall21', 'blink21'):
+        count(1)
+        offset = immediate(args[0], -2097152, 2097150)
+        if offset % 2: raise Error('branch displacement must be parcel aligned')
+        return 'branch21', (major[name], (offset // 2) & 0x1fffff)
     if target == CURRENT_ISA and name in COMPACT_IMMEDIATE and len(args) == 2:
         if name in ('get5', 'addi'):
             value = immediate(args[1], -32, 32)
@@ -149,10 +158,12 @@ def parse(op,args,symbols,pc,target=CURRENT_ISA):
 
 def size(form, fields):
     if form=='get': return 4 if fields[-1]==16 else 6
+    if form=='branch21': return 4
     return 4 if form in ('imm11', 'imm6') else 2
 
 def encode(form, f):
     def p(n): return n.to_bytes(2,'little')
+    if form=='branch21': return p((f[0]<<6)|((f[1]>>16)<<1))+p(f[1]&65535)
     if form=='one': return p((f[0]<<6)|(f[1]<<1))
     if form=='get':
         op,r,v,bits=f

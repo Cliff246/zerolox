@@ -27,15 +27,16 @@ This table describes the forms available to the `zerolox1-emu-v4` backend. See [
 | `push.W`, `pop.W`, `n.push.W`, `n.pop.W` | register |
 | `extb`, `n.extb` | `destination, source, index` returns bit `index` as 0 or 1. The unsigned 11-bit field holds the index. ZLX-1 faults on values above 31. |
 | `sext` | `destination, source, width` with width in bits from 1 through 32 |
-| `calli`, `m.calli` | Even byte displacement from the call, −1024…+1022. Writes the following instruction address to rp. |
+| `bcall10`, `blink10` | Even byte displacement from the call, −1024…+1022. Both link to rp. bcall10 also pushes the old rp. |
+| `bcall21`, `blink21` | Even byte displacement from the call, −2097152…+2097150. High five displacement bits are in the first parcel, followed by the low sixteen. bcall21 pushes old rp. |
 | `get5` | `register, value` from −32…−1 or +1…+32. Selects `getneg` or `getpos`. Plain `get` can also produce zero in one parcel. |
 | `inc`, `dec` | `register, magnitude` from 1…32. Two-operand `addi` selects the family by the sign of its delta. |
 | `slli`, `srli`, `srai` | Two operands shift the register in place by 1…31. Field zero is reserved for a future shift by 32. |
 | `anda`, `xora`, `ora`, `aand`, `axor`, `aor` | register. A trailing `a` writes ac. A leading `a` writes the register. |
 | `j`, `n.j` | One register holding an absolute byte address. An odd target faults. All registers, including `rp`, retain their values. |
-| `call`, `ret`, `callp`, `retp` and `n.` versions | register |
+| `jlink`, `jcall`, `jret` and `n.` versions | register |
 
-`W` is `8`, `16`, `32` or `p`; `p` is three bytes on zerolox one. `m.ldplus` and `m.stplus` accept only -4, -2, -1, 1, 2, 3, 4, 8 as their increment, matching the current emulator's encoded selector; the operation accesses the old address, then updates the base. `m.ldplus` rejects `ac` as base because it conflicts with its implicit accumulator destination. `ret` and `retp` have a register operand because the current emulator copies `ac` to it. These spellings do not imply an ABI.
+`W` is `8`, `16`, `32` or `p`; `p` is three bytes on zerolox one. `m.ldplus` and `m.stplus` accept only -4, -2, -1, 1, 2, 3, 4, 8 as their increment, matching the current emulator's encoded selector; the operation accesses the old address, then updates the base. `m.ldplus` rejects `ac` as base because it conflicts with its implicit accumulator destination. `jret` copies `ac` to its register operand while jumping through the current rp and restoring the saved rp. These spellings do not imply an ABI.
 
 The C code's comments say stack-relative accumulator operations subtract their offsets, but the implementation adds them; this prototype encodes the raw nonnegative field and does not assume the comment is correct. There may be other implementation discrepancies. Direct form coverage is based on the current enum, decoding and execution switches, not a claim that every operation has been independently emulator-tested. See README for layout, string and image limitations.
 

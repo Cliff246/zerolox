@@ -61,7 +61,8 @@ ZLX_ISA_register_identifier_t ZLX_ISA_get_register_number(char *string)
 
 ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[ZLX_ISA_minor_operation_count] =
 {
-	[ZLX_ISA_minor_operation_calli] = ZLX_ISA_minor_format_type_a,
+	[ZLX_ISA_minor_operation_bcall10] = ZLX_ISA_minor_format_type_a,
+	[ZLX_ISA_minor_operation_blink10] = ZLX_ISA_minor_format_type_a,
 	[ZLX_ISA_minor_operation_move] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_add] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_adda] = ZLX_ISA_minor_format_type_55,
@@ -107,6 +108,8 @@ ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[ZLX_ISA_major_operat
 	[ZLX_ISA_major_operation_pop16] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_pop32] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_popp] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_bcall21] = ZLX_ISA_major_format_type_5_f,
+	[ZLX_ISA_major_operation_blink21] = ZLX_ISA_major_format_type_5_f,
 	[ZLX_ISA_major_operation_get16] = ZLX_ISA_major_format_type_5_f,
 	[ZLX_ISA_major_operation_get32] = ZLX_ISA_major_format_type_5_f_f,
 
@@ -119,10 +122,9 @@ ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[ZLX_ISA_major_operat
 	[ZLX_ISA_major_operation_bltu] = ZLX_ISA_major_format_type_5_b5,
 	[ZLX_ISA_major_operation_bgeu] = ZLX_ISA_major_format_type_5_b5,
 	[ZLX_ISA_major_operation_j] = ZLX_ISA_major_format_type_5,
-	[ZLX_ISA_major_operation_call] = ZLX_ISA_major_format_type_5,
-	[ZLX_ISA_major_operation_ret] = ZLX_ISA_major_format_type_5,
-	[ZLX_ISA_major_operation_callp] = ZLX_ISA_major_format_type_5,
-	[ZLX_ISA_major_operation_retp] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_jlink] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_jcall] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_jret] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_add] = ZLX_ISA_major_format_type_5_5551,
 	[ZLX_ISA_major_operation_sub] = ZLX_ISA_major_format_type_5_5551,
 	[ZLX_ISA_major_operation_sll] = ZLX_ISA_major_format_type_5_5551,

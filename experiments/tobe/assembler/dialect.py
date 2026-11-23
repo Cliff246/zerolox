@@ -65,7 +65,7 @@ def lower(op, args, symbols, pc, target=CURRENT_ISA):
         return 'm.' + op, args
     if op in ('add', 'sub') and len(args) == 2:
         return 'm.' + op, args
-    if op in ('ret', 'retp', 'n.ret', 'n.retp') and not args:
+    if op in ('jret', 'n.jret') and not args:
         return op, ['ac']
     stack = re.fullmatch(r'(n\.)?(push|pop)(8|16|32|p)', op)
     if stack:

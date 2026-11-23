@@ -30,6 +30,7 @@ MAJOR_CLASS = read_enum(header, 'ZLX_ISA_major_class')
 # Family operation IDs index C dispatch tables, not individual wire opcodes.
 MAJOR = {name: code for name, code in MAJOR.items() if name not in MAJOR_CLASS}
 V3_MINOR = {name: code for name, code in MINOR.items() if name not in ('mvw', 'wmv')}
+V3_MINOR['calli'] = 26
 V3_MINOR.update(addi=22, slli=23, srli=24, srai=25, get5=27)
 
 

@@ -106,7 +106,7 @@ def link(obj):
         elif (obj['target'] == CURRENT_ISA and record['operation'] in extra.COMPACT_IMMEDIATE
               and len(record['args']) == 2):
             sizes.append(2)
-        elif mnemonic(record) in ('calli', 'm.calli', 'get5', 'm.get5'):
+        elif mnemonic(record) in ('calli', 'm.calli', 'bcall10', 'm.bcall10', 'blink10', 'm.blink10', 'get5', 'm.get5'):
             sizes.append(2)
         elif mnemonic(record) in ('n.get32', 'get32', 'get'):
             sizes.append(6)

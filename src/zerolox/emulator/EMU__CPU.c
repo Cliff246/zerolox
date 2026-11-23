@@ -716,7 +716,7 @@ OPERATION(minor_bineqc_update)
 	return output;
 }
 
-OPERATION(minor_calli)
+OPERATION(minor_blink10)
 {
 	OPERATION_SETUP;
 	stage_register(&output, ZLX_ISA_register_identifier_return_pointer, ZLX_EMU_get_pc__CPU(cpu) + 2);
@@ -726,9 +726,30 @@ OPERATION(minor_calli)
 	return output;
 }
 
+OPERATION(minor_bcall10)
+{
+    OPERATION_SETUP;
+    uint32_t sp = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_stack_pointer) - 3;
+    uint32_t old_rp = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_return_pointer);
+    store_variable_size_data(memory, sp, old_rp, 3);
+    output.memory_operation = true;
+    output.memory_store = true;
+    output.memory_address = sp;
+    output.memory_value = old_rp;
+    stage_register(&output, ZLX_ISA_register_identifier_stack_pointer, sp);
+    output.use_destination_2 = true;
+    output.destination_2 = ZLX_ISA_register_identifier_return_pointer;
+    output.destination_2_data = ZLX_EMU_get_pc__CPU(cpu) + 2;
+    output.pc_changed = true;
+    output.pc_set_or_add = true;
+    output.pc_value = 2 * MY_sign_extend32(paramaters.imm10, 10);
+    return output;
+}
+
 static const ZLX_EMU__CPU_operation_t minor_operations[ZLX_ISA_minor_operation_count] =
 {
-	[ZLX_ISA_minor_operation_calli] = minor_calli,
+	[ZLX_ISA_minor_operation_blink10] = minor_blink10,
+	[ZLX_ISA_minor_operation_bcall10] = minor_bcall10,
 	[ZLX_ISA_minor_operation_bieqc_update] = minor_bieqc_update,
 	[ZLX_ISA_minor_operation_bineqc_update] = minor_bineqc_update,
 	[ZLX_ISA_minor_operation_move] = minor_move,
@@ -1499,6 +1520,7 @@ OPERATION(major_call)
 	OPERATION_SETUP;
 
 	uint32_t dest = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	if (dest & 1) MY_FAULT("jump target must be parcel aligned");
 	uint32_t pc = ZLX_EMU_get_pc__CPU(cpu);	
 
 	
@@ -1516,27 +1538,34 @@ OPERATION(major_call)
 	return output;
 }
 
-OPERATION(major_return)
+OPERATION(major_blink21)
 {
+    OPERATION_SETUP;
+    stage_register(&output, ZLX_ISA_register_identifier_return_pointer, ZLX_EMU_get_pc__CPU(cpu) + 4);
+    output.pc_changed = true;
+    output.pc_set_or_add = true;
+    output.pc_value = 2 * MY_sign_extend32(paramaters.imm32, 21);
+    return output;
+}
 
-	OPERATION_SETUP;
-
-	uint32_t rp = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_return_pointer);	
-		
-	output.pc_set_or_add = false;	
-	output.pc_changed = true;
-	output.pc_value = rp;
-
-	uint32_t data = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_accumulator);
-	output.use_destination = true;
-	output.use_destination_1 = true;
-	output.destination_1 = paramaters.source_1;
-	output.destination_1_data = data;
-
-
-	
-	return output;
-
+OPERATION(major_bcall21)
+{
+    OPERATION_SETUP;
+    uint32_t sp = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_stack_pointer) - 3;
+    uint32_t old_rp = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_return_pointer);
+    store_variable_size_data(memory, sp, old_rp, 3);
+    output.memory_operation = true;
+    output.memory_store = true;
+    output.memory_address = sp;
+    output.memory_value = old_rp;
+    stage_register(&output, ZLX_ISA_register_identifier_stack_pointer, sp);
+    output.use_destination_2 = true;
+    output.destination_2 = ZLX_ISA_register_identifier_return_pointer;
+    output.destination_2_data = ZLX_EMU_get_pc__CPU(cpu) + 4;
+    output.pc_changed = true;
+    output.pc_set_or_add = true;
+    output.pc_value = 2 * MY_sign_extend32(paramaters.imm32, 21);
+    return output;
 }
 
 OPERATION(major_callp)
@@ -1545,6 +1574,7 @@ OPERATION(major_callp)
 	OPERATION_SETUP;
 
 	uint32_t dest = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	if (dest & 1) MY_FAULT("jump target must be parcel aligned");
 	uint32_t data_2 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_stack_pointer);
 	uint32_t data_1 = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_return_pointer);
 	
@@ -1685,10 +1715,11 @@ static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_c
 	[ZLX_ISA_major_operation_bltu] = major_branch_less_than_unsigned,
 	[ZLX_ISA_major_operation_bgeu] = major_branch_greater_than_equals_unsigned,
 	[ZLX_ISA_major_operation_j] = major_jump,
-	[ZLX_ISA_major_operation_call] = major_call,
-	[ZLX_ISA_major_operation_callp] = major_callp,
-	[ZLX_ISA_major_operation_ret] = major_return,
-	[ZLX_ISA_major_operation_retp] = major_returnp,
+	[ZLX_ISA_major_operation_jlink] = major_call,
+	[ZLX_ISA_major_operation_jcall] = major_callp,
+		[ZLX_ISA_major_operation_jret] = major_returnp,
+	[ZLX_ISA_major_operation_bcall21] = major_bcall21,
+	[ZLX_ISA_major_operation_blink21] = major_blink21,
 	[ZLX_ISA_major_operation_get16] = major_get16,
 	[ZLX_ISA_major_operation_get32] = major_get32
 
@@ -1816,6 +1847,7 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 		case ZLX_ISA_major_format_type_5_f:
 			parameters.source_1 = major.u__format_5_f.a5;
 			parameters.imm16 = major.u__format_5_f.bf;
+			parameters.imm32 = ((uint32_t)major.u__format_5_f.a5 << 16) | major.u__format_5_f.bf;
 			break;
 		case ZLX_ISA_major_format_type_5_f_f:
 			parameters.source_1 = major.u__format_5_f_f.a5;

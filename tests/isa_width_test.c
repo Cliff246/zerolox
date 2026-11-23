@@ -15,12 +15,13 @@ int main(void)
 		{
 			width = 1;
 			legal = group <= ZLX_ISA_minor_operation_bineqc_update ||
-			        group == ZLX_ISA_minor_operation_calli;
+			        group == ZLX_ISA_minor_operation_bcall10 ||
+			        group == ZLX_ISA_minor_operation_blink10;
 		}
-		else if (opcode <= ZLX_ISA_major_operation_extb)
+		else if (opcode <= ZLX_ISA_major_operation_blink21)
 		{
 			width = ZLX_ISA_Major_operation_size[ZLX_ISA_Major_operation_formats[opcode]];
-			legal = true;
+			legal = width != 0;
 		}
 		else if (group >= ZLX_ISA_major_class_inc && group <= ZLX_ISA_major_class_get_neg)
 		{
