@@ -33,6 +33,13 @@ class EncodingTests(unittest.TestCase):
             with self.assertRaises(Error):
                 binary(f'm.{name} t0, 1')
 
+    def test_accumulator_add_source_order(self):
+        compact = binary('m.adda t0, t1')
+        self.assertEqual(len(compact), 2)
+        self.assertEqual(binary('add t0, ac, t1'), compact)
+        self.assertEqual(binary('add t0, t1, ac'), compact)
+        self.assertEqual(len(binary('n.add t0, t1, ac')), 4)
+
     def test_stack_triplet_encoding(self):
         for name in ('push3', 'pop3'):
             first = (MAJOR[name] << 6) | (8 << 1)

@@ -25,7 +25,8 @@ def encode(rec, chosen, symbols, pc, target=CURRENT_ISA):
     if chosen in ('m.mv','m.add','m.adda','m.sub'):
         if op in ('add','n.add','sub','n.sub'):
             d,a,b=map(reg,args)
-            a,b=(a,b) if chosen in ('m.add','m.sub') else (d,b)
+            if chosen == 'm.adda':
+                a, b = d, b if a == reg('ac') else a
         else: a,b=map(reg,args)
         return parcel((minor[minor_name]<<11)|(a<<6)|(b<<1)|1)
     if chosen in ('m.geta','m.b','m.baeqz','m.baneqz'):
