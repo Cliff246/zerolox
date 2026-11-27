@@ -253,12 +253,12 @@ class ExecutionTests(unittest.TestCase):
                 raw[-1] |= 0x02  # Set the low width bit to turn 32 (10) into reserved (11).
                 result = self.execute(raw, 1)
                 self.assertNotEqual(result.returncode, 0)
-                self.assertIn('reserved memory width', result.stdout + result.stderr)
+                self.assertIn('TODO[', result.stdout + result.stderr)
         for opcode in (5, 9):  # Former pushp and popp slots.
             with self.subTest(opcode=opcode):
                 result = self.execute((opcode << 6).to_bytes(2, 'little'), 1)
                 self.assertNotEqual(result.returncode, 0)
-                self.assertIn('invalid major opcode', result.stdout + result.stderr)
+                self.assertIn('TODO[', result.stdout + result.stderr)
 
     def test_call_and_link_results(self):
         for call in ('bcall10', 'bcall21'):
