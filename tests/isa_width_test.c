@@ -18,7 +18,7 @@ int main(void)
 			        group == ZLX_ISA_minor_operation_bcall10 ||
 			        group == ZLX_ISA_minor_operation_blink10;
 		}
-		else if (opcode <= ZLX_ISA_major_operation_addpc)
+		else if (opcode <= ZLX_ISA_major_operation_pop3)
 		{
 			width = ZLX_ISA_Major_operation_size[ZLX_ISA_Major_operation_formats[opcode]];
 			legal = width != 0;

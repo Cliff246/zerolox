@@ -103,6 +103,8 @@ ZLX_ISA_major_format_type_t ZLX_ISA_Major_operation_formats[ZLX_ISA_major_operat
 	[ZLX_ISA_major_operation_push8] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_push16] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_push32] = ZLX_ISA_major_format_type_5,
+	[ZLX_ISA_major_operation_push3] = ZLX_ISA_major_format_type_5_655,
+	[ZLX_ISA_major_operation_pop3] = ZLX_ISA_major_format_type_5_655,
 	[ZLX_ISA_major_operation_pushp] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_pop8] = ZLX_ISA_major_format_type_5,
 	[ZLX_ISA_major_operation_pop16] = ZLX_ISA_major_format_type_5,

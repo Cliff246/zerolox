@@ -21,6 +21,7 @@ ITER = {'bieqc+': 'bieqc_update', 'bineqc+': 'bineqc_update'}
 BRANCH = {'bneq', 'beq', 'blt', 'bge', 'bltu', 'bgeu'}
 MINOR28 = {'ldsa', 'stsa', 'bieqc', 'bteqa', 'btneqa'}
 PLUS = {'ldplus': 'ld_plus', 'stplus': 'st_plus'}
+STACK_TRIPLET = {'push3', 'pop3'}
 WIDTH = {'8':0,'16':1,'32':2}
 
 def names(target=CURRENT_ISA):
@@ -36,6 +37,7 @@ def names(target=CURRENT_ISA):
         added.update(CLASS_NAMES)
         added.update('n.' + k for k in CLASS_NAMES)
         added.add('n.get5')
+        added.update(STACK_TRIPLET | {'n.' + op for op in STACK_TRIPLET})
     if target == V3_ISA:
         added.update('m.' + k for k in IN_PLACE | {'get5'})
     return (added | set(ITER) | {'m.'+k for k in ITER} | steps | {'n.'+k for k in steps} |
@@ -112,6 +114,20 @@ def parse(op,args,symbols,pc,target=CURRENT_ISA):
         offset = immediate(args[1], -256, 254)
         if offset % 2: raise Error('branch offset must be parcel aligned')
         return 'minor28', (minor[ITER[branch]], modes[args[0]], (offset // 2) & 255)
+    if name in STACK_TRIPLET and target == CURRENT_ISA:
+        count(3)
+        registers = []
+        size_codes = 0
+        for index, operand in enumerate(args):
+            register, _, width = operand.strip().partition('.')
+            if width not in WIDTH:
+                raise Error(f'{op} expects register.8, register.16, or register.32')
+            registers.append(reg(register))
+            size_codes |= WIDTH[width] << (2 * index)
+        destinations = [register for register in registers if register != reg('z0')]
+        if name == 'pop3' and (reg('sp') in destinations or len(set(destinations)) != len(destinations)):
+            raise Error('pop3 requires distinct nonzero destinations other than sp')
+        return 'stack655', (major[name], registers[0], size_codes, registers[1], registers[2])
     if name in ONE:
         count(1); return 'one',(major[ONE[name]],reg(args[0]))
     if name in ('get16','get32'):
@@ -159,11 +175,14 @@ def parse(op,args,symbols,pc,target=CURRENT_ISA):
 def size(form, fields):
     if form=='get': return 4 if fields[-1]==16 else 6
     if form=='branch21': return 4
-    return 4 if form in ('imm11', 'imm6') else 2
+    return 4 if form in ('imm11', 'imm6', 'stack655') else 2
 
 def encode(form, f):
     def p(n): return n.to_bytes(2,'little')
     if form=='branch21': return p((f[0]<<6)|((f[1]>>16)<<1))+p(f[1]&65535)
+    if form == 'stack655':
+        op, first, sizes, second, third = f
+        return p((op << 6) | (first << 1)) + p(((sizes & 31) << 11) | (second << 6) | (third << 1) | (sizes >> 5))
     if form=='one': return p((f[0]<<6)|(f[1]<<1))
     if form=='get':
         op,r,v,bits=f
