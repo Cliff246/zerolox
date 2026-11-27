@@ -734,9 +734,26 @@ OPERATION(minor_bcall10)
     return output;
 }
 
+static uint32_t sign_extend_register_value(uint32_t value, unsigned width)
+{
+	if (width == 32)
+		return value;
+	return MY_sign_extend32(value & ((UINT32_C(1) << width) - 1), width);
+}
+
+OPERATION(ZLX_ISA_execute_sexta)
+{
+	OPERATION_SETUP;
+	unsigned width = paramaters.source_2 ? paramaters.source_2 : 32;
+	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
+	stage_register(&output, ZLX_ISA_register_identifier_accumulator, sign_extend_register_value(value, width));
+	return output;
+}
+
 static const ZLX_EMU__CPU_operation_t minor_operations[ZLX_ISA_minor_operation_count] =
 {
 	[ZLX_ISA_minor_operation_blink10] = minor_blink10,
+	[ZLX_ISA_minor_operation_sexta] = ZLX_ISA_execute_sexta,
 	[ZLX_ISA_minor_operation_bcall10] = minor_bcall10,
 	[ZLX_ISA_minor_operation_bieqc_update] = minor_bieqc_update,
 	[ZLX_ISA_minor_operation_bineqc_update] = minor_bineqc_update,
@@ -1253,9 +1270,7 @@ OPERATION(major_sext)
 	unsigned width = paramaters.imm11;
 	if (width == 0 || width > 32) MY_FAULT("sext width outside 1..32");
 	uint32_t value = ZLX_EMU_get_register__CPU(cpu, paramaters.source_1);
-	if (width < 32)
-		value = MY_sign_extend32(value & ((UINT32_C(1) << width) - 1), width);
-	stage_register(&output, paramaters.source_2, value);
+	stage_register(&output, paramaters.source_2, sign_extend_register_value(value, width));
 	return output;
 }
 

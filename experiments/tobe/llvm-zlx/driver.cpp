@@ -15,7 +15,15 @@ int main(int argc, char **argv) {
     diagnostic.print(argv[0], llvm::errs());
     return 1;
   }
-  llvm::legacy::PassManager passes;
-  passes.add(new Emit(llvm::outs()));
-  passes.run(*module);
+  if (module->getDataLayoutStr().empty())
+    module->setDataLayout("e-p:32:32-i64:64-n32-S64");
+  const auto &layout = module->getDataLayout();
+  if (!layout.isLittleEndian() || layout.getPointerSizeInBits() != 32 ||
+      layout.getIndexSizeInBits(0) != 32) {
+    llvm::errs() << "zlx-emit requires little-endian IR with 32-bit pointers and indices\n";
+    return 1;
+  }
+  Emit emitter(llvm::outs());
+  for (auto &function : *module)
+    emitter.emitFunction(function);
 }

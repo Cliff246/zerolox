@@ -66,6 +66,7 @@ ZLX_ISA_minor_format_type_t ZLX_ISA_Minor_operation_formats[ZLX_ISA_minor_operat
 	[ZLX_ISA_minor_operation_move] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_add] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_adda] = ZLX_ISA_minor_format_type_55,
+	[ZLX_ISA_minor_operation_sexta] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_sub] = ZLX_ISA_minor_format_type_55,
 	[ZLX_ISA_minor_operation_geta] = ZLX_ISA_minor_format_type_a,
 	[ZLX_ISA_minor_operation_bieqc_update] = ZLX_ISA_minor_format_type_28,

@@ -36,7 +36,7 @@ def names(target=CURRENT_ISA):
     if target == CURRENT_ISA:
         added.update(CLASS_NAMES)
         added.update('n.' + k for k in CLASS_NAMES)
-        added.add('n.get5')
+        added.update(('n.get5', 'sexta', 'm.sexta'))
         added.update(STACK_TRIPLET | {'n.' + op for op in STACK_TRIPLET})
     if target == V3_ISA:
         added.update('m.' + k for k in IN_PLACE | {'get5'})
@@ -150,6 +150,10 @@ def parse(op,args,symbols,pc,target=CURRENT_ISA):
         count(3); offset=immediate(args[2],-2048,2046)
         if offset%2: raise Error('branch offset must be parcel aligned')
         return 'imm11',(major[name],reg(args[0]),reg(args[1]),(offset//2)&2047)
+    if op in ('sexta', 'm.sexta') and target == CURRENT_ISA:
+        count(2)
+        width = immediate(args[1], 1, 32)
+        return 'minor55', (minor['sexta'], reg(args[0]), width & 31)
     if op.startswith('m.'):
         parts=op.split('.'); instruction=parts[1]
         if instruction in ('ldsa','stsa'):

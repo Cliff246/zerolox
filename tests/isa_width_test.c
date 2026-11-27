@@ -16,7 +16,8 @@ int main(void)
 			width = 1;
 			legal = group <= ZLX_ISA_minor_operation_bineqc_update ||
 			        group == ZLX_ISA_minor_operation_bcall10 ||
-			        group == ZLX_ISA_minor_operation_blink10;
+			        group == ZLX_ISA_minor_operation_blink10 ||
+			        group == ZLX_ISA_minor_operation_sexta;
 		}
 		else if (opcode <= ZLX_ISA_major_operation_pop3)
 		{

@@ -31,6 +31,7 @@ ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[] =
 	{.type = ZLX_ISA_instruction_type_minor, .a__mnemonic = "btneqa", .opcode = ZLX_ISA_minor_operation_btneqa},
 	{.type = ZLX_ISA_instruction_type_minor, .form = ZLX_SYTX_pattern_form_iterator_branch, .a__mnemonic = "bieqc+", .opcode = ZLX_ISA_minor_operation_bieqc_update},
 	{.type = ZLX_ISA_instruction_type_minor, .form = ZLX_SYTX_pattern_form_iterator_branch, .a__mnemonic = "bineqc+", .opcode = ZLX_ISA_minor_operation_bineqc_update},
+	{.type = ZLX_ISA_instruction_type_minor, .form = ZLX_SYTX_pattern_form_register_immediate, .a__mnemonic = "sexta", .opcode = ZLX_ISA_minor_operation_sexta},
 	{.type = ZLX_ISA_instruction_type_minor, .form = ZLX_SYTX_pattern_form_displacement, .a__mnemonic = "bcall10", .opcode = ZLX_ISA_minor_operation_bcall10},
 	{.type = ZLX_ISA_instruction_type_minor, .form = ZLX_SYTX_pattern_form_displacement, .a__mnemonic = "blink10", .opcode = ZLX_ISA_minor_operation_blink10},
 	{.type = ZLX_ISA_instruction_type_major, .form = ZLX_SYTX_pattern_form_displacement, .a__mnemonic = "bcall21", .opcode = ZLX_ISA_major_operation_bcall21},

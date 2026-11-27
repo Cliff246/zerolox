@@ -64,7 +64,7 @@ def select(rec,symbols,pc,target=CURRENT_ISA):
         d,a,b=map(reg,args)
         if op=='n.add': return op,4
         if d==1: return 'm.add',2
-        if a==1: return 'm.adda',2
+        if a == 1 or b == 1: return 'm.adda', 2
         return 'n.add',4
     if op in ('b','m.b','beqz','bnez','m.baeqz','m.baneqz'):
         if len(args)!=1: raise Error(f'{op} requires one offset')

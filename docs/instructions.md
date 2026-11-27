@@ -97,7 +97,9 @@ minors
     1 | addpc rd | rd = address of this instruction + ac (32-bit wrap).
     2 | bcall21, blink21 | Corresponding signed imm21-parcel branches. High five bits precede low sixteen bits, as in get32.
     Reserved for W hardware: mvw, wmv and wmvw (slots 22, 23 and 24). ZLX-1 faults on both.
-    27 slots allocated including the three W reservations. Five slots remain free.
+    28 slots allocated including the three W reservations. Four slots remain free.
+    1 | sexta source, width | 55 | slot 27, ac = sext(source, width).
+    The first five-bit operand is the source register. The second encodes a width of 1 through 31, with zero encoding 32.
 	1 |	mv		|			| 
 	1 | add		|			|
 	1 | adda	|			|
