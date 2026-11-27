@@ -6,8 +6,8 @@ from syntax import split_args
 
 def expr(text, symbols, here, stack=()):
     # Replace the deliberately small expression language with safe Python AST nodes.
-    def unit(m): return str(int(m.group(1), 0) * {'b':1,'s':2,'w':4,'l':8,'p':3}[m.group(2)])
-    text = re.sub(r'\b(0x[0-9a-fA-F]+|\d+)([bswlp])\b', unit, text)
+    def unit(m): return str(int(m.group(1), 0) * {'b':1,'s':2,'w':4,'l':8}[m.group(2)])
+    text = re.sub(r'\b(0x[0-9a-fA-F]+|\d+)([bswl])\b', unit, text)
     refs = {}
     def ref(m):
         key = f'__ref{len(refs)}'; refs[key] = (m.group(1),m.group(2)); return key

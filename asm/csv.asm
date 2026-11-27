@@ -23,7 +23,7 @@ field_begin:
 
     bxeqc #capacity_error 
     mv ac, t5
-    st+a.p [s0{1}]
+    st+a.32 [s0{1}]
 
     addi ix, 1
     ld+a.8 [t4{1}]

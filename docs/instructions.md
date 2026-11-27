@@ -12,11 +12,11 @@ majors:
 	1 | push8	|			|
 	1 | push16	|			|
 	1 | push32	|			|
-	1 | pushp	|			|
+	1 | retired pushp slot | Faults on ZLX-1.
 	1 | pop8	|			|
     1 | pop16	|			|
 	1 | pop32	|			|
-	1 | popp	|			|
+	1 | retired popp slot  | Faults on ZLX-1.
 	2 | get16	|			|
 	3 | get32	|			|
     2 | ori, andi, xori     | 5_b5 | signed 11-bit immediate
@@ -61,6 +61,10 @@ The one-parcel major `55` format uses `[class5][magnitude5][register5][0]`.
 | 2, 3 | inc, dec | 1…32. Field zero encodes 32. |
 | 4, 5, 6 | slli, srli, srai in place | 1…31. Field zero is reserved on ZLX-1. |
 | 7, 8 | getpos, getneg | 1…32. Write the positive or negative magnitude. |
+
+Memory width codes 0, 1, and 2 select 8, 16, and 32 bits. Code 3 faults on ZLX-1 and is reserved for 64-bit transfers. The retired push and pop slots are reserved for 64-bit stack operations.
+
+`bcall10`, `bcall21`, and `jcall` save the full 32-bit old rp in a four-byte stack slot. `jret` restores it and advances sp by four bytes. Rebuild code that assumes the old three-byte stack layout.
 
 The assembler accepts signed two-operand `addi` and `get5`. Each selects the
 corresponding positive or negative family. Ordinary `get` also accepts zero.

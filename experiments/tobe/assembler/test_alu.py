@@ -241,11 +241,30 @@ class ExecutionTests(unittest.TestCase):
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(reason, result.stdout + result.stderr)
 
+    def test_retired_memory_encodings_fault(self):
+        memory_forms = (
+            'n.ld.32 t0, [t1]', 'n.st.32 t0, [t1]',
+            'm.lda.32 [t0]', 'm.ald.32 t0, [ac]', 'm.ldsa.32 0', 'm.ldplus.32 t0, 1',
+            'm.sta.32 [t0]', 'm.ast.32 t0, [ac]', 'm.stsa.32 0', 'm.stplus.32 t0, 1',
+        )
+        for source in memory_forms:
+            with self.subTest(source=source):
+                raw = bytearray(binary(source))
+                raw[-1] |= 0x02  # Set the low width bit to turn 32 (10) into reserved (11).
+                result = self.execute(raw, 1)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('TODO[', result.stdout + result.stderr)
+        for opcode in (5, 9):  # Former pushp and popp slots.
+            with self.subTest(opcode=opcode):
+                result = self.execute((opcode << 6).to_bytes(2, 'little'), 1)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('TODO[', result.stdout + result.stderr)
+
     def test_call_and_link_results(self):
-        for call, size in [('bcall10', 2), ('bcall21', 4)]:
-            source = ('get16 sp, 0x8000\nget16 rp, 0x1234\n' + call +
-                      ' #callee\nget t0, 7\nb #done\ncallee:\nget ac, 42\njret t1\ndone:')
-            self.check_program(source, {1: 42, 2: 0x8000, 3: 0x1234, 8: 7, 9: 42}, 7)
+        for call in ('bcall10', 'bcall21'):
+            source = ('get16 sp, 0x8000\nget32 rp, 0xfe001234\n' + call +
+                      ' #callee\nget t0, 7\nb #done\ncallee:\nmv t2, sp\nget ac, 42\njret t1\ndone:')
+            self.check_program(source, {1: 42, 2: 0x8000, 3: 0xfe001234, 8: 7, 9: 42, 10: 0x7ffc}, 8)
         for link in ('blink10', 'blink21'):
             source = ('get16 sp, 0x8000\n' + link +
                       ' #callee\nget t0, 7\nb #done\ncallee:\nget ac, 42\nj rp\ndone:')
@@ -269,9 +288,9 @@ class ExecutionTests(unittest.TestCase):
                            {1: 6, 8: 8, 9: 7}, 4)
 
     def test_register_call_and_link(self):
-        call = ('get16 sp, 0x8000\nget16 rp, 0x1234\nget16 t0, &callee\n'
-                'jcall t0\nget t1, 7\nb #done\ncallee:\nget ac, 42\njret t2\ndone:')
-        self.check_program(call, {1: 42, 2: 0x8000, 3: 0x1234, 9: 7, 10: 42}, 8)
+        call = ('get16 sp, 0x8000\nget32 rp, 0xfe001234\nget16 t0, &callee\n'
+                'jcall t0\nget t1, 7\nb #done\ncallee:\nmv t3, sp\nget ac, 42\njret t2\ndone:')
+        self.check_program(call, {1: 42, 2: 0x8000, 3: 0xfe001234, 9: 7, 10: 42, 11: 0x7ffc}, 9)
         link = ('get16 t0, &callee\njlink t0\nget t1, 7\nb #done\n'
                 'callee:\nget ac, 42\nj rp\ndone:')
         self.check_program(link, {1: 42, 9: 7}, 6)

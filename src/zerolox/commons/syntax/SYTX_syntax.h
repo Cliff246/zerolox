@@ -23,9 +23,7 @@ typedef enum ZLX_SYTX_instruction_postfix
 	ZLX_SYTX_instruction_postfix_none,
 	ZLX_SYTX_instruction_postfix_8,
 	ZLX_SYTX_instruction_postfix_16,
-	ZLX_SYTX_instruction_postfix_32,
-	ZLX_SYTX_instruction_postfix_24,
-	ZLX_SYTX_instruction_postfix_p
+	ZLX_SYTX_instruction_postfix_32
 }ZLX_SYTX_instruction_postfix_t;
 
 extern char *ZLX_SYTX_instruction_postfix_keywords[];

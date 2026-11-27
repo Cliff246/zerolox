@@ -164,11 +164,11 @@ typedef enum ZLX_ISA_major_operation
 	ZLX_ISA_major_operation_push8,
 	ZLX_ISA_major_operation_push16,
 	ZLX_ISA_major_operation_push32,
-	ZLX_ISA_major_operation_pushp,
+	ZLX_ISA_major_operation_pushp, /* retired, faults */
 	ZLX_ISA_major_operation_pop8,
 	ZLX_ISA_major_operation_pop16,
 	ZLX_ISA_major_operation_pop32,
-	ZLX_ISA_major_operation_popp,
+	ZLX_ISA_major_operation_popp, /* retired, faults */
 	ZLX_ISA_major_operation_get16,
 	ZLX_ISA_major_operation_get32,
 	ZLX_ISA_major_operation_addi,

@@ -11,7 +11,7 @@ class DesignCases(unittest.TestCase):
             ('ald t1, [5]', 'm.ald.8 t1, [ac, 5]'),
             ('stsa [5]', 'm.stsa.8 5'),
             ('ld+a [t4{1}]', 'm.ldplus.8 t4, 1'),
-            ('st+a.p [s0{-1}]', 'm.stplus.p s0, -1'),
+            ('st+a.32 [s0{-1}]', 'm.stplus.32 s0, -1'),
             ('jret', 'jret ac'),
             ('push8 t1', 'push.8 t1'),
         ]
@@ -21,6 +21,16 @@ class DesignCases(unittest.TestCase):
         for invalid in ('ld+a [t4, 1]', 'ld+a [t4{1}, 5]', 'ld+a [t4{0}]', 'lda t0, 5'):
             with self.subTest(invalid=invalid), self.assertRaises(Error):
                 build_image(assemble(invalid))
+
+    def test_retired_pointer_spellings(self):
+        for source in (
+            'ld.p t0, [t1]', 'n.st.p t0, [t1]', 'ld.24 t0, [t1]',
+            'm.lda.p [t0]', 'm.ald.p t0, [ac]', 'ldsa.p [sp]',
+            'ld+a.p [t0{1}]', 'm.stplus.p t0, 1',
+            'pushp t0', 'n.push.p t0', 'n.popp t0', 'pop.p t0',
+        ):
+            with self.subTest(source=source), self.assertRaises(Error):
+                assemble(source)
 
     def test_current_branch_selection_and_forward_reference(self):
         for selector, alias, comparison in (

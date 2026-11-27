@@ -8,7 +8,7 @@ start:
     ld.16 ac, [r8, 3s]
     ld.16 ac, [r8, 3]
     ld.32 ac, [r8, -8]
-    ld.p ac, [r8, $COUNT * 1p]
+    ld.32 ac, [r8, $COUNT * 1w]
     b #start
 
 %align 4
