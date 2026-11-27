@@ -40,6 +40,15 @@ class EncodingTests(unittest.TestCase):
         self.assertEqual(binary('add t0, t1, ac'), compact)
         self.assertEqual(len(binary('n.add t0, t1, ac')), 4)
 
+    def test_sexta_encoding(self):
+        for width in (1, 8, 16, 31, 32):
+            word = (27 << 11) | (8 << 6) | ((width & 31) << 1) | 1
+            self.assertEqual(binary(f'm.sexta t0, {width}'), word.to_bytes(2, 'little'))
+            self.assertEqual(binary(f'sexta t0, {width}'), word.to_bytes(2, 'little'))
+        for width in (0, 33):
+            with self.assertRaises(Error):
+                binary(f'sexta t0, {width}')
+
     def test_stack_triplet_encoding(self):
         for name in ('push3', 'pop3'):
             first = (MAJOR[name] << 6) | (8 << 1)
@@ -260,6 +269,12 @@ class ExecutionTests(unittest.TestCase):
                 result = self.execute(data, 1)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(reason, result.stdout + result.stderr)
+
+    def test_accumulator_sign_extension(self):
+        self.check_program('get32 t0, 0x88991180\nm.sexta t0, 8',
+                           {1: 0xffffff80, 8: 0x88991180}, 2)
+        self.check_program('get32 ac, 0xaabb127f\nsexta ac, 8', {1: 127}, 2)
+        self.check_program('get32 t0, 0x88991180\nsexta t0, 32', {1: 0x88991180}, 2)
 
     def test_stack_triplet_round_trip(self):
         source = ('get16 sp, 0x8000\nget32 t0, 0xaabbccdd\nget32 t1, 0x44332211\n'

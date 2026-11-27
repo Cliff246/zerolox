@@ -381,7 +381,10 @@ struct Emit {
           auto source = reg(operand);
           auto target = dest();
           if (isa<SExtInst>(i)) {
-            out << "sext " << target << ", " << source << ", " << from << "\n";
+            if (target == "ac")
+              out << "m.sexta " << source << ", " << from << "\n";
+            else
+              out << "sext " << target << ", " << source << ", " << from << "\n";
           } else {
             mask(target, source, std::min(from, to));
           }
@@ -391,15 +394,25 @@ struct Emit {
           const auto *compare = dyn_cast<ICmpInst>(select->getCondition());
           const auto *zeroTest = compare ? foldedZeroTest(*compare) : nullptr;
           auto condition = reg(zeroTest ? zeroTest : select->getCondition());
-          const char *branch = zeroTest && compare->getPredicate() == CmpInst::ICMP_EQ ? "bneq" : "beq";
+          bool trueWhenZero = zeroTest && compare->getPredicate() == CmpInst::ICMP_EQ;
           auto whenTrue = reg(select->getTrueValue());
           auto whenFalse = reg(select->getFalseValue());
           auto target = dest();
           auto label = labels[&bb] + "_select" + std::to_string(selectIndex++);
-          out << branch << " " << condition << ", z0, #" << label << "_false\n";
-          move(target, whenTrue);
-          out << "b #" << label << "_end\n" << label << "_false:\n";
-          move(target, whenFalse);
+          // A default move may overwrite a value that the test or alternate still needs.
+          if (target == whenTrue || (target != condition && target != whenFalse)) {
+            move(target, whenTrue);
+            out << (trueWhenZero ? "beq " : "bneq ") << condition << ", z0, #" << label << "_end\n";
+            move(target, whenFalse);
+          } else if (target == whenFalse) {
+            out << (trueWhenZero ? "bneq " : "beq ") << condition << ", z0, #" << label << "_end\n";
+            move(target, whenTrue);
+          } else {
+            out << (trueWhenZero ? "bneq " : "beq ") << condition << ", z0, #" << label << "_false\n";
+            move(target, whenTrue);
+            out << "b #" << label << "_end\n" << label << "_false:\n";
+            move(target, whenFalse);
+          }
           out << label << "_end:\n";
         }else if(auto *br=dyn_cast<BranchInst>(&i)){
           if(br->isConditional()){

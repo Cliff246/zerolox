@@ -82,6 +82,7 @@ typedef enum ZLX_ISA_minor_operation
 	ZLX_ISA_minor_operation_wmvw = 24,
 	ZLX_ISA_minor_operation_blink10 = 25,
 	ZLX_ISA_minor_operation_bcall10 = 26,
+	ZLX_ISA_minor_operation_sexta = 27,
 	ZLX_ISA_minor_operation_count, /* Exclusive slot bound, including holes. */
 }ZLX_ISA_minor_operation_t;
 

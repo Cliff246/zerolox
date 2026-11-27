@@ -62,6 +62,7 @@ int main(void)
 	check_opcode("getneg a0, 32", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_get_neg);
 	check_opcode("get5 a0, 16", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_get_pos);
 	check_opcode("j t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_j);
+	check_opcode("m.sexta ac, 8", ZLX_ISA_instruction_type_minor, ZLX_ISA_minor_operation_sexta);
 	check_opcode("extb t0, t1, 31", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_extb);
 	check_opcode("andn t0, t1, t2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_andn);
 	check_opcode("clt t0, t1, t2", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_clt);

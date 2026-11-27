@@ -28,6 +28,7 @@ This table describes the forms available to the `zerolox1-emu-v4` backend. See [
 | `push3`, `pop3` and `n.` versions | register.W, register.W, register.W |
 | `extb`, `n.extb` | `destination, source, index` returns bit `index` as 0 or 1. The unsigned 11-bit field holds the index. ZLX-1 faults on values above 31. |
 | `sext` | `destination, source, width` with width in bits from 1 through 32 |
+| `sexta`, `m.sexta` | `source, width` from 1 through 32 bits. The result goes to `ac`. |
 | `bcall10`, `blink10` | Even byte displacement from the call, −1024…+1022. Both link to rp. bcall10 also pushes the old rp. |
 | `b21`, `bcall21`, `blink21` | Even byte displacement from the call, −2097152…+2097150. High five displacement bits are in the first parcel, followed by the low sixteen. bcall21 pushes old rp, and b21 branches without linking. |
 | `get5` | `register, value` from −32…−1 or +1…+32. Selects `getneg` or `getpos`. Plain `get` can also produce zero in one parcel. |
