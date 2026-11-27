@@ -175,6 +175,7 @@ class DesignCases(unittest.TestCase):
             **{x:'t0, t1, 1' for x in extra.IMM},
             **{x:'t0, t1, 2' for x in extra.BRANCH},
             **{x:'t0' for x in extra.ONE},
+            **{x:'t0.8, t1.16, t2.32' for x in extra.STACK_TRIPLET},
             **{x:'t0, 7' for x in ('inc','dec','getpos','getneg')},
             **{x:'x+, 2' for x in extra.ITER},
             **{'m.'+x:'y-, 2' for x in extra.ITER},

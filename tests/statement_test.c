@@ -56,6 +56,8 @@ int main(void)
 	check_opcode("jcall t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_jcall);
 	check_opcode("jlink t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_jlink);
 	check_opcode("jret t0", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_jret);
+	check_opcode("push3 t0.8, t1.16, t2.32", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_push3);
+	check_opcode("n.pop3 t0.8, t1.16, t2.32", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_pop3);
 	check_opcode("dec t0, 32", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_dec);
 	check_opcode("getneg a0, 32", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_get_neg);
 	check_opcode("get5 a0, 16", ZLX_ISA_instruction_type_major, ZLX_ISA_major_operation_get_pos);

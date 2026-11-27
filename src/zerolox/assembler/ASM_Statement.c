@@ -121,7 +121,7 @@ static ZLX_ASM_Statement_information_t get_statement_tokentypes(MY_Token_group_t
 	}
 	int count = _group.length;
 	if(count >= ZLX_ASM_TYPE_BUFFER_SIZE)
-		MY_FAULT("count >= 16");
+		MY_FAULT("too many tokens in statement");
 	ZLX_ASM_Statement_information_t statement_information =
 	{
 		.group = _group,

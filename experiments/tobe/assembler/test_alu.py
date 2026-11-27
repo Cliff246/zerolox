@@ -33,6 +33,19 @@ class EncodingTests(unittest.TestCase):
             with self.assertRaises(Error):
                 binary(f'm.{name} t0, 1')
 
+    def test_stack_triplet_encoding(self):
+        for name in ('push3', 'pop3'):
+            first = (MAJOR[name] << 6) | (8 << 1)
+            # Width fields for 8, 16, and 32 are 00, 01, and 10 from low to high.
+            second = (4 << 11) | (9 << 6) | (10 << 1) | 1
+            expected = first.to_bytes(2, 'little') + second.to_bytes(2, 'little')
+            self.assertEqual(binary(f'{name} t0.8, t1.16, t2.32'), expected)
+            self.assertEqual(binary(f'n.{name} t0.8, t1.16, t2.32'), expected)
+        for source in ('push3 t0.8, t1.16', 'push3 t0.8, t1.16, t2.64',
+                       'pop3 t0.8, t1.16, t0.32', 'pop3 t0.8, t1.16, sp.32'):
+            with self.subTest(source=source), self.assertRaises(Error):
+                binary(source)
+
     def test_previous_target_bytes(self):
         source = 'm.addi t0, 16\nm.slli t0, 0\nm.srli t0, 31\nm.srai t0, 1\nm.get5 t0, -16\ncalli 2'
         data = build_image(assemble(source, target='zerolox1-emu-v3'))
@@ -240,6 +253,31 @@ class ExecutionTests(unittest.TestCase):
                 result = self.execute(data, 1)
                 self.assertNotEqual(result.returncode, 0)
                 self.assertIn(reason, result.stdout + result.stderr)
+
+    def test_stack_triplet_round_trip(self):
+        source = ('get16 sp, 0x8000\nget32 t0, 0xaabbccdd\nget32 t1, 0x44332211\n'
+                  'get32 t2, 0x89abcdef\npush3 t0.8, t1.16, t2.32\nmv t3, sp\n'
+                  'ld.32 t4, [sp]\npop3 t0.8, t1.16, t2.32')
+        self.check_program(source, {2: 0x8000, 8: 0xdd, 9: 0x2211, 10: 0x89abcdef,
+                                   11: 0x7ff9, 12: 0x89abcdef}, 8)
+        self.check_program('get16 sp, 0x8000\npush3 sp.32, z0.8, z0.16\n'
+                           'pop3 t0.32, z0.8, z0.16', {2: 0x8000, 8: 0x8000}, 3)
+
+    def test_stack_triplet_invalid_raw_encodings(self):
+        for name in ('push3', 'pop3'):
+            for field in (0x1800, 0x6000, 0x8001):
+                raw = binary(f'{name} t0.8, t1.8, t2.8')
+                invalid = int.from_bytes(raw[2:], 'little') | field
+                result = self.execute(raw[:2] + invalid.to_bytes(2, 'little'), 1)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('TODO[', result.stdout + result.stderr)
+
+        prefix = binary('get16 sp, 0x8000\npush3 t0.8, t1.16, t2.32')
+        pop = binary('pop3 t0.8, t1.16, t2.32')
+        second = (int.from_bytes(pop[2:], 'little') & ~0x3e) | (2 << 1)
+        result = self.execute(prefix + pop[:2] + second.to_bytes(2, 'little'), 3)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('overlapping w4', result.stdout + result.stderr)
 
     def test_retired_memory_encodings_fault(self):
         memory_forms = (

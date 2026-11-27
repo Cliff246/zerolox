@@ -19,6 +19,7 @@ majors:
 	1 | retired popp slot  | Faults on ZLX-1.
 	2 | get16	|			|
 	3 | get32	|			|
+    2 | push3, pop3 | 5_655 | Three registers with independent widths.
     2 | ori, andi, xori     | 5_b5 | signed 11-bit immediate
     2 | slli, srli, srai    | 5_b5 | low 5 bits of the 11-bit shift count
     2 | extb                | 5_b5 | rd = (rs >> index) & 1, bit 0 is least significant, ZLX-1 accepts 0..31
@@ -65,6 +66,20 @@ The one-parcel major `55` format uses `[class5][magnitude5][register5][0]`.
 Memory width codes 0, 1, and 2 select 8, 16, and 32 bits. Code 3 faults on ZLX-1 and is reserved for 64-bit transfers. The retired push and pop slots are reserved for 64-bit stack operations.
 
 `bcall10`, `bcall21`, and `jcall` save the full 32-bit old rp in a four-byte stack slot. `jret` restores it and advances sp by four bytes. Rebuild code that assumes the old three-byte stack layout.
+
+`push3` and `pop3` take three sized registers, for example
+`push3 t0.8, t1.16, t2.32`. The `5_655` fields are `r1, widths, r2, r3`.
+The width pairs in `b6` occupy bits 1:0 for r1, 3:2 for r2, and 5:4 for r3.
+Each pair uses the ordinary ZLX-1 memory width codes.
+In parcel two, bits 15:11 hold the low five bits of `b6`, bits 10:6 hold r2,
+bits 5:1 hold r3, and bit 0 holds the high bit of `b6`.
+
+Push predecrements sp separately for each operand in source order. Pop reads
+in reverse order and zero-extends each value into its associated destination,
+so paired instructions can list the same registers and widths in the same order.
+The net stack movement is the sum of the three widths in bytes.
+Pop destinations must be distinct except that `z0` can be repeated to discard
+values. A pop destination of `sp` conflicts with the implicit stack update.
 
 The assembler accepts signed two-operand `addi` and `get5`. Each selects the
 corresponding positive or negative family. Ordinary `get` also accepts zero.
@@ -134,6 +149,4 @@ majors:
 	2 | ld2		|			| r1 = mem_size[r2, r3]
 	2 | st2		|			| mem[r2, r3] = r1
 
-	2 | push3	|			| push 3 registers of 3 sizes. 
-	2 | pop3	|			| push 3 registers of 3 sizes. 
 	1 | auipc	|			|

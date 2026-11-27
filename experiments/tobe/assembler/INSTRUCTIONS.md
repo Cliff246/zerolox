@@ -25,6 +25,7 @@ This table describes the forms available to the `zerolox1-emu-v4` backend. See [
 | `bieqc+`, `bineqc+` and `m.` versions | `x± or y±, d`. The high selector bit picks x/y. The low bit picks increment/decrement. Both outcomes update the iterator after comparing its old value. |
 | `m.bteqa`, `m.btneqa` | `t0..t3, d` |
 | `push.W`, `pop.W`, `n.push.W`, `n.pop.W` | register |
+| `push3`, `pop3` and `n.` versions | register.W, register.W, register.W |
 | `extb`, `n.extb` | `destination, source, index` returns bit `index` as 0 or 1. The unsigned 11-bit field holds the index. ZLX-1 faults on values above 31. |
 | `sext` | `destination, source, width` with width in bits from 1 through 32 |
 | `bcall10`, `blink10` | Even byte displacement from the call, −1024…+1022. Both link to rp. bcall10 also pushes the old rp. |

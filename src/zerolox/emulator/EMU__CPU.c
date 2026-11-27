@@ -1608,6 +1608,69 @@ OPERATION(major_returnp)
 }
 
 
+static void ZLX_ISA_get_stack_triplet_sizes(uint8_t size_codes, uint8_t sizes[3])
+{
+	for (unsigned i = 0; i < 3; ++i)
+		sizes[i] = imm2_size_to_bytes((size_codes >> (2 * i)) & 3);
+}
+
+OPERATION(ZLX_ISA_execute_push3)
+{
+	OPERATION_SETUP;
+	uint8_t sizes[3];
+	ZLX_ISA_get_stack_triplet_sizes(paramaters.imm6, sizes);
+	const uint8_t registers[] = {paramaters.source_1, paramaters.source_2, paramaters.source_3};
+	const uint8_t total = sizes[0] + sizes[1] + sizes[2];
+	uint32_t sp = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_stack_pointer);
+	if (sp < total || sp > memory->size)
+		MY_FAULT("push3 stack range is outside memory");
+
+	uint32_t value = 0;
+	for (unsigned i = 0; i < 3; ++i)
+	{
+		value = ZLX_EMU_get_register__CPU(cpu, registers[i]);
+		sp -= sizes[i];
+		store_variable_size_data(memory, sp, value, sizes[i]);
+	}
+	stage_register(&output, ZLX_ISA_register_identifier_stack_pointer, sp);
+	output.memory_operation = true;
+	output.memory_store = true;
+	output.memory_address = sp;
+	output.memory_value = MY_cap_to_bytes(value, sizes[2]);
+	return output;
+}
+
+OPERATION(ZLX_ISA_execute_pop3)
+{
+	OPERATION_SETUP;
+	uint8_t sizes[3];
+	ZLX_ISA_get_stack_triplet_sizes(paramaters.imm6, sizes);
+	uint32_t sp = ZLX_EMU_get_register__CPU(cpu, ZLX_ISA_register_identifier_stack_pointer);
+	const uint64_t next_sp = (uint64_t)sp + sizes[0] + sizes[1] + sizes[2];
+	if (next_sp > memory->size || next_sp > UINT32_MAX)
+		MY_FAULT("pop3 stack range is outside memory");
+
+	uint32_t value_3 = load_variable_size_data(memory, sp, sizes[2]);
+	uint32_t value_2 = load_variable_size_data(memory, sp + sizes[2], sizes[1]);
+	uint32_t value_1 = load_variable_size_data(memory, sp + sizes[2] + sizes[1], sizes[0]);
+
+	stage_register(&output, ZLX_ISA_register_identifier_stack_pointer, next_sp);
+	output.use_destination_2 = true;
+	output.destination_2 = paramaters.source_1;
+	output.destination_2_data = value_1;
+	output.use_destination_3 = true;
+	output.destination_3 = paramaters.source_2;
+	output.destination_3_data = value_2;
+	output.use_destination_4 = true;
+	output.destination_4 = paramaters.source_3;
+	output.destination_4_data = value_3;
+	output.memory_operation = true;
+	output.memory_load = true;
+	output.memory_address = sp;
+	output.memory_value = value_3;
+	return output;
+}
+
 OPERATION(ZLX_ISA_execute_retired_pointer_stack_operation)
 {
 	(void)machine;
@@ -1661,6 +1724,8 @@ static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_c
 	[ZLX_ISA_major_operation_push8] = major_push8,
 	[ZLX_ISA_major_operation_push16] = major_push16,
 	[ZLX_ISA_major_operation_push32] = major_push32,
+	[ZLX_ISA_major_operation_push3] = ZLX_ISA_execute_push3,
+	[ZLX_ISA_major_operation_pop3] = ZLX_ISA_execute_pop3,
 	[ZLX_ISA_major_operation_pushp] = ZLX_ISA_execute_retired_pointer_stack_operation,
 	[ZLX_ISA_major_operation_addi] = major_add_immediate,
 
@@ -1701,6 +1766,11 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output, int i
 		if(output.use_destination_2 && output.use_destination_3 &&
 		   output.destination_2 == output.destination_3 && output.destination_2 != ZLX_ISA_register_identifier_zero)
 			MY_FAULT("cannot have w3 == w2");
+		if (output.use_destination_4 && output.destination_4 != ZLX_ISA_register_identifier_zero &&
+		    ((output.use_destination_1 && output.destination_4 == output.destination_1) ||
+		     (output.use_destination_2 && output.destination_4 == output.destination_2) ||
+		     (output.use_destination_3 && output.destination_4 == output.destination_3)))
+			MY_FAULT("cannot have overlapping w4");
 
 		if(output.use_destination_1 == true)
 		{
@@ -1715,6 +1785,8 @@ void ZLX_EMU_solve__CPU(ZLX_EMU__CPU_t *cpu, ZLX_EMU__CPU_output_t output, int i
 		{
 			ZLX_EMU_set_regiser__CPU(cpu, output.destination_3, output.destination_3_data);
 		}
+		if (output.use_destination_4)
+			ZLX_EMU_set_regiser__CPU(cpu, output.destination_4, output.destination_4_data);
 	}
 
 	if(output.pc_changed == true)
@@ -1793,6 +1865,12 @@ ZLX_EMU__CPU_output_t ZLX_EMU_major_execution(ZLX_EMU_Machine_t *machine, ZLX_IS
 			parameters.source_3 = major.u__format_5_5551.c5;
 			parameters.source_4 = major.u__format_5_5551.d5;
 			parameters.imm1_x = major.u__format_5_5551.e1;
+			break;
+		case ZLX_ISA_major_format_type_5_655:
+			parameters.source_1 = major.u__format_5_655.a5;
+			parameters.imm6 = major.u__format_5_655.b6;
+			parameters.source_2 = major.u__format_5_655.c5;
+			parameters.source_3 = major.u__format_5_655.d5;
 			break;
 		case ZLX_ISA_major_format_type_5_952:
 			parameters.source_1 = major.u__format_5_952.a5;

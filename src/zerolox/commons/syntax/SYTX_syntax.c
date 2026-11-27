@@ -62,6 +62,8 @@ ZLX_SYTX_Mnemonic_t ZLX_SYTX_mnemonics[] =
 	MAJOR_MNEMONIC(jlink, register),
 	MAJOR_MNEMONIC(jcall, register),
 	MAJOR_MNEMONIC(jret, register),
+	MAJOR_MNEMONIC(push3, sized_register_triplet),
+	MAJOR_MNEMONIC(pop3, sized_register_triplet),
 	MAJOR_MNEMONIC(add, register_ultra),
 	MAJOR_MNEMONIC(sub, register_ultra),
 	MAJOR_MNEMONIC(sll, register_ultra),

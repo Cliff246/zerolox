@@ -3,7 +3,7 @@
 
 #include <MY_Lexer.h>
 
-#define ZLX_ASM_TYPE_BUFFER_SIZE 16
+#define ZLX_ASM_TYPE_BUFFER_SIZE 32
 
 typedef struct ZLX_ASM_Statement_information
 {
