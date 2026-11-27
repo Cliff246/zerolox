@@ -1,18 +1,21 @@
+#include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/SmallVector.h"
+#include "llvm/ADT/STLExtras.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
-#include "llvm/IR/LegacyPassManager.h"
-#include "llvm/MC/TargetRegistry.h"
-#include "llvm/Target/TargetMachine.h"
-#include "llvm/Pass.h"
+#include "llvm/Support/ErrorHandling.h"
+#include "llvm/Support/raw_ostream.h"
+#include <cstdint>
 #include <map>
 #include <set>
+#include <string>
+#include <vector>
 using namespace llvm;
 namespace {
-struct Emit : FunctionPass {
-  static char ID;
+struct Emit {
   raw_ostream &out;
-  Emit(raw_ostream &out):FunctionPass(ID),out(out){}
+  explicit Emit(raw_ostream &out):out(out){}
   std::map<const Value*,std::string> regs;
   std::map<const BasicBlock*,std::string> labels;
   std::set<std::string> occupied;
@@ -24,26 +27,98 @@ struct Emit : FunctionPass {
     }
     report_fatal_error("ZLX prototype needs a spill");
   }
-  std::string reg(Value *v){
-    if(auto *k=dyn_cast<ConstantInt>(v)){
-      if(k->isZero())return "z0";
-      out<<"get ac, "<<k->getZExtValue()<<"\n";return "ac";
-    }
-    return regs.at(v);
+  SmallVector<std::string, 2> scratch;
+
+  std::string materialize(uint32_t value) {
+    if (value == 0)
+      return "z0";
+    auto name = temp();
+    scratch.push_back(name);
+    out << "get " << name << ", " << value << "\n";
+    return name;
   }
-  void edge(BasicBlock *from,BasicBlock *to){
-    SmallVector<std::pair<std::string,std::string>> copies;
-    for(auto &phi:to->phis()){
-      auto src=reg(phi.getIncomingValueForBlock(from));
-      if(src!=regs.at(&phi)){
-        out<<"push32 "<<src<<"\n";copies.emplace_back(src,regs.at(&phi));
+
+  std::string reg(Value *value) {
+    if (auto *integer = dyn_cast<ConstantInt>(value)) {
+      if (integer->getBitWidth() > 32)
+        report_fatal_error("ZLX expects integer constants of at most 32 bits");
+      return materialize(integer->getZExtValue());
+    }
+    if (isa<ConstantPointerNull>(value))
+      return "z0";
+    auto mapping = regs.find(value);
+    if (mapping == regs.end())
+      report_fatal_error("ZLX value has no register");
+    return mapping->second;
+  }
+
+  void addOffset(StringRef dest, StringRef base, int64_t offset) {
+    if (offset >= -1024 && offset <= 1023) {
+      out << "addi " << dest << ", " << base << ", " << offset << "\n";
+    } else {
+      auto value = materialize(static_cast<uint32_t>(offset));
+      out << "add " << dest << ", " << base << ", " << value << "\n";
+    }
+  }
+
+  unsigned memoryWidth(Type *type) {
+    if (auto *pointer = dyn_cast<PointerType>(type)) {
+      if (pointer->getAddressSpace() == 0)
+        return 32;
+    } else if (type->isIntegerTy(8) || type->isIntegerTy(16) || type->isIntegerTy(32)) {
+      return type->getIntegerBitWidth();
+    }
+    report_fatal_error("ZLX memory operands must be i8, i16, i32, or default-address-space pointers");
+  }
+
+  void stackTriplet(StringRef op, ArrayRef<std::string> registers) {
+    out << op << " " << registers[0] << ".32, " << registers[1] << ".32, "
+        << registers[2] << ".32\n";
+  }
+
+  void edge(BasicBlock *from, BasicBlock *to) {
+    SmallVector<std::string, 3> pending;
+    SmallVector<std::string, 6> destinations;
+    for (auto &phi : to->phis()) {
+      auto *source = phi.getIncomingValueForBlock(from);
+      const auto &dest = regs.at(&phi);
+      if (auto *integer = dyn_cast<ConstantInt>(source)) {
+        if (integer->getBitWidth() > 32)
+          report_fatal_error("ZLX expects PHI values of at most 32 bits");
+        if (!integer->isZero()) {
+          for (const auto &name : pending)
+            out << "push32 " << name << "\n";
+          pending.clear();
+          out << "get ac, " << integer->getZExtValue() << "\npush32 ac\n";
+          destinations.push_back(dest);
+          continue;
+        }
+      }
+      auto name = isa<ConstantInt, ConstantPointerNull>(source) ? std::string("z0") : reg(source);
+      if (name == dest)
+        continue;
+      pending.push_back(name);
+      destinations.push_back(dest);
+      if (pending.size() == 3) {
+        stackTriplet("push3", pending);
+        pending.clear();
       }
     }
-    for(auto &p:reverse(copies))out<<"pop32 "<<p.second<<"\n";
+    for (const auto &name : pending)
+      out << "push32 " << name << "\n";
+
+    while (destinations.size() >= 3) {
+      stackTriplet("pop3", ArrayRef<std::string>(destinations).take_back(3));
+      destinations.resize(destinations.size() - 3);
+    }
+    for (const auto &name : reverse(destinations))
+      out << "pop32 " << name << "\n";
   }
-  bool runOnFunction(Function &f) override {
-    if(f.isDeclaration())return false;
-    regs.clear();labels.clear();occupied.clear();releaseAfter.clear();
+
+  void emitFunction(Function &f) {
+    if (f.isDeclaration())
+      return;
+    regs.clear();labels.clear();occupied.clear();releaseAfter.clear();scratch.clear();
     unsigned n=0;
     for(auto &a:f.args()){
       if(n==8)report_fatal_error("too many arguments");
@@ -68,7 +143,7 @@ struct Emit : FunctionPass {
             Instruction *last=nullptr;
             for(auto *user:i.users()){
               auto *use=dyn_cast<Instruction>(user);
-              if(!use || use->getParent()!=&bb || isa<PHINode>(use) || isa<PtrToIntInst>(use)){
+              if(!use || use->getParent()!=&bb || isa<PHINode>(use)){
                 last=nullptr;
                 break;
               }
@@ -82,9 +157,17 @@ struct Emit : FunctionPass {
           if(!i.getType()->isIntegerTy(32))report_fatal_error("expected i32 ALU");
           auto x=reg(b->getOperand(0)),d=dest();
           if(auto *k=dyn_cast<ConstantInt>(b->getOperand(1))){
-            StringRef op;
-            switch(i.getOpcode()){case Instruction::Add:op="addi";break;case Instruction::LShr:op="srli";break;default:report_fatal_error("unsupported immediate");}
-            out<<op<<" "<<d<<", "<<x<<", "<<k->getSExtValue()<<"\n";
+            if (i.getOpcode() == Instruction::Add) {
+              addOffset(d, x, k->getSExtValue());
+            } else if (i.getOpcode() == Instruction::LShr && k->getZExtValue() < 32) {
+              out << "srli " << d << ", " << x << ", " << k->getZExtValue() << "\n";
+            } else {
+              auto y = reg(k);
+              StringRef op = i.getOpcodeName();
+              if (op != "sub" && op != "and" && op != "or" && op != "xor")
+                report_fatal_error("unsupported ZLX immediate");
+              out << op << " " << d << ", " << x << ", " << y << "\n";
+            }
           }else{
             auto y=reg(b->getOperand(1)); StringRef op=i.getOpcodeName();
             if(op!="add" && op!="sub" && op!="and" && op!="or" && op!="xor")report_fatal_error("unsupported ALU");
@@ -92,20 +175,42 @@ struct Emit : FunctionPass {
             else out<<op<<" "<<d<<", "<<x<<", "<<y<<"\n";
           }
         }else if(auto *r=dyn_cast<ReturnInst>(&i)){
-          if(!r->getReturnValue()){out<<"ret z0\n";continue;}
-          auto v=reg(r->getReturnValue());
-          if(v!="ac")out<<"mv ac, "<<v<<"\n";
-          out<<"ret ac\n";
+          if (auto *value = r->getReturnValue()) {
+            auto name = reg(value);
+            if (name != "ac")
+              out << "mv ac, " << name << "\n";
+          }
+          out << "j rp\n";
         }else if(auto *g=dyn_cast<GetElementPtrInst>(&i)){
-          APInt off(32,0);if(!g->accumulateConstantOffset(f.getDataLayout(),off))report_fatal_error("nonconstant GEP");
-          auto p=reg(g->getPointerOperand());auto d=dest();out<<"addi "<<d<<", "<<p<<", "<<off.getSExtValue()<<"\n";
+          if (g->getPointerAddressSpace() != 0)
+            report_fatal_error("ZLX GEP requires the default address space");
+          const auto &layout = f.getParent()->getDataLayout();
+          APInt offset(layout.getIndexSizeInBits(g->getPointerAddressSpace()), 0);
+          if (!g->accumulateConstantOffset(layout, offset))
+            report_fatal_error("nonconstant ZLX GEP");
+          auto base = reg(g->getPointerOperand());
+          addOffset(dest(), base, offset.getSExtValue());
         }else if(auto *l=dyn_cast<LoadInst>(&i)){
-          if(!l->getType()->isIntegerTy(8)||l->isAtomic())report_fatal_error("expected byte load");
-          auto p=reg(l->getPointerOperand());auto d=dest();out<<"ld.8 "<<d<<", ["<<p<<"]\n";
+          if (l->isAtomic() || l->getPointerAddressSpace() != 0)
+            report_fatal_error("unsupported ZLX load");
+          const auto width = memoryWidth(l->getType());
+          auto base = reg(l->getPointerOperand());
+          out << "ld." << width << " " << dest() << ", [" << base << "]\n";
         }else if(auto *s=dyn_cast<StoreInst>(&i)){
-          if(!s->getValueOperand()->getType()->isIntegerTy(8)||s->isAtomic())report_fatal_error("expected byte store");
-          auto p=reg(s->getPointerOperand()),v=reg(s->getValueOperand());out<<"st.8 "<<v<<", ["<<p<<"]\n";
-        }else if(isa<PtrToIntInst>(i)){regs[&i]=reg(i.getOperand(0));}
+          if (s->isAtomic() || s->getPointerAddressSpace() != 0)
+            report_fatal_error("unsupported ZLX store");
+          const auto width = memoryWidth(s->getValueOperand()->getType());
+          auto base = reg(s->getPointerOperand());
+          auto value = reg(s->getValueOperand());
+          out << "st." << width << " " << value << ", [" << base << "]\n";
+        }else if(auto *cast=dyn_cast<PtrToIntInst>(&i)){
+          if (!cast->getType()->isIntegerTy(32) || cast->getPointerAddressSpace() != 0)
+            report_fatal_error("ZLX ptrtoint requires a default-address-space pointer and i32");
+          auto source = reg(cast->getPointerOperand());
+          auto target = dest();
+          if (source != target)
+            out << "mv " << target << ", " << source << "\n";
+        }
         else if(auto *cmp=dyn_cast<ICmpInst>(&i)){
           if(!cmp->isEquality())report_fatal_error("expected equality");
           auto x=reg(i.getOperand(0)),y=reg(i.getOperand(1)),d=dest();
@@ -119,21 +224,13 @@ struct Emit : FunctionPass {
           auto *to=br->getSuccessor(br->isConditional()?1:0);edge(&bb,to);
           if(to!=bb.getNextNode())out<<"b #"<<labels[to]<<"\n";
         }else report_fatal_error(Twine("unsupported ZLX instruction: ")+i.getOpcodeName());
+        for (const auto &name : scratch)
+          occupied.erase(name);
+        scratch.clear();
       }
+      for (const auto &name : releaseAfter[bb.getTerminator()])
+        occupied.erase(name);
     }
-    return false;
   }
 };
-char Emit::ID;
-class Machine:public TargetMachine{
-public:
- Machine(const Target&t,const Triple&tt,StringRef cpu,StringRef fs,const TargetOptions&o,std::optional<Reloc::Model>,std::optional<CodeModel::Model>,CodeGenOptLevel,bool):TargetMachine(t,"e-p:32:32-i64:64-n32-S64",tt,cpu,fs,o){}
- bool addPassesToEmitFile(PassManagerBase &pm,raw_pwrite_stream &out,raw_pwrite_stream*,CodeGenFileType type,bool,MachineModuleInfoWrapperPass*)override{
-   if(type!=CodeGenFileType::AssemblyFile)return true;
-   pm.add(new Emit(out));return false;
- }
-};
-Target target;
-RegisterTarget<Triple::UnknownArch> registration(target,"zlx","ZeroLox ZLX-1","ZLX");
-RegisterTargetMachine<Machine> machine(target);
 }

@@ -1,8 +1,7 @@
 # Experimental LLVM IR to ZeroLox emitter
 
 This is a prototype LLVM 19 IR emitter for a small subset of ZLX-1. It emits
-assembly directly from an LLVM function pass. The driver provides an entry
-point for experiments without modifying LLVM.
+assembly directly from LLVM IR through a standalone driver.
 
 Build with LLVM 19 development headers and llvm-config available:
 
@@ -11,13 +10,18 @@ c++ -std=c++17 driver.cpp $(llvm-config-19 --cxxflags --ldflags --system-libs --
 ./zlx-emit input.ll > output.zlx
 ```
 
-The emitter handles a limited selection of integer arithmetic, byte memory
-operations, equality comparisons, constant-offset addressing and branches.
-It uses ac for adjacent single-use values and scalar return values, and reuses
-some temporary registers after their last local use. It does not implement
-spilling or a complete ABI, and unsupported IR can terminate the emitter.
-The target registration is experimental. Standalone llc loading previously
-crashed, so use the driver above.
+The emitter handles a limited selection of integer arithmetic, equality
+comparisons, constant-offset addressing and branches. It emits 8-, 16-, and
+32-bit integer loads and stores, and uses 32-bit loads and stores for pointers
+in the default address space. Use little-endian IR with 32-bit pointers and
+indices. The driver supplies a ZLX-1 data layout when the input omits one.
+
+Functions take scalar arguments in `a0` through `a7` and return scalar values in
+`ac`. Call them with `blink10`, `blink21`, or `jlink` and supply a valid `sp` for
+PHI copies. The emitter uses `j rp` for leaf returns and emits `push3` and
+`pop3` for groups of PHI copies. Use the current Python assembler to encode
+its output. The prototype supports leaf functions in a limited register
+budget and reports unsupported IR and spill requirements as errors.
 
 The chibicc density experiment used a separate RV32I assembly lowering and
 hand-optimized ZLX assembly. Its results are not output from this emitter.
