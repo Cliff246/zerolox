@@ -105,9 +105,7 @@ char *ZLX_SYTX_instruction_postfix_keywords[] =
 	[ZLX_SYTX_instruction_postfix_none] = NULL,
 	[ZLX_SYTX_instruction_postfix_8] = "8",
 	[ZLX_SYTX_instruction_postfix_16] = "16",
-	[ZLX_SYTX_instruction_postfix_32] = "32",
-	[ZLX_SYTX_instruction_postfix_24] = "24",
-	[ZLX_SYTX_instruction_postfix_p] = "p"
+	[ZLX_SYTX_instruction_postfix_32] = "32"
 
 };
 

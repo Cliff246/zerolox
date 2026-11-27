@@ -9,7 +9,7 @@ from values import expr, reg, data_size
 
 from opcodes import MAJOR, MINOR, LEGACY_MAJOR, LEGACY_MINOR, LEGACY_REG_SELECTOR
 
-WIDTH = {'8':0, '16':1, '32':2, 'p':3}
+WIDTH = {'8':0, '16':1, '32':2}
 
 def parcel(value):
     return value.to_bytes(2,'little')
@@ -45,7 +45,7 @@ def encode(rec, chosen, symbols, pc, target=CURRENT_ISA):
         return parcel(first) + parcel(second)
     if base in ('m.lda','m.ald','m.sta','m.ast','n.ld','n.st'):
         fields=split_args(args[-1][1:-1]); address=reg(fields[0]); offset=expr(fields[1],symbols,pc) if len(fields)==2 else 0
-        width=chosen.rsplit('.',1)[1]; size={'8':1,'16':2,'32':4,'p':3}[width]
+        width=chosen.rsplit('.',1)[1]; size={'8':1,'16':2,'32':4}[width]
         value_reg=1 if op.startswith(('m.lda.','m.sta.')) else reg(args[0])
         if base.startswith('m.'):
             operand=address if base in ('m.lda','m.sta') else value_reg

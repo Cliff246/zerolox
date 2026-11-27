@@ -92,30 +92,6 @@ uint32_t ZLX_EMU_read_32_Memory(ZLX_EMU_Memory_t *_memory, uint32_t _address)
 	return data;
 }
 
-uint32_t ZLX_EMU_read_24_Memory(ZLX_EMU_Memory_t *_memory, uint32_t _address)
-{
-
-	uint32_t size = _memory->size;
-	if(_address >= size || size - _address < 3)
-	{
-
-		MY_FAULT("cannot read memory unallocated");
-	}
-
-	uint8_t byte1 = _memory->ap__memory[_address];
-	uint8_t byte2 = _memory->ap__memory[_address + 1];
-
-	uint8_t byte3 = _memory->ap__memory[_address + 2];
-
-
-
-	uint32_t data = ((uint32_t)byte1) |
-					((uint32_t)byte2 << 8) |
-					((uint32_t)byte3 << 16);
-	return data;
-
-}
-
 void ZLX_EMU_write_8_Memory(ZLX_EMU_Memory_t *_memory, uint32_t _address, uint8_t _value)
 {
 
@@ -162,21 +138,3 @@ void ZLX_EMU_write_32_Memory(ZLX_EMU_Memory_t *_memory, uint32_t _address, uint3
 	_memory->ap__memory[_address + 2] = (uint8_t)((_value >> 16) & 0xff);
 	_memory->ap__memory[_address + 3] = (uint8_t)((_value >> 24) & 0xff);
 }
-
-
-void ZLX_EMU_write_24_Memory(ZLX_EMU_Memory_t *_memory, uint32_t _address, uint32_t _value)
-{
-
-	uint32_t size = _memory->size;
-
-	if(_address >= size || size - _address < 3)
-	{
-		MY_FAULT("cannot write memory unallocated");
-	}
-
-	_memory->ap__memory[_address ] = _value;
-	_memory->ap__memory[_address + 1] = (uint8_t)(_value >> 8);
-	_memory->ap__memory[_address + 2] = (uint8_t)((_value >> 16) & 0xff);
-}
-
-

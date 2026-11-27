@@ -15,13 +15,13 @@ LEGACY_STEP = {'inc': 'inc', 'inc1': 'inc', 'dec': 'dec', 'dec1': 'dec'}
 ONE = {name: name for name in ('j', 'jlink', 'jcall', 'jret', 'addpc',
                                 'anda', 'xora', 'ora', 'aand', 'axor', 'aor')}
 for name in ('push', 'pop'):
-    for width in ('8', '16', '32', 'p'):
+    for width in ('8', '16', '32'):
         ONE[f'{name}.{width}'] = name + width
 ITER = {'bieqc+': 'bieqc_update', 'bineqc+': 'bineqc_update'}
 BRANCH = {'bneq', 'beq', 'blt', 'bge', 'bltu', 'bgeu'}
 MINOR28 = {'ldsa', 'stsa', 'bieqc', 'bteqa', 'btneqa'}
 PLUS = {'ldplus': 'ld_plus', 'stplus': 'st_plus'}
-WIDTH = {'8':0,'16':1,'32':2,'p':3}
+WIDTH = {'8':0,'16':1,'32':2}
 
 def names(target=CURRENT_ISA):
     steps = set(LEGACY_STEP) if legacy_encoding(target) else set()

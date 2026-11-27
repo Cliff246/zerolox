@@ -73,9 +73,9 @@ def select(rec,symbols,pc,target=CURRENT_ISA):
         if not -1024<=off<=1022: raise Error(f'm.b offset {off} outside -1024..1022 bytes')
         chosen={'b':'m.b','beqz':'m.baeqz','bnez':'m.baneqz'}.get(op,op)
         return chosen,2
-    match=re.fullmatch(r'(m\.(?:lda|ald|sta|ast)|n\.(?:ld|st)|ld|st)\.(8|16|32|p)',op)
+    match=re.fullmatch(r'(m\.(?:lda|ald|sta|ast)|n\.(?:ld|st)|ld|st)\.(8|16|32)',op)
     if not match: raise Error('unsupported instruction')
-    form,width=match.groups(); size={'8':1,'16':2,'32':4,'p':3}[width]
+    form,width=match.groups(); size={'8':1,'16':2,'32':4}[width]
     if len(args)!=(1 if form in ('m.lda','m.sta') else 2): raise Error(f'{op} has wrong number of arguments')
     value_reg=1 if form in ('m.lda','m.sta') else reg(args[0]); mem=args[-1]
     if not (mem.startswith('[') and mem.endswith(']')): raise Error('expected [base, offset] memory operand')

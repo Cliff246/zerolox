@@ -9,14 +9,14 @@ from values import expr, reg
 
 
 ITERATOR_BRANCH = {'bxeqc': 0, 'bxneqc': 1, 'byeqc': 2, 'byneqc': 3}
-MEMORY = r'(ld|st|lda|sta|ald|ast|ldsa|stsa|ld\+a|st\+a)(?:\.(8|16|32|p))?'
+MEMORY = r'(ld|st|lda|sta|ald|ast|ldsa|stsa|ld\+a|st\+a)(?:\.(8|16|32))?'
 
 
 def accepts(op):
     return (op in ITERATOR_BRANCH or op in ('get', 'ret', 'retp', 'bieqc', 'bteqa', 'btneqa',
                                            'baeqz', 'baneqz', 'geta', 'get8', 'adda')
             or re.fullmatch(r'(?:[mn]\.)?' + MEMORY, op)
-            or re.fullmatch(r'(push|pop)(8|16|32|p)', op.removeprefix('n.')))
+            or re.fullmatch(r'(push|pop)(8|16|32)', op.removeprefix('n.')))
 
 
 def lower(op, args, symbols, pc, target=CURRENT_ISA):
@@ -67,7 +67,7 @@ def lower(op, args, symbols, pc, target=CURRENT_ISA):
         return 'm.' + op, args
     if op in ('jret', 'n.jret') and not args:
         return op, ['ac']
-    stack = re.fullmatch(r'(n\.)?(push|pop)(8|16|32|p)', op)
+    stack = re.fullmatch(r'(n\.)?(push|pop)(8|16|32)', op)
     if stack:
         prefix, name, width = stack.groups()
         return f'{prefix or ""}{name}.{width}', args

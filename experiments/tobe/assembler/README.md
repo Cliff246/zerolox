@@ -13,7 +13,7 @@ Current source examples:
 | `ld t1, [t0, 5]` | Load one byte from the address in `t0` plus five bytes. |
 | `lda.16 [t0, 6]` | Load a 16-bit value into the implied accumulator. |
 | `ld+a [t4{1}]` | Load one byte into the accumulator, then advance `t4` by one access unit. |
-| `st+a.p [s0{-1}]` | Store the accumulator, then move `s0` back one pointer-sized unit. |
+| `st+a.32 [s0{-1}]` | Store the accumulator, then move `s0` back four bytes. |
 | `beq ix, cx, #target` | Select the compact iterator comparison when its displacement fits. |
 | `bxeqc #target` | Explicit compact X iterator and counter comparison. |
 | `get t0, 44` | Select the smallest available immediate load that fits. |
@@ -31,6 +31,6 @@ Mnemonic records share one pseudo-instruction structure: `operation`, `args`, op
 
 Layout starts with large instruction sizes, reselects forms, and detects repeated states. It is not a complete relaxation algorithm. Forward references in fixed-width data are supported; forward references in layout operations are not, and a size-dependent reference can still fail if fitting a short form requires first assuming the short form itself. `@jumpto` only moves forward. No major unconditional branch is assumed. Direct forms use experimental spellings such as `m.add r1, r2`, `m.adda r1, r2`, and `m.lda.16 [r1, offset]`; `m.ald` and `m.ast` require an explicit `[ac, offset]`.
 
-Pointer size is fixed to three bytes for zerolox one. The prototype has no cross-file linking, external symbols, or general target configuration. Run `ZEROLOX_EMULATOR=/path/to/ZLX_emu python3 -m unittest discover -s experiments/tobe/assembler -v` to run the emulator integration cases. The emulator runs a specified number of instructions; images have no automatic halt.
+Zerolox one stores pointers and saved return pointers in four-byte slots. To assemble the retired three-byte forms for an older emulator, use an earlier checkout. The prototype has no cross-file linking, external symbols, or general target configuration. Run `ZEROLOX_EMULATOR=/path/to/ZLX_emu python3 -m unittest discover -s experiments/tobe/assembler -v` to run the emulator integration cases. The emulator runs a specified number of instructions; images have no automatic halt.
 
 See `INSTRUCTIONS.md` for the current complete enum-form inventory, experimental operand spellings, and known emulator ambiguities. Form coverage does not mean every operation has been independently executed in the emulator.
