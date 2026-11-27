@@ -25,3 +25,18 @@ budget and reports unsupported IR and spill requirements as errors.
 
 The chibicc density experiment used a separate RV32I assembly lowering and
 hand-optimized ZLX assembly. Its results are not output from this emitter.
+
+## Code-size comparison
+
+From this directory, build the driver as above and run:
+
+```sh
+python3 measure_density.py --emitter ./zlx-emit --emulator /path/to/ZLX_emu
+```
+
+The benchmark compiles the same C kernels at Clang 19 `-Oz` for all three
+paths. ZLX uses 32-bit LLVM IR and counts assembled function bytes. RV32IC
+and Cortex-M3 Thumb-2 use ELF function-symbol sizes. The counts include
+returns and exclude the emulator harness, metadata, and padding between
+functions. Pass `--baseline /path/to/old-zlx-emit` for a before column.
+An em dash means the previous shim could not emit that kernel.
