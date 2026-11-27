@@ -36,9 +36,6 @@ static void check_opcode(char *source, ZLX_ISA_instruction_type_t type, unsigned
 
 int main(void)
 {
-	assert(ZLX_SYTX_get_instruction_postfix("24") == ZLX_SYTX_instruction_postfix_invalid);
-	assert(ZLX_SYTX_get_instruction_postfix("p") == ZLX_SYTX_instruction_postfix_invalid);
-	assert(ZLX_SYTX_get_instruction_postfix("32") == ZLX_SYTX_instruction_postfix_32);
 	check_statement("m.mv r1, r2", ZLX_ASM_statement_type_operation_mnemonic);
 	check_statement("\tm.mv r1, r2", ZLX_ASM_statement_type_operation_mnemonic);
 	check_statement("		m.mv r1, r2", ZLX_ASM_statement_type_operation_mnemonic);

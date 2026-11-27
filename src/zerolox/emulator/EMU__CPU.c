@@ -1608,7 +1608,7 @@ OPERATION(major_returnp)
 }
 
 
-OPERATION(retired_pointer_stack_operation)
+OPERATION(ZLX_ISA_execute_retired_pointer_stack_operation)
 {
 	(void)machine;
 	(void)paramaters;
@@ -1657,11 +1657,11 @@ static const ZLX_EMU__CPU_operation_t major_operations[ZLX_ISA_major_operation_c
 	[ZLX_ISA_major_operation_pop8] = major_pop8,
 	[ZLX_ISA_major_operation_pop16] = major_pop16,
 	[ZLX_ISA_major_operation_pop32] = major_pop32,
-	[ZLX_ISA_major_operation_popp] = retired_pointer_stack_operation,
+	[ZLX_ISA_major_operation_popp] = ZLX_ISA_execute_retired_pointer_stack_operation,
 	[ZLX_ISA_major_operation_push8] = major_push8,
 	[ZLX_ISA_major_operation_push16] = major_push16,
 	[ZLX_ISA_major_operation_push32] = major_push32,
-	[ZLX_ISA_major_operation_pushp] = retired_pointer_stack_operation,
+	[ZLX_ISA_major_operation_pushp] = ZLX_ISA_execute_retired_pointer_stack_operation,
 	[ZLX_ISA_major_operation_addi] = major_add_immediate,
 
 
